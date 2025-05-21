@@ -1,9 +1,9 @@
 namespace QiMata.MobileIoT.Views;
 
-public partial class Beacon : ContentPage
+public partial class BeaconPage : ContentPage
 {
-	public Beacon()
-	{
-		InitializeComponent();
-	}
+        public BeaconPage()
+        {
+                InitializeComponent();
+        }
 }
