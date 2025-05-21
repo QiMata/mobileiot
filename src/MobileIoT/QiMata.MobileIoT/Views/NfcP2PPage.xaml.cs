@@ -1,9 +1,9 @@
 namespace QiMata.MobileIoT.Views;
 
-public partial class NfcP2P : ContentPage
+public partial class NfcP2PPage : ContentPage
 {
-	public NfcP2P()
-	{
-		InitializeComponent();
-	}
+        public NfcP2PPage()
+        {
+                InitializeComponent();
+        }
 }

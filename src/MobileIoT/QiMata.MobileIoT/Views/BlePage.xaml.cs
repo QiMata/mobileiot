@@ -1,9 +1,9 @@
 namespace QiMata.MobileIoT.Views;
 
-public partial class BleView : ContentPage
+public partial class BlePage : ContentPage
 {
-	public BleView()
-	{
-		InitializeComponent();
-	}
+        public BlePage()
+        {
+                InitializeComponent();
+        }
 }
