@@ -15,6 +15,8 @@ namespace QiMata.MobileIoT
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
+            builder.Services.AddSingleton<Services.I.IBluetoothClassicService, Services.BluetoothClassicService>();
+
 #if DEBUG
     		builder.Logging.AddDebug();
 #endif
