@@ -26,10 +26,16 @@
 
             <Button
                 x:Name="CounterBtn"
-                Text="Click me" 
+                Text="Click me"
                 SemanticProperties.Hint="Counts the number of times you click"
                 Clicked="OnCounterClicked"
                 HorizontalOptions="Fill" />
+            <Button Text="BLE Sensor &amp; LED"
+                    BackgroundColor="#2563EB"
+                    TextColor="White"
+                    CornerRadius="8"
+                    Command="{Binding NavigateCommand}"
+                    CommandParameter="BleSensorControlPage" />
         </VerticalStackLayout>
     </ScrollView>
 
