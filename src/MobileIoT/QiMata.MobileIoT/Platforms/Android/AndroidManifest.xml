@@ -8,4 +8,22 @@
         <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
         <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
         <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+        <uses-permission android:name="android.permission.NFC" />
+        <uses-feature android:name="android.hardware.nfc" android:required="true" />
+
+  <application android:label="MyMauiApp">
+    <activity android:name="crc64fa985e60e8a4f16e.MainActivity"
+              android:exported="true"
+              android:launchMode="singleTop">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:mimeType="text/plain" />
+      </intent-filter>
+    </activity>
+  </application>
 </manifest>
