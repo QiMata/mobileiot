@@ -1,6 +1,4 @@
-using System.Threading.Tasks;
-
-namespace QiMata.MobileIoT;
+namespace QiMata.MobileIoT.Services.I;
 
 public interface IBleService
 {

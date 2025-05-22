@@ -1,3 +1,5 @@
+using QiMata.MobileIoT.Services.I;
+
 namespace QiMata.MobileIoT;
 
 public class BleService : IBleService

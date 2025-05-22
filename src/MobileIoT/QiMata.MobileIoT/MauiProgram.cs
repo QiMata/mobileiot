@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using QiMata.MobileIoT.Services.I;
+using QiMata.MobileIoT.Views;
 
 namespace QiMata.MobileIoT
 {
@@ -20,9 +22,8 @@ namespace QiMata.MobileIoT
             builder.Logging.AddDebug();
 #endif
             builder.Services.AddSingleton<IBleService, BleService>();
-            builder.Services.AddTransient<BleSensorControlViewModel>();
-            builder.Services.AddTransient<BleSensorControlPage>();
-            builder.Services.AddTransient<MainPageViewModel>();
+            builder.Services.AddTransient<ViewModels.BleViewModel>();
+            builder.Services.AddTransient<BlePage>();
 
             return builder.Build();
         }

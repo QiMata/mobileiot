@@ -1,14 +1,14 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Maui.Controls;
+using QiMata.MobileIoT.Services.I;
 
-namespace QiMata.MobileIoT;
+namespace QiMata.MobileIoT.ViewModels;
 
-public partial class BleSensorControlViewModel : ObservableObject
+public partial class BleViewModel : ObservableObject
 {
     private readonly IBleService _ble;
 
-    public BleSensorControlViewModel(IBleService ble)
+    public BleViewModel(IBleService ble)
     {
         _ble = ble;
         LedButtonText  = "Turn LED On";

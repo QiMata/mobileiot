@@ -65,16 +65,15 @@
         </ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Services\I\" />
 	  <Folder Include="Services\Mock\" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Views\BeaconPage.xaml.cs">
-	    <DependentUpon>BeaconPage.xaml</DependentUpon>
-	  </Compile>
 	  <Compile Update="Views\BlePage.xaml.cs">
 	    <DependentUpon>BlePage.xaml</DependentUpon>
+	  </Compile>
+	  <Compile Update="Views\BeaconPage.xaml.cs">
+	    <DependentUpon>BeaconPage.xaml</DependentUpon>
 	  </Compile>
 	  <Compile Update="Views\NfcP2PPage.xaml.cs">
 	    <DependentUpon>NfcP2PPage.xaml</DependentUpon>
@@ -86,9 +85,6 @@
 
 	<ItemGroup>
 	  <MauiXaml Update="Views\BeaconPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="Views\BlePage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\NfcP2PPage.xaml">

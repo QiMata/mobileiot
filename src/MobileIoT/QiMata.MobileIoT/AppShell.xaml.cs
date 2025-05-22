@@ -9,7 +9,6 @@ namespace QiMata.MobileIoT
             InitializeComponent();
 
             // register application routes
-            Routing.RegisterRoute(nameof(BleSensorControlPage), typeof(BleSensorControlPage));
             Routing.RegisterRoute(nameof(BeaconPage), typeof(QiMata.MobileIoT.Views.BeaconPage));
             Routing.RegisterRoute(nameof(BlePage), typeof(QiMata.MobileIoT.Views.BlePage));
             Routing.RegisterRoute(nameof(NfcPage), typeof(QiMata.MobileIoT.Views.NfcPage));
