@@ -5,19 +5,27 @@ VisualStudioVersion = 17.14.36109.1 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QiMata.MobileIoT", "QiMata.MobileIoT\QiMata.MobileIoT.csproj", "{7DED6D37-68F6-4E96-8E92-D317EC6290AB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "..\..\tests\TestProject\TestProject.csproj", "{FD2646C1-A99D-4594-B6C8-9AD8BAED5876}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
+EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7DED6D37-68F6-4E96-8E92-D317EC6290AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7DED6D37-68F6-4E96-8E92-D317EC6290AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7DED6D37-68F6-4E96-8E92-D317EC6290AB}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{7DED6D37-68F6-4E96-8E92-D317EC6290AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7DED6D37-68F6-4E96-8E92-D317EC6290AB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7DED6D37-68F6-4E96-8E92-D317EC6290AB}.Release|Any CPU.Deploy.0 = Release|Any CPU
-	EndGlobalSection
+{7DED6D37-68F6-4E96-8E92-D317EC6290AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+{7DED6D37-68F6-4E96-8E92-D317EC6290AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+{7DED6D37-68F6-4E96-8E92-D317EC6290AB}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+{7DED6D37-68F6-4E96-8E92-D317EC6290AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+{7DED6D37-68F6-4E96-8E92-D317EC6290AB}.Release|Any CPU.Build.0 = Release|Any CPU
+{7DED6D37-68F6-4E96-8E92-D317EC6290AB}.Release|Any CPU.Deploy.0 = Release|Any CPU
+{FD2646C1-A99D-4594-B6C8-9AD8BAED5876}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+{FD2646C1-A99D-4594-B6C8-9AD8BAED5876}.Debug|Any CPU.Build.0 = Debug|Any CPU
+{FD2646C1-A99D-4594-B6C8-9AD8BAED5876}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+{FD2646C1-A99D-4594-B6C8-9AD8BAED5876}.Release|Any CPU.ActiveCfg = Release|Any CPU
+{FD2646C1-A99D-4594-B6C8-9AD8BAED5876}.Release|Any CPU.Build.0 = Release|Any CPU
+{FD2646C1-A99D-4594-B6C8-9AD8BAED5876}.Release|Any CPU.Deploy.0 = Release|Any CPU
+EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
