@@ -6,6 +6,8 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Plugin.BLE.Abstractions.EventArgs;
+using Plugin.BLE.Abstractions.Extensions;
 
 namespace QiMata.MobileIoT.Services;
 
@@ -41,8 +43,8 @@ public sealed class BluetoothService : IBluetoothService
         _adapt.DeviceDiscovered -= handler;
         if (_device is null) return false;
 
-        await _adapt.ConnectToDeviceAsync(_device, ct: ct);
-        var service = await _device.GetServiceAsync(ServiceUuid);
+        await _adapt.ConnectToDeviceAsync(_device, cancellationToken: ct);
+        var service = await _device.GetServiceAsync(ServiceUuid, ct);
         if (service is null) throw new Exception("Service not found");
 
         _tempChar = await service.GetCharacteristicAsync(TempUuid);
@@ -68,12 +70,12 @@ public sealed class BluetoothService : IBluetoothService
             HumidityUpdatedPercent?.Invoke(this, raw / 100.0);
         };
 
-        await _tempChar.StartUpdatesAsync();
-        await _humChar.StartUpdatesAsync();
+        await _tempChar.StartUpdatesAsync(ct);
+        await _humChar.StartUpdatesAsync(ct);
     }
 
     public Task ToggleLedAsync(bool on, CancellationToken ct)
-        => _ledChar?.WriteAsync(new[] { (byte)(on ? 1 : 0) }, ct)
+        => _ledChar?.WriteAsync([(byte)(on ? 1 : 0)], ct)
            ?? throw new InvalidOperationException("Connect first");
 
     public async Task DisconnectAsync()

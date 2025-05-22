@@ -23,10 +23,11 @@ namespace QiMata.MobileIoT
 #if DEBUG
             builder.Logging.AddDebug();
             builder.Services.AddSingleton<IBleDemoService>(MockServiceFactory.CreateBleDemoService());
+            builder.Services.AddSingleton<IBluetoothService>(MockServiceFactory.CreateBluetoothService());
 #else
+            builder.Services.AddSingleton<IBluetoothService, BluetoothService>();
             builder.Services.AddSingleton<IBleDemoService, BleDemoService>();
 #endif
-            builder.Services.AddSingleton<IBluetoothService, BluetoothService>();
             builder.Services.AddTransient<ViewModels.BleViewModel>();
             builder.Services.AddTransient<BlePage>();
 
