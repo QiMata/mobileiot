@@ -3,10 +3,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="QiMata.MobileIoT.Views.NfcPage"
              Title="NfcPage">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+  <VerticalStackLayout Spacing="12" Padding="24">
+    <Label Text="NFC Demo" FontAttributes="Bold" FontSize="24"/>
+    <Entry x:Name="EntryText" Placeholder="Text to write" />
+    <Button Text="Start Scan"   Clicked="OnStartClicked" />
+    <Button Text="Stop Scan"    Clicked="OnStopClicked" />
+    <Button Text="Write Tag"    Clicked="OnWriteClicked" />
+  </VerticalStackLayout>
 </ContentPage>
