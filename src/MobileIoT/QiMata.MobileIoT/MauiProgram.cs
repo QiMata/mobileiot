@@ -21,7 +21,7 @@ namespace QiMata.MobileIoT
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
-            builder.Services.AddSingleton<IBleService, BleService>();
+            builder.Services.AddSingleton<IBleDemoService, BleService>();
             builder.Services.AddTransient<ViewModels.BleViewModel>();
             builder.Services.AddTransient<BlePage>();
 

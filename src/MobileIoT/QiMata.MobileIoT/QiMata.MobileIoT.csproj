@@ -65,10 +65,6 @@
         </ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Services\Mock\" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <Compile Update="Views\BlePage.xaml.cs">
 	    <DependentUpon>BlePage.xaml</DependentUpon>
 	  </Compile>

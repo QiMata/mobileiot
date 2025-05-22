@@ -6,9 +6,9 @@ namespace QiMata.MobileIoT.ViewModels;
 
 public partial class BleViewModel : ObservableObject
 {
-    private readonly IBleService _ble;
+    private readonly IBleDemoService _ble;
 
-    public BleViewModel(IBleService ble)
+    public BleViewModel(IBleDemoService ble)
     {
         _ble = ble;
         LedButtonText  = "Turn LED On";

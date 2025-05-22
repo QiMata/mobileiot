@@ -2,7 +2,7 @@ using QiMata.MobileIoT.Services.I;
 
 namespace QiMata.MobileIoT;
 
-public class BleService : IBleService
+public class BleDemoService : IBleDemoService
 {
     public Task<(double temp, double humidity)> ReadDht22Async()
         => Task.FromResult<(double temp, double humidity)>((23.4, 56.7)); // TODO real BLE read
