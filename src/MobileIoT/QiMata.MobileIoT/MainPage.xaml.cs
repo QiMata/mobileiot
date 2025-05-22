@@ -1,25 +1,23 @@
-﻿namespace QiMata.MobileIoT
+﻿using System.Windows.Input;
+
+namespace QiMata.MobileIoT
 {
     public partial class MainPage : ContentPage
     {
-        int count = 0;
+        public ICommand NavigateCommand { get; }
 
         public MainPage()
         {
             InitializeComponent();
+
+            NavigateCommand = new Command<string>(async (pageName) => await NavigateToPage(pageName));
+
+            BindingContext = this;
         }
 
-        private void OnCounterClicked(object sender, EventArgs e)
+        private async System.Threading.Tasks.Task NavigateToPage(string pageName)
         {
-            count++;
-
-            if (count == 1)
-                CounterBtn.Text = $"Clicked {count} time";
-            else
-                CounterBtn.Text = $"Clicked {count} times";
-
-            SemanticScreenReader.Announce(CounterBtn.Text);
+            await Shell.Current.GoToAsync(pageName);
         }
     }
-
 }

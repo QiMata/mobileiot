@@ -1,4 +1,6 @@
-﻿namespace QiMata.MobileIoT
+﻿using QiMata.MobileIoT.Views;
+
+namespace QiMata.MobileIoT
 {
     public partial class AppShell : Shell
     {
