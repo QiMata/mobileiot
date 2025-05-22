@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using QiMata.MobileIoT.Services.I;
+using QiMata.MobileIoT.Services.Mock;
 using QiMata.MobileIoT.Views;
 
 namespace QiMata.MobileIoT
@@ -20,8 +21,10 @@ namespace QiMata.MobileIoT
 
 #if DEBUG
             builder.Logging.AddDebug();
+            builder.Services.AddSingleton<IBleDemoService>(MockServiceFactory.CreateBleDemoService());
+#else
+            builder.Services.AddSingleton<IBleDemoService, BleDemoService>();
 #endif
-            builder.Services.AddSingleton<IBleDemoService, BleService>();
             builder.Services.AddTransient<ViewModels.BleViewModel>();
             builder.Services.AddTransient<BlePage>();
 

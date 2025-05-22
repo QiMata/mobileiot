@@ -13,11 +13,26 @@ namespace QiMata.MobileIoT.Services.Mock
         public static IBleDemoService CreateBleDemoService()
         {
             var mock = new Moq.Mock<IBleDemoService>();
+            var random = new Random();
+            var ledState = false;
 
-            mock.Setup(m => m.ReadDht22Async()).ReturnsAsync((25.0, 60.0));
-            mock.Setup(m => m.ToggleLedAsync()).ReturnsAsync(true);
+            mock.Setup(m => m.ReadDht22Async())
+                .ReturnsAsync(() =>
+                {
+                    var temperature = random.NextDouble() * 20 + 15;   // 15-35 °C
+                    var humidity = random.NextDouble() * 60 + 20;      // 20-80 %
+                    return (temperature, humidity);
+                });
+
+            mock.Setup(m => m.ToggleLedAsync())
+                .ReturnsAsync(() =>
+                {
+                    ledState = !ledState;
+                    return ledState;
+                });
 
             return mock.Object;
         }
+
     }
 }
