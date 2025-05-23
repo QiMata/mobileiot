@@ -28,13 +28,14 @@ namespace QiMata.MobileIoT
 #else
             builder.Services.AddSingleton<IBluetoothService, BluetoothService>();
             builder.Services.AddSingleton<IBleDemoService, BleDemoService>();
-#endif
-            
 #if ANDROID
             builder.Services.AddSingleton<INfcService, AndroidNfcService>();
 #elif IOS
             builder.Services.AddSingleton<INfcService, IosNfcService>();
 #endif
+#endif
+
+
 
             builder.Services.AddTransient<ViewModels.BleViewModel>();
             builder.Services.AddTransient<BlePage>();

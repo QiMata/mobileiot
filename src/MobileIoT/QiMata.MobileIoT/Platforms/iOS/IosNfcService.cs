@@ -37,6 +37,8 @@ public class IosNfcService : NSObject, INfcService, INFCNdefReaderSessionDelegat
         return writerTcs.Task;
     }
 
+    public event EventHandler<string>? MessageReceived;
+
     public void DidDetect(NFCNdefReaderSession s, NFCNdefMessage[] messages)
     {
         foreach (var msg in messages)
@@ -45,10 +47,7 @@ public class IosNfcService : NSObject, INfcService, INFCNdefReaderSessionDelegat
             {
                 var payload = rec.Payload.Skip(1).ToArray();
                 var text = System.Text.Encoding.UTF8.GetString(payload);
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    Application.Current.MainPage.DisplayAlert("Tag Read", text, "OK");
-                });
+                MessageReceived?.Invoke(this, text);
             }
         }
     }

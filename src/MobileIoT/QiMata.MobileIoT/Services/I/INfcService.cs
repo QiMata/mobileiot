@@ -7,4 +7,5 @@ public interface INfcService
     Task StartListeningAsync();
     Task StopListeningAsync();
     Task WriteTextAsync(string text);
+    event EventHandler<string> MessageReceived;
 }

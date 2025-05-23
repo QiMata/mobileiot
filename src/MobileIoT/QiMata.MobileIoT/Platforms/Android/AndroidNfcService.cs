@@ -29,17 +29,28 @@ public class AndroidNfcService : Java.Lang.Object, INfcService
 
     public Task WriteTextAsync(string text)
     {
-        var record = NFCNdefRecord.CreateTextRecord(text);
-        var msg    = new NFCNdefMessage { Records = new[] { record } };
-
-        CrossNFC.Current.OnTagDiscovered += async (tagInfo, format) =>
+        var record = new NFCNdefRecord
         {
-            await CrossNFC.Current.PublishMessage(msg);
+            TypeFormat = NFCNdefTypeFormat.Mime,
+            MimeType = "application/com.companyname.yourapp",
+            Payload = NFCUtils.EncodeToByteArray(text)
+        };
+
+
+        CrossNFC.Current.OnTagDiscovered += (tagInfo, format) =>
+        {
+            if (tagInfo.IsWritable)
+            {
+                tagInfo.Records = [record];
+                CrossNFC.Current.PublishMessage(tagInfo);
+            }
         };
 
         CrossNFC.Current.StartPublishing();
         return Task.CompletedTask;
     }
+
+    public event EventHandler<string>? MessageReceived;
 
     void OnMessageReceived(ITagInfo tagInfo)
     {
@@ -49,10 +60,7 @@ public class AndroidNfcService : Java.Lang.Object, INfcService
         if (first?.TypeFormat == NFCNdefTypeFormat.WellKnown)
         {
             var payloadText = first.Message;
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                Application.Current.MainPage.DisplayAlert("Tag Read", payloadText, "OK");
-            });
+            MessageReceived?.Invoke(this, payloadText);
         }
     }
 }
