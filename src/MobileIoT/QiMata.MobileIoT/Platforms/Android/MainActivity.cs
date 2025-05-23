@@ -9,7 +9,7 @@ namespace QiMata.MobileIoT;
 [Activity(Theme = "@style/Maui.SplashTheme", MainLauncher = true, LaunchMode = LaunchMode.SingleTop,
           ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode |
           ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | ConfigChanges.Density)]
-public class MainActivity : MauiAppCompatActivity
+public partial class MainActivity : MauiAppCompatActivity
 {
     protected override void OnCreate(Bundle savedInstanceState)
     {
@@ -17,9 +17,4 @@ public class MainActivity : MauiAppCompatActivity
         CrossNFC.Init(this);
     }
 
-    protected override void OnNewIntent(Intent intent)
-    {
-        base.OnNewIntent(intent);
-        CrossNFC.OnNewIntent(intent);
-    }
 }

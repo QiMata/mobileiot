@@ -4,6 +4,8 @@ using QiMata.MobileIoT.Services.I;
 using QiMata.MobileIoT.Services.Mock;
 using QiMata.MobileIoT.Services;
 using QiMata.MobileIoT.Views;
+using QiMata.MobileIoT.Platforms.Android;
+using QiMata.MobileIoT.Platforms.iOS;
 using Plugin.NFC;
 
 namespace QiMata.MobileIoT
@@ -44,11 +46,19 @@ namespace QiMata.MobileIoT
 #elif IOS
             builder.Services.AddSingleton<INfcService, IosNfcService>();
 #endif
+#if ANDROID
+            builder.Services.AddSingleton<INfcP2PService, NfcP2PService_Android>();
+#else
+            builder.Services.AddSingleton<INfcP2PService, NfcP2PService_iOS>();
+#endif
 #endif
 
 
             builder.Services.AddTransient<ViewModels.NfcPageViewModel>();
             builder.Services.AddTransient<NfcPage>();
+
+            builder.Services.AddTransient<ViewModels.NfcP2PViewModel>();
+            builder.Services.AddTransient<NfcP2PPage>();
 
             builder.Services.AddTransient<ViewModels.BleViewModel>();
             builder.Services.AddTransient<BlePage>();
