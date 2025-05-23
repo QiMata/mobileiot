@@ -26,9 +26,19 @@ namespace QiMata.MobileIoT
             builder.Services.AddSingleton<IBleDemoService>(MockServiceFactory.CreateBleDemoService());
             builder.Services.AddSingleton<IBluetoothService>(MockServiceFactory.CreateBluetoothService());
             builder.Services.AddSingleton<INfcService>(MockServiceFactory.CreateNfcService());
+#if ANDROID
+            builder.Services.AddSingleton<IBeaconScanner, BeaconScanner_Android>();
+#elif IOS
+            builder.Services.AddSingleton<IBeaconScanner, BeaconScanner_iOS>();
+#endif
 #else
             builder.Services.AddSingleton<IBluetoothService, BluetoothService>();
             builder.Services.AddSingleton<IBleDemoService, BleDemoService>();
+#if ANDROID
+            builder.Services.AddSingleton<IBeaconScanner, BeaconScanner_Android>();
+#elif IOS
+            builder.Services.AddSingleton<IBeaconScanner, BeaconScanner_iOS>();
+#endif
 #if ANDROID
             builder.Services.AddSingleton<INfcService, AndroidNfcService>();
 #elif IOS

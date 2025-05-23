@@ -30,7 +30,7 @@
 <key>XSAppIconAssets</key>
 <string>Assets.xcassets/appicon.appiconset</string>
 <key>NSBluetoothAlwaysUsageDescription</key>
-<string>Needed to connect to environmental sensor.</string>
+<string>Scanning nearby BLE beacons.</string>
 <key>NFCReaderUsageDescription</key>
 <string>This app uses NFC to read and write tags.</string>
 </dict>
