@@ -25,6 +25,7 @@ namespace QiMata.MobileIoT
             builder.Logging.AddDebug();
             builder.Services.AddSingleton<IBleDemoService>(MockServiceFactory.CreateBleDemoService());
             builder.Services.AddSingleton<IBluetoothService>(MockServiceFactory.CreateBluetoothService());
+            builder.Services.AddSingleton<INfcService>(MockServiceFactory.CreateNfcService());
 #else
             builder.Services.AddSingleton<IBluetoothService, BluetoothService>();
             builder.Services.AddSingleton<IBleDemoService, BleDemoService>();
@@ -36,10 +37,11 @@ namespace QiMata.MobileIoT
 #endif
 
 
+            builder.Services.AddTransient<ViewModels.NfcPageViewModel>();
+            builder.Services.AddTransient<NfcPage>();
 
             builder.Services.AddTransient<ViewModels.BleViewModel>();
             builder.Services.AddTransient<BlePage>();
-            builder.Services.AddTransient<Views.NfcPage>();
 
             return builder.Build();
         }
