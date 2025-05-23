@@ -4,8 +4,6 @@ using QiMata.MobileIoT.Services.I;
 using QiMata.MobileIoT.Services.Mock;
 using QiMata.MobileIoT.Services;
 using QiMata.MobileIoT.Views;
-using QiMata.MobileIoT.Platforms.Android;
-using QiMata.MobileIoT.Platforms.iOS;
 using Plugin.NFC;
 
 namespace QiMata.MobileIoT
@@ -28,27 +26,20 @@ namespace QiMata.MobileIoT
             builder.Services.AddSingleton<IBleDemoService>(MockServiceFactory.CreateBleDemoService());
             builder.Services.AddSingleton<IBluetoothService>(MockServiceFactory.CreateBluetoothService());
             builder.Services.AddSingleton<INfcService>(MockServiceFactory.CreateNfcService());
-#if ANDROID
-            builder.Services.AddSingleton<IBeaconScanner, BeaconScanner_Android>();
-#elif IOS
-            builder.Services.AddSingleton<IBeaconScanner, BeaconScanner_iOS>();
-#endif
+            builder.Services.AddSingleton<INfcP2PService>(MockServiceFactory.CreateNfcP2PService());
+            builder.Services.AddSingleton<IBeaconScanner>(MockServiceFactory.CreateBeaconScanner());
 #else
             builder.Services.AddSingleton<IBluetoothService, BluetoothService>();
             builder.Services.AddSingleton<IBleDemoService, BleDemoService>();
 #if ANDROID
+            using QiMata.MobileIoT.Platforms.Android;
             builder.Services.AddSingleton<IBeaconScanner, BeaconScanner_Android>();
-#elif IOS
-            builder.Services.AddSingleton<IBeaconScanner, BeaconScanner_iOS>();
-#endif
-#if ANDROID
             builder.Services.AddSingleton<INfcService, AndroidNfcService>();
-#elif IOS
-            builder.Services.AddSingleton<INfcService, IosNfcService>();
-#endif
-#if ANDROID
             builder.Services.AddSingleton<INfcP2PService, NfcP2PService_Android>();
-#else
+#elif IOS
+            using QiMata.MobileIoT.Platforms.iOS;
+            builder.Services.AddSingleton<IBeaconScanner, BeaconScanner_iOS>();
+            builder.Services.AddSingleton<INfcService, IosNfcService>();
             builder.Services.AddSingleton<INfcP2PService, NfcP2PService_iOS>();
 #endif
 #endif

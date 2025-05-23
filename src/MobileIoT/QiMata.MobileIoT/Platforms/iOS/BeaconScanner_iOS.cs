@@ -1,5 +1,6 @@
 #if IOS
 using CoreBluetooth;
+using CoreFoundation;
 using Foundation;
 using QiMata.MobileIoT.Services.I;
 
@@ -16,7 +17,7 @@ public sealed class BeaconScanner_iOS : NSObject, IBeaconScanner, ICBCentralMana
 
     public void StartScanning()
     {
-        if (IsScanning || _central.State != CBCentralManagerState.PoweredOn) return;
+        if (IsScanning || _central.State != CBManagerState.PoweredOn) return;
         var opts = new PeripheralScanningOptions { AllowDuplicatesKey = true };
         _central.ScanForPeripherals(peripheralUuids: null, options: opts);
         IsScanning = true;
@@ -32,7 +33,7 @@ public sealed class BeaconScanner_iOS : NSObject, IBeaconScanner, ICBCentralMana
     [Export("centralManagerDidUpdateState:")]
     public void UpdatedState(CBCentralManager central)
     {
-        if (central.State == CBCentralManagerState.PoweredOn) StartScanning();
+        if (central.State == CBManagerState.PoweredOn) StartScanning();
     }
 
     [Export("centralManager:didDiscoverPeripheral:advertisementData:RSSI:")]

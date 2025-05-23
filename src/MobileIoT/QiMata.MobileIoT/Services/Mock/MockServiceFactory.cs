@@ -98,5 +98,47 @@ namespace QiMata.MobileIoT.Services.Mock
 
             return mock.Object;
         }
+
+        public static INfcP2PService CreateNfcP2PService()
+        {
+            var mock = new Mock<INfcP2PService>();
+            mock.Setup(m => m.StartP2P());
+            mock.Setup(m => m.StopP2P());
+            return mock.Object;
+        }
+
+        public static IBeaconScanner CreateBeaconScanner()
+        {
+            var mock = new Mock<IBeaconScanner>();
+
+            var random = new Random();
+            Timer? timer = null;
+
+            mock.SetupGet(s => s.IsScanning).Returns(() => timer != null);
+
+            mock.Setup(s => s.StartScanning()).Callback(() =>
+            {
+                if (timer != null) return; // Already scanning
+
+                timer = new Timer(_ =>
+                {
+                    var data = new byte[20];
+                    random.NextBytes(data);
+                    var rssi = random.Next(-100, -20);
+
+                    mock.Raise(m => m.AdvertisementReceived += null,
+                        mock.Object,
+                        new BeaconAdvertisement(data, rssi));
+                }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(500)); // every 500 ms
+            });
+
+            mock.Setup(s => s.StopScanning()).Callback(() =>
+            {
+                timer?.Dispose();
+                timer = null;
+            });
+
+            return mock.Object;
+        }
     }
 }

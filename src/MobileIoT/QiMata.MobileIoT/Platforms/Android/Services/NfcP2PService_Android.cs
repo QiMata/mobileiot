@@ -1,12 +1,12 @@
-#if ANDROID
-[assembly: Microsoft.Maui.Controls.Dependency(typeof(QiMata.MobileIoT.Platforms.Android.NfcP2PService_Android))]
+using QiMata.MobileIoT.Services.I;
 
 using Android.Nfc;
 using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.Platform;
 using QiMata.MobileIoT.Services;
+[assembly: Microsoft.Maui.Controls.Dependency(typeof(QiMata.MobileIoT.Platforms.Android.NfcP2PService_Android))]
 
 namespace QiMata.MobileIoT.Platforms.Android;
-
 public class NfcP2PService_Android : Java.Lang.Object,
                                      INfcP2PService,
                                      NfcAdapter.ICreateNdefMessageCallback,
@@ -16,9 +16,9 @@ public class NfcP2PService_Android : Java.Lang.Object,
 
     public void StartP2P()
     {
-        var activity = Platform.CurrentActivity ?? MauiApplication.Current.MainActivity;
+        var activity = Platform.CurrentActivity ?? MauiApplication.Current.GetActivity();
         _adapter = NfcAdapter.GetDefaultAdapter(activity);
-        if (_adapter == null) return;     // device has no NFC
+        if (_adapter == null || activity == null) return;     // device has no NFC
 
         _adapter.SetNdefPushMessageCallback(this, activity);
         _adapter.SetOnNdefPushCompleteCallback(this, activity);
@@ -26,7 +26,11 @@ public class NfcP2PService_Android : Java.Lang.Object,
 
     public void StopP2P()
     {
-        var activity = Platform.CurrentActivity ?? MauiApplication.Current.MainActivity;
+        var activity = Platform.CurrentActivity ?? MauiApplication.Current.GetActivity();
+        if (_adapter == null || activity == null)
+        {
+            return; 
+        }
         _adapter?.SetNdefPushMessageCallback(null, activity);
         _adapter?.SetOnNdefPushCompleteCallback(null, activity);
     }
@@ -48,4 +52,3 @@ public class NfcP2PService_Android : Java.Lang.Object,
         System.Diagnostics.Debug.WriteLine("NDEF push completed.");
     }
 }
-#endif
