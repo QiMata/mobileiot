@@ -6,9 +6,9 @@ namespace QiMata.MobileIoT.ViewModels;
 
 public partial class UsbDemoViewModel : ObservableObject
 {
-    readonly IUsbSerialPort _usb;
+    readonly IUsbDeviceService _usb;
 
-    public UsbDemoViewModel(IUsbSerialPort usb)
+    public UsbDemoViewModel(IUsbDeviceService usb)
         => _usb = usb;
 
     [ObservableProperty]
@@ -17,7 +17,7 @@ public partial class UsbDemoViewModel : ObservableObject
     [RelayCommand]
     private async Task ConnectAsync()
     {
-        var devices = await _usb.ListDevicesAsync();
+        var devices = await _usb.ListAsync();
         if (devices.Any() && await _usb.OpenAsync(devices[0].VendorId, devices[0].ProductId))
             Log += $"Connected to {devices[0].Name}\n";
         else

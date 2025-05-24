@@ -37,12 +37,14 @@ namespace QiMata.MobileIoT
             builder.Services.AddSingleton<INfcService, AndroidNfcService>();
             builder.Services.AddSingleton<INfcP2PService, NfcP2PService_Android>();
             builder.Services.AddSingleton<IP2PService, Platforms.Android.WifiDirectService>();
+            builder.Services.AddSingleton<IUsbDeviceService, Platforms.Android.UsbDeviceServiceAndroid>();
 #elif IOS
             using QiMata.MobileIoT.Platforms.iOS;
             builder.Services.AddSingleton<IBeaconScanner, BeaconScanner_iOS>();
             builder.Services.AddSingleton<INfcService, IosNfcService>();
             builder.Services.AddSingleton<INfcP2PService, NfcP2PService_iOS>();
             builder.Services.AddSingleton<IP2PService, Platforms.iOS.MultipeerService>();
+            builder.Services.AddSingleton<IUsbDeviceService, Platforms.iOS.UsbDeviceServiceIos>();
 #endif
 #endif
 
