@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Linq;
 using System.Threading;
+using Application = Android.App.Application;
 
 namespace QiMata.MobileIoT.Platforms.Android;
 
@@ -30,7 +31,7 @@ public sealed class WifiDirectService : Java.Lang.Object, IP2PService,
 
     public WifiDirectService()
     {
-        _manager = WifiP2pManager.FromContext(_ctx)!;
+        _manager = (WifiP2pManager)_ctx.GetSystemService(Context.WifiP2pService)!;
         _channel = _manager.Initialize(_ctx, Looper.MainLooper, null);
         _receiver = new WifiP2pBroadcastReceiver(_manager, _channel, this, this);
         var filter = new IntentFilter(WifiP2pManager.WifiP2pPeersChangedAction);

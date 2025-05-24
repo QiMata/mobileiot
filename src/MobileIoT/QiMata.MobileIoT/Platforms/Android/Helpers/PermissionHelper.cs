@@ -17,22 +17,35 @@ public static partial class PermissionHelper
             "android.permission.NEARBY_WIFI_DEVICES"         // API 33+
         };
 
-        var pending = required.Where(p => ActivityCompat.CheckSelfPermission(activity, p) != Permission.Granted)
-                              .ToArray();
+        var pending = required
+            .Where(p => ActivityCompat.CheckSelfPermission(activity, p) != Permission.Granted)
+            .ToArray();
 
-        if (pending.Length == 0) return Task.FromResult(true);
+        if (pending.Length == 0)
+            return Task.FromResult(true);
 
         var tcs = new TaskCompletionSource<bool>();
-        ActivityCompat.RequestPermissions(activity, pending, 7001);
 
-        void Handler(object? s, EventArgs e)
+        void Handler(int requestCode, string[] permissions, Permission[] grantResults)
         {
-            activity.RequestPermissionsResult -= Handler;
-            var allGranted = pending.All(p => ActivityCompat.CheckSelfPermission(activity, p) == Permission.Granted);
+            if (requestCode != 7001) return;
+
+            MainActivity.PermissionsResultReceived -= Handler;
+
+            var grantedPermissions = permissions
+                .Zip(grantResults, (perm, result) => (perm, result))
+                .Where(pr => pr.result == Permission.Granted)
+                .Select(pr => pr.perm)
+                .ToArray();
+
+            var allGranted = pending.All(grantedPermissions.Contains);
             tcs.TrySetResult(allGranted);
         }
 
-        activity.RequestPermissionsResult += Handler;
+        MainActivity.PermissionsResultReceived += Handler;
+
+        ActivityCompat.RequestPermissions(activity, pending, 7001);
+
         return tcs.Task;
     }
 }

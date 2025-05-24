@@ -3,6 +3,7 @@ using MultipeerConnectivity;
 using QiMata.MobileIoT.Services;
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
+using UIKit;
 
 namespace QiMata.MobileIoT.Platforms.iOS;
 
@@ -72,7 +73,7 @@ public sealed class MultipeerService : NSObject, IP2PService, IMCSessionDelegate
 
     // ---- Advertiser ----
     public void DidReceiveInvitationFromPeer(MCNearbyServiceAdvertiser advertiser, MCPeerID peerID,
-                                             NSData? context, MCNearbyServiceInvitationHandler invitationHandler)
+                                             NSData? context, MCNearbyServiceAdvertiserInvitationHandler invitationHandler)
         => invitationHandler(true, _session);
 
     // ---- Browser ----
