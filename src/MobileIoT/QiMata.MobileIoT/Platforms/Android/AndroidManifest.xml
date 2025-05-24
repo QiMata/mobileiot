@@ -16,6 +16,7 @@
         <uses-permission android:name="android.permission.NFC" />
         <uses-feature android:name="android.hardware.nfc" android:required="true" />
         <uses-feature android:name="android.hardware.usb.host" android:required="false" />
+        <uses-permission android:name="android.permission.USB_PERMISSION" tools:node="remove"/>
 
   <application android:label="MyMauiApp">
     <activity android:name="crc64fa985e60e8a4f16e.MainActivity"
