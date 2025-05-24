@@ -42,7 +42,11 @@ public sealed class BeaconScanner_iOS : NSObject, IBeaconScanner, ICBCentralMana
     {
         if (ad[CBAdvertisement.DataManufacturerDataKey] is NSData d && d.Length > 0)
             AdvertisementReceived?.Invoke(this,
-                new BeaconAdvertisement(d.ToArray(), rssi.Int32Value));
+                new BeaconAdvertisement(
+                    p.Identifier.AsString(),
+                    p.Name,
+                    d.ToArray(),
+                    rssi.Int32Value));
     }
 }
 #endif
