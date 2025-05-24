@@ -4,6 +4,7 @@ using QiMata.MobileIoT.Services.I;
 using QiMata.MobileIoT.Services.Mock;
 using QiMata.MobileIoT.Services;
 using QiMata.MobileIoT.Views;
+using QiMata.MobileIoT.Usb;
 using Plugin.NFC;
 
 namespace QiMata.MobileIoT
@@ -45,6 +46,16 @@ namespace QiMata.MobileIoT
             builder.Services.AddSingleton<INfcP2PService, NfcP2PService_iOS>();
             builder.Services.AddSingleton<IP2PService, Platforms.iOS.MultipeerService>();
             builder.Services.AddSingleton<IUsbDeviceService, Platforms.iOS.UsbDeviceServiceIos>();
+#endif
+            builder.Services.AddSingleton<IUsbCommunicator>(provider =>
+#if ANDROID
+                new Platforms.Android.UsbCommunicatorAndroid()
+#elif IOS
+                new Platforms.iOS.UsbCommunicatoriOS()
+#else
+                throw new NotImplementedException()
+#endif
+            );
 #endif
 #endif
 
