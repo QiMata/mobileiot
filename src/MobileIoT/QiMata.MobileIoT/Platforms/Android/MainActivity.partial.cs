@@ -1,6 +1,8 @@
 using Android.Nfc;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
+using Microsoft.Maui.Controls.PlatformConfiguration;
+using QiMata.MobileIoT.Platforms.Android;
 using QiMata.MobileIoT.Services;
 using QiMata.MobileIoT.Services.I;
 
