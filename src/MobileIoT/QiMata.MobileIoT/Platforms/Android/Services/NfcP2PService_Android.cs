@@ -1,3 +1,4 @@
+using Android.Content;
 using QiMata.MobileIoT.Services.I;
 
 using Android.Nfc;
@@ -52,7 +53,7 @@ public class NfcP2PService_Android : Java.Lang.Object,
         System.Diagnostics.Debug.WriteLine("NDEF push completed.");
 
     // Called from MainActivity to parse incoming intents
-    internal void HandleIntent(Android.Content.Intent intent)
+    internal void HandleIntent(Intent intent)
     {
         if (!NfcAdapter.ActionNdefDiscovered.Equals(intent.Action)) return;
 
@@ -63,7 +64,7 @@ public class NfcP2PService_Android : Java.Lang.Object,
             var record = msg.GetRecords().FirstOrDefault();
             if (record == null) return;
 
-            var mimeType = System.Text.Encoding.ASCII.GetString(record.GetType());
+            var mimeType = record.ToMimeType();
             var text     = System.Text.Encoding.UTF8.GetString(record.GetPayload());
 
             MessageReceived?.Invoke(this,
