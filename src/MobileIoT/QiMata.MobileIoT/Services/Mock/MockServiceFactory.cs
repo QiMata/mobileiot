@@ -148,12 +148,22 @@ namespace QiMata.MobileIoT.Services.Mock
             {
                 if (timer != null) return; // Already scanning
 
+                var deviceList = new List<string>
+                {
+                    $"AA:BB:{random.Next(0,255):X2}:{random.Next(0,255):X2}:{random.Next(0,255):X2}:{random.Next(0,255):X2}",
+                    $"AA:BB:{random.Next(0,255):X2}:{random.Next(0,255):X2}:{random.Next(0,255):X2}:{random.Next(0,255):X2}",
+                    $"AA:BB:{random.Next(0,255):X2}:{random.Next(0,255):X2}:{random.Next(0,255):X2}:{random.Next(0,255):X2}",
+                    $"AA:BB:{random.Next(0,255):X2}:{random.Next(0,255):X2}:{random.Next(0,255):X2}:{random.Next(0,255):X2}",
+                    $"AA:BB:{random.Next(0,255):X2}:{random.Next(0,255):X2}:{random.Next(0,255):X2}:{random.Next(0,255):X2}"
+                };
+
+
                 timer = new Timer(_ =>
                 {
                     var data = new byte[20];
                     random.NextBytes(data);
                     var rssi = random.Next(-100, -20);
-                    var deviceId = $"AA:BB:{random.Next(0,255):X2}:{random.Next(0,255):X2}:{random.Next(0,255):X2}:{random.Next(0,255):X2}";
+                    var deviceId = deviceList[random.Next(deviceList.Count)];
 
                     mock.Raise(m => m.AdvertisementReceived += null,
                         mock.Object,
