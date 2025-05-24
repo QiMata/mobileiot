@@ -12,7 +12,7 @@ public partial class NfcP2PViewModel : ObservableObject
     public NfcP2PViewModel(INfcP2PService svc) => _svc = svc;
 
     [RelayCommand]
-    void StartP2P() => _svc.StartP2P();
+    void StartP2P() => _svc.StartP2P("Hello World");
 
     [RelayCommand]
     void NavigateBack() => Shell.Current.GoToAsync("..");
