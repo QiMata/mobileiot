@@ -36,11 +36,13 @@ namespace QiMata.MobileIoT
             builder.Services.AddSingleton<IBeaconScanner, BeaconScanner_Android>();
             builder.Services.AddSingleton<INfcService, AndroidNfcService>();
             builder.Services.AddSingleton<INfcP2PService, NfcP2PService_Android>();
+            builder.Services.AddSingleton<IP2PService, Platforms.Android.WifiDirectService>();
 #elif IOS
             using QiMata.MobileIoT.Platforms.iOS;
             builder.Services.AddSingleton<IBeaconScanner, BeaconScanner_iOS>();
             builder.Services.AddSingleton<INfcService, IosNfcService>();
             builder.Services.AddSingleton<INfcP2PService, NfcP2PService_iOS>();
+            builder.Services.AddSingleton<IP2PService, Platforms.iOS.MultipeerService>();
 #endif
 #endif
 
@@ -59,18 +61,6 @@ namespace QiMata.MobileIoT
 
             builder.Services.AddTransient<ViewModels.UsbDemoViewModel>();
             builder.Services.AddTransient<UsbDemoPage>();
-
-#if ANDROID
-            builder.Services.AddSingleton<IP2PService, Platforms.Android.WifiDirectService>();
-#elif IOS
-            builder.Services.AddSingleton<IP2PService, Platforms.iOS.MultipeerService>();
-#endif
-
-#if ANDROID
-            builder.Services.AddSingleton<IUsbSerialPort, Platforms.Android.UsbSerialPortAndroid>();
-#elif IOS
-            builder.Services.AddSingleton<IUsbSerialPort, Platforms.iOS.UsbSerialPortIos>();
-#endif
 
             return builder.Build();
         }
