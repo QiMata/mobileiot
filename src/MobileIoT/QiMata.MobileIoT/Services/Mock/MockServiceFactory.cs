@@ -102,7 +102,7 @@ namespace QiMata.MobileIoT.Services.Mock
         public static INfcP2PService CreateNfcP2PService()
         {
             var mock = new Mock<INfcP2PService>();
-            mock.Setup(m => m.StartP2P());
+            mock.Setup(m => m.StartP2P(It.IsAny<string>()));
             mock.Setup(m => m.StopP2P());
             return mock.Object;
         }

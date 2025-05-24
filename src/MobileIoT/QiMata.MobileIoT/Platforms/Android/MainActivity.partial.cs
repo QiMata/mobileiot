@@ -1,6 +1,8 @@
 using Android.Nfc;
 using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.Controls;
 using QiMata.MobileIoT.Services;
+using QiMata.MobileIoT.Services.I;
 
 namespace QiMata.MobileIoT;
 
@@ -10,19 +12,11 @@ partial class MainActivity
     {
         base.OnNewIntent(intent);
 
-        if (NfcAdapter.ActionNdefDiscovered.Equals(intent.Action))
-        {
-            var raw = intent.GetParcelableArrayExtra(NfcAdapter.ExtraNdefMessages);
-            if (raw?.Length > 0)
-            {
-                var msg = (NdefMessage)raw[0]!;
-                var record = msg.GetRecords().FirstOrDefault();
-                var text = System.Text.Encoding.UTF8.GetString(record!.GetPayload());
-                MainThread.BeginInvokeOnMainThread(() =>
-                    Shell.Current.DisplayAlert("Received", text, "OK"));
-            }
-        }
+        // Give the P2P service first crack at the intent
+        (DependencyService.Get<INfcP2PService>() as NfcP2PService_Android)
+            ?.HandleIntent(intent);
 
+        // Still let Plugin.NFC process tag scans, if used
         Plugin.NFC.CrossNFC.OnNewIntent(intent);
     }
 }
