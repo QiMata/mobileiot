@@ -33,5 +33,11 @@
 <string>Scanning nearby BLE beacons.</string>
 <key>NFCReaderUsageDescription</key>
 <string>This app uses NFC to read and write tags.</string>
+<key>NSLocalNetworkUsageDescription</key>
+<string>Peer-to-peer communication with nearby devices.</string>
+<key>NSBonjourServices</key>
+<array>
+  <string>_maui-p2p._tcp</string>
+</array>
 </dict>
 </plist>

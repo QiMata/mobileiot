@@ -3,6 +3,12 @@
 	<application android:allowBackup="true" android:icon="@mipmap/appicon" android:roundIcon="@mipmap/appicon_round" android:supportsRtl="true"></application>
         <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
         <uses-permission android:name="android.permission.INTERNET" />
+        <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+        <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+        <!-- For API ≤ 32 -->
+        <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+        <!-- For API 33+ -->
+        <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" android:usesPermissionFlags="neverForLocation" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" tools:targetApi="31" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" tools:targetApi="31" />
         <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
