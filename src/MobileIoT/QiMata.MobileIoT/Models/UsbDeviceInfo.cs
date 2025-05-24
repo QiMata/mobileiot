@@ -1,3 +1,3 @@
 namespace QiMata.MobileIoT.Services;
 
-public record UsbDeviceInfo(int VendorId, int ProductId, string Name);
+public record UsbDeviceInfo(ushort VendorId, ushort ProductId, string Name);
