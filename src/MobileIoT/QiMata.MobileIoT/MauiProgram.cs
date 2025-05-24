@@ -57,6 +57,12 @@ namespace QiMata.MobileIoT
             builder.Services.AddTransient<ViewModels.BeaconScanViewModel>();
             builder.Services.AddTransient<BleScannerPage>();
 
+#if ANDROID
+            builder.Services.AddSingleton<IP2PService, Platforms.Android.WifiDirectService>();
+#elif IOS
+            builder.Services.AddSingleton<IP2PService, Platforms.iOS.MultipeerService>();
+#endif
+
             return builder.Build();
         }
     }
