@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:QiMata.MobileIoT.ViewModels"
+             x:Class="QiMata.MobileIoT.Views.BleScannerPage"
+             Title="BLE Beacons"
+             BackgroundColor="#F3F4F6">
+
+    <Grid Padding="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*"   />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Label Text="Detected BLE Beacons"
+               FontSize="26"
+               FontAttributes="Bold"
+               TextColor="#374151"
+               HorizontalOptions="Center"
+               Margin="0,20"/>
+
+        <!-- Device list -->
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding Devices}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame Margin="0,6"
+                           Padding="12"
+                           CornerRadius="8"
+                           BackgroundColor="White"
+                           HasShadow="True">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{Binding Name, FallbackValue=(no name)}"
+                                   FontAttributes="Bold"
+                                   FontSize="18"
+                                   TextColor="#111827"/>
+                            <Label Text="{Binding DeviceId}"
+                                   FontSize="12"
+                                   TextColor="#6B7280"/>
+                            <Label Text="{Binding Rssi, StringFormat='RSSI: {0} dBm'}"
+                                   FontSize="14"
+                                   TextColor="#374151"/>
+                            <Label Text="{Binding DataPreview}"
+                                   FontFamily="Courier New"
+                                   FontSize="12"
+                                   TextColor="#2563EB"/>
+                        </VerticalStackLayout>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

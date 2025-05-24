@@ -81,12 +81,15 @@
       </ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Views\BlePage.xaml.cs">
-	    <DependentUpon>BlePage.xaml</DependentUpon>
-	  </Compile>
-	  <Compile Update="Views\BeaconPage.xaml.cs">
-	    <DependentUpon>BeaconPage.xaml</DependentUpon>
-	  </Compile>
+          <Compile Update="Views\BlePage.xaml.cs">
+            <DependentUpon>BlePage.xaml</DependentUpon>
+          </Compile>
+          <Compile Update="Views\BleScannerPage.xaml.cs">
+            <DependentUpon>BleScannerPage.xaml</DependentUpon>
+          </Compile>
+          <Compile Update="Views\BeaconPage.xaml.cs">
+            <DependentUpon>BeaconPage.xaml</DependentUpon>
+          </Compile>
 	  <Compile Update="Views\NfcP2PPage.xaml.cs">
 	    <DependentUpon>NfcP2PPage.xaml</DependentUpon>
 	  </Compile>
@@ -111,9 +114,12 @@
 	  <MauiXaml Update="Views\UsbPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Views\WifiDirectPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	</ItemGroup>
+          <MauiXaml Update="Views\WifiDirectPage.xaml">
+            <Generator>MSBuild:Compile</Generator>
+          </MauiXaml>
+          <MauiXaml Update="Views\BleScannerPage.xaml">
+            <Generator>MSBuild:Compile</Generator>
+          </MauiXaml>
+        </ItemGroup>
 
 </Project>

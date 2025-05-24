@@ -1,6 +1,13 @@
 namespace QiMata.MobileIoT.Services.I;
 
-public record BeaconAdvertisement(byte[] Data, int Rssi);
+/// <summary>
+/// Advertisement details from a BLE beacon.
+/// </summary>
+public record BeaconAdvertisement(
+    string DeviceId,
+    string? Name,
+    byte[] Data,
+    int Rssi);
 
 public interface IBeaconScanner
 {

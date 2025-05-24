@@ -38,9 +38,15 @@ public sealed class BeaconScanner_Android : Java.Lang.Object, IBeaconScanner
 
     void OnAdv(ScanResult result)
     {
-        var data = result?.ScanRecord?.GetBytes();
+        var rec  = result?.ScanRecord;
+        var data = rec?.GetBytes();
         if (data?.Length > 0)
-            AdvertisementReceived?.Invoke(this, new BeaconAdvertisement(data, result.Rssi));
+            AdvertisementReceived?.Invoke(this,
+                new BeaconAdvertisement(
+                    result.Device.Address,
+                    result.Device.Name,
+                    data,
+                    result.Rssi));
     }
 
     sealed class ScanCallbackImpl : ScanCallback

@@ -54,6 +54,9 @@ namespace QiMata.MobileIoT
             builder.Services.AddTransient<ViewModels.BleViewModel>();
             builder.Services.AddTransient<BlePage>();
 
+            builder.Services.AddTransient<ViewModels.BeaconScanViewModel>();
+            builder.Services.AddTransient<BleScannerPage>();
+
             return builder.Build();
         }
     }

@@ -38,12 +38,12 @@
                             Command="{Binding NavigateCommand}"
                             CommandParameter="BlePage" />
 
-                    <Button Text="Beacon"
+                    <Button Text="BLE Beacons"
                             BackgroundColor="#2563EB"
                             TextColor="White"
                             CornerRadius="8"
                             Command="{Binding NavigateCommand}"
-                            CommandParameter="BeaconPage" />
+                            CommandParameter="BleScannerPage" />
 
                     <Button Text="NFC"
                             BackgroundColor="#2563EB"

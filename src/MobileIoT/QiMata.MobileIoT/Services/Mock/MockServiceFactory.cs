@@ -153,10 +153,15 @@ namespace QiMata.MobileIoT.Services.Mock
                     var data = new byte[20];
                     random.NextBytes(data);
                     var rssi = random.Next(-100, -20);
+                    var deviceId = $"AA:BB:{random.Next(0,255):X2}:{random.Next(0,255):X2}:{random.Next(0,255):X2}:{random.Next(0,255):X2}";
 
                     mock.Raise(m => m.AdvertisementReceived += null,
                         mock.Object,
-                        new BeaconAdvertisement(data, rssi));
+                        new BeaconAdvertisement(
+                            deviceId,
+                            "MockBeacon",
+                            data,
+                            rssi));
                 }, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(500)); // every 500 ms
             });
 
