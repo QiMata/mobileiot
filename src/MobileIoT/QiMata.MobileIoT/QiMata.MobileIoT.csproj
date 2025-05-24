@@ -65,8 +65,8 @@
       <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.0" />
       <PackageReference Include="Plugin.NFC" Version="0.1.26" />
       <!-- Cross-platform USB libraries -->
-      <PackageReference Include="Device.Net" Version="5.*" />
-      <PackageReference Include="Usb.Net"    Version="5.*" />
+      <PackageReference Include="Device.Net" Version="4.2.1" />
+      <PackageReference Include="Usb.Net"    Version="4.2.1" />
       </ItemGroup>
 
         <ItemGroup>

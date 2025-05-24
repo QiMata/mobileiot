@@ -28,7 +28,7 @@ public sealed class UsbCommunicatoriOS : IUsbCommunicator
         return _in is not null && _out is not null;
     }
 
-    public int Write(byte[] d) { _out?.Write(d, 0, d.Length); return d.Length; }
-    public int Read(byte[] b)  => _in?.Read(b, 0, b.Length) ?? -1;
+    public int Write(byte[] d) { _out?.Write(d, 0, (UIntPtr)d.Length); return d.Length; }
+    public int Read(byte[] b)  => (int)_in?.Read(b, 0, (UIntPtr)b.Length)!;
 }
 #endif

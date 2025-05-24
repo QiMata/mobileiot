@@ -1,3 +1,4 @@
+using Android.App;
 using Android.Content;
 using Android.Hardware.Usb;
 using Microsoft.Maui.Controls;

@@ -39,6 +39,7 @@ namespace QiMata.MobileIoT
             builder.Services.AddSingleton<INfcP2PService, NfcP2PService_Android>();
             builder.Services.AddSingleton<IP2PService, Platforms.Android.WifiDirectService>();
             builder.Services.AddSingleton<IUsbDeviceService, Platforms.Android.UsbDeviceServiceAndroid>();
+            builder.Services.AddSingleton<IUsbCommunicator,Platforms.Android.UsbCommunicatorAndroid>();
 #elif IOS
             using QiMata.MobileIoT.Platforms.iOS;
             builder.Services.AddSingleton<IBeaconScanner, BeaconScanner_iOS>();
@@ -46,16 +47,7 @@ namespace QiMata.MobileIoT
             builder.Services.AddSingleton<INfcP2PService, NfcP2PService_iOS>();
             builder.Services.AddSingleton<IP2PService, Platforms.iOS.MultipeerService>();
             builder.Services.AddSingleton<IUsbDeviceService, Platforms.iOS.UsbDeviceServiceIos>();
-#endif
-            builder.Services.AddSingleton<IUsbCommunicator>(provider =>
-#if ANDROID
-                new Platforms.Android.UsbCommunicatorAndroid()
-#elif IOS
-                new Platforms.iOS.UsbCommunicatoriOS()
-#else
-                throw new NotImplementedException()
-#endif
-            );
+            builder.Services.AddSingleton<IUsbCommunicator,Platforms.iOS.UsbCommunicatoriOS>();
 #endif
 #endif
 

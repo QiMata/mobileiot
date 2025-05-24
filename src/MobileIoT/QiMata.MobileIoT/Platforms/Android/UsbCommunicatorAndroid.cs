@@ -16,8 +16,8 @@ public sealed class UsbCommunicatorAndroid : IUsbCommunicator
     UsbEndpoint? _out;
 
     public UsbCommunicatorAndroid() =>
-        _mgr = (UsbManager)(Platform.CurrentActivity?.GetSystemService(Context.UsbService)
-               ?? Application.Context.GetSystemService(Context.UsbService))!;
+        _mgr = (UsbManager)(Platform.CurrentActivity?.GetSystemService(Context.UsbService) ??
+                            global::Android.App.Application.Context.GetSystemService(Context.UsbService))!;
 
     public IEnumerable<UsbDeviceInfo> ListDevices() =>
         _mgr.DeviceList.Values.Select(d => new UsbDeviceInfo(
