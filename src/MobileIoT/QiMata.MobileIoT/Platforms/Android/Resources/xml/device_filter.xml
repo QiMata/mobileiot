@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Arduino Uno / Mega (CDC-ACM) -->
+    <usb-device vendor-id="0x2341" product-id="0x0043" />
+    <!-- FTDI FT232R -->
     <usb-device vendor-id="0x0403" product-id="0x6001" />
-    <usb-device vendor-id="0x067B" product-id="0x2303" />
+    <!-- CH340 -->
+    <usb-device vendor-id="0x1A86" product-id="0x7523" />
 </resources>

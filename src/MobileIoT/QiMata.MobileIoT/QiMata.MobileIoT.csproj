@@ -67,6 +67,7 @@
       <!-- Cross-platform USB libraries -->
       <PackageReference Include="Device.Net" Version="4.2.1" />
       <PackageReference Include="Usb.Net"    Version="4.2.1" />
+      <PackageReference Include="UsbSerialForAndroid" Version="3.0.0" />
       </ItemGroup>
 
         <ItemGroup>

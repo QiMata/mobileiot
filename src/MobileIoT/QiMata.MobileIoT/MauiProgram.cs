@@ -40,6 +40,7 @@ namespace QiMata.MobileIoT
             builder.Services.AddSingleton<IP2PService, Platforms.Android.WifiDirectService>();
             builder.Services.AddSingleton<IUsbDeviceService, Platforms.Android.UsbDeviceServiceAndroid>();
             builder.Services.AddSingleton<IUsbCommunicator,Platforms.Android.UsbCommunicatorAndroid>();
+            builder.Services.AddSingleton<ISerialDeviceService, Platforms.Android.UsbSerialDeviceService>();
 #elif IOS
             using QiMata.MobileIoT.Platforms.iOS;
             builder.Services.AddSingleton<IBeaconScanner, BeaconScanner_iOS>();
@@ -48,6 +49,7 @@ namespace QiMata.MobileIoT
             builder.Services.AddSingleton<IP2PService, Platforms.iOS.MultipeerService>();
             builder.Services.AddSingleton<IUsbDeviceService, Platforms.iOS.UsbDeviceServiceIos>();
             builder.Services.AddSingleton<IUsbCommunicator,Platforms.iOS.UsbCommunicatoriOS>();
+            builder.Services.AddSingleton<ISerialDeviceService, Platforms.iOS.ExternalAccessorySerialDeviceService>();
 #endif
 #endif
 
