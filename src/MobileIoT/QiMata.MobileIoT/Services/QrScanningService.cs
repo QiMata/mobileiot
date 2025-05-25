@@ -21,7 +21,7 @@ public class QrScanningService : IQrScanningService
         {
             Options = new BarcodeReaderOptions
             {
-                Formats = BarcodeFormats.QrCode,
+                Formats = BarcodeFormats.TwoDimensional,
                 AutoRotate = true,
                 Multiple = false
             },

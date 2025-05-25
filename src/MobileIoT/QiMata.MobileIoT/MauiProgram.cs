@@ -7,6 +7,7 @@ using QiMata.MobileIoT.Views;
 using QiMata.MobileIoT.Usb;
 using Plugin.NFC;
 using ZXing.Net.Maui;
+using ZXing.Net.Maui.Controls;
 
 namespace QiMata.MobileIoT
 {
