@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using QiMata.MobileIoT.Services.I;
+using QiMata.MobileIoT.Services;
 using System.Threading;
 
 namespace QiMata.MobileIoT.ViewModels;
@@ -8,13 +9,15 @@ namespace QiMata.MobileIoT.ViewModels;
 public partial class MainViewModel : ObservableObject
 {
     private readonly IBluetoothService _ble;
+    private readonly IQrScanningService _qrScanner;
 
     [ObservableProperty] double tempC;
     [ObservableProperty] double humidity;
 
-    public MainViewModel(IBluetoothService ble)
+    public MainViewModel(IBluetoothService ble, IQrScanningService qrScanner)
     {
         _ble = ble;
+        _qrScanner = qrScanner;
         _ble.TemperatureUpdatedC += (_, v) => TempC = v;
         _ble.HumidityUpdatedPercent += (_, v) => Humidity = v;
     }
@@ -30,4 +33,11 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private Task ToggleLedAsync(bool on)
         => _ble.ToggleLedAsync(on, CancellationToken.None);
+
+    [RelayCommand]
+    private async Task ScanQrAsync()
+    {
+        var result = await _qrScanner.ScanAsync();
+        // handle the result as needed
+    }
 }
