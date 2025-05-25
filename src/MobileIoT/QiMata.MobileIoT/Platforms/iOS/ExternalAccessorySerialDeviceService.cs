@@ -29,8 +29,8 @@ public sealed class ExternalAccessorySerialDeviceService : NSObject, ISerialDevi
         var protocol = _acc.ProtocolStrings.First();
         _session = new EASession(_acc, protocol);
         _session.InputStream.Delegate  = this;
-        _session.OutputStream.Schedule(NSRunLoop.Current, NSRunLoop.NSDefaultRunLoopMode);
-        _session.InputStream.Schedule(NSRunLoop.Current, NSRunLoop.NSDefaultRunLoopMode);
+        _session.OutputStream.Schedule(NSRunLoop.Current, NSRunLoopMode.Default);
+        _session.InputStream.Schedule(NSRunLoop.Current, NSRunLoopMode.Default);
         _session.OutputStream.Open();
         _session.InputStream.Open();
         return Task.FromResult(true);
@@ -39,8 +39,7 @@ public sealed class ExternalAccessorySerialDeviceService : NSObject, ISerialDevi
     public Task<int> WriteAsync(byte[] data, CancellationToken ct = default)
     {
         if (_session == null) throw new InvalidOperationException("Not open");
-        var nsdata = NSData.FromArray(data);
-        _session.OutputStream.Write(nsdata.Bytes, (nuint)nsdata.Length);
+        _session.OutputStream.Write(data, 0, (UIntPtr)data.Length);
         return Task.FromResult(data.Length);
     }
 
@@ -52,7 +51,7 @@ public sealed class ExternalAccessorySerialDeviceService : NSObject, ISerialDevi
         if (streamEvent.HasFlag(NSStreamEvent.HasBytesAvailable))
         {
             var buffer = new byte[READ_BUFF_SZ];
-            nuint len = _session!.InputStream.Read(buffer, (nuint)buffer.Length);
+            var len = _session!.InputStream.Read(buffer, (UIntPtr)buffer.Length);
             if (len > 0)
                 DataReceived?.Invoke(this, new ReadOnlyMemory<byte>(buffer, 0, (int)len));
         }
@@ -62,8 +61,6 @@ public sealed class ExternalAccessorySerialDeviceService : NSObject, ISerialDevi
     {
         _session?.InputStream.Close();
         _session?.OutputStream.Close();
-        _session?.InputStream.RemoveFromRunLoop(NSRunLoop.Current, NSRunLoop.NSDefaultRunLoopMode);
-        _session?.OutputStream.RemoveFromRunLoop(NSRunLoop.Current, NSRunLoop.NSDefaultRunLoopMode);
         _session = null;
         return ValueTask.CompletedTask;
     }

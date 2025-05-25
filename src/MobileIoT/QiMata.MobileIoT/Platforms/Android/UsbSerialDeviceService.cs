@@ -1,8 +1,14 @@
+using Android.App;
 using Android.Content;
 using Android.Hardware.Usb;
-using Java.IO;
-using UsbSerialForAndroid; // NuGet/Xamarin binding
+using Hoho.Android.UsbSerial.Driver;
 using QiMata.MobileIoT.Services;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Application = Android.App.Application;
+using IOException = System.IO.IOException;
 
 namespace QiMata.MobileIoT.Platforms.Android;
 
@@ -12,49 +18,57 @@ public sealed class UsbSerialDeviceService : ISerialDeviceService
 
     private readonly UsbManager _usb;
     private UsbDeviceConnection? _conn;
-    private UsbSerialPort? _port;
+    private IUsbSerialPort? _port;
     private CancellationTokenSource? _rxCts;
-    private static readonly Dictionary<int, TaskCompletionSource> _permBlocks = new();
+
+    private static readonly Dictionary<int, TaskCompletionSource<bool>> _permBlocks = new();
 
     public UsbSerialDeviceService()
-    {
-        _usb = (UsbManager)Android.App.Application.Context.GetSystemService(Context.UsbService)!;
-    }
+        => _usb = (UsbManager)Application.Context.GetSystemService(Context.UsbService)!;
 
-    public bool IsOpen => _port?.IsOpen == true;
+    private bool _isOpen = false;
+    public bool IsOpen => _port != null && _isOpen;
 
-    public async Task<IReadOnlyList<SerialDeviceInfo>> ListAsync(CancellationToken ct = default)
-    {
-        var list = new List<SerialDeviceInfo>();
-        foreach (var dev in _usb.DeviceList.Values)
-            list.Add(new SerialDeviceInfo((ushort)dev.VendorId, (ushort)dev.ProductId, dev.DeviceName));
-        return list;
-    }
+    public Task<IReadOnlyList<SerialDeviceInfo>> ListAsync(CancellationToken ct = default)
+        => Task.FromResult<IReadOnlyList<SerialDeviceInfo>>(
+               _usb.DeviceList.Values
+                   .Select(d => new SerialDeviceInfo(
+                                    (ushort)d.VendorId,
+                                    (ushort)d.ProductId,
+                                    d.DeviceName))
+                   .ToList()
+                   .AsReadOnly());
 
     public async Task<bool> OpenAsync(ushort vid, ushort pid, int baudRate = 9600, CancellationToken ct = default)
     {
         var dev = _usb.DeviceList.Values.FirstOrDefault(d => d.VendorId == vid && d.ProductId == pid);
         if (dev == null) return false;
 
+        //-- Request runtime permission if we don't have it ––––––––––––––––––––––
         if (!_usb.HasPermission(dev))
         {
-            var tcs = new TaskCompletionSource();
+            var tcs = new TaskCompletionSource<bool>();
             _permBlocks[dev.DeviceId] = tcs;
 
-            var pi = PendingIntent.GetBroadcast(Android.App.Application.Context, 0,
-                     new Intent(UsbPermissionBroadcastReceiver.ACTION_USB_PERMISSION),
-                     PendingIntentFlags.Immutable);
+            var pi = PendingIntent.GetBroadcast(
+                         Application.Context, 0,
+                         new Intent(UsbPermissionBroadcastReceiver.ACTION_USB_PERMISSION),
+                         PendingIntentFlags.Immutable);
+
             _usb.RequestPermission(dev, pi);
             await tcs.Task.WaitAsync(ct);
         }
-
+        //-- Open connection / configure port –––––––––––––––––––––––––––––––––––
         _conn = _usb.OpenDevice(dev);
         if (_conn == null) return false;
 
-        var driver = UsbSerialProber.DefaultProber.FindAllDrivers(_usb)
-                                                  .First(d => d.Device.DeviceId == dev.DeviceId);
+        var driver = UsbSerialProber.DefaultProber
+                                    .FindAllDrivers(_usb)
+                                    .First(d => d.Device.DeviceId == dev.DeviceId);
+
         _port = driver.Ports[0];
         _port.Open(_conn);
+        _isOpen = true;
         _port.SetParameters(baudRate, 8, StopBits.One, Parity.None);
 
         _rxCts = new CancellationTokenSource();
@@ -84,22 +98,25 @@ public sealed class UsbSerialDeviceService : ISerialDeviceService
             }
             catch (IOException)
             {
-                break;
+                break; // Device unplugged
             }
         }
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
+        _isOpen = false;
         _rxCts?.Cancel();
         _port?.Close();
         _conn?.Close();
         _rxCts?.Dispose();
+        return ValueTask.CompletedTask;
     }
 
+    /// <summary>Called by the broadcast receiver once permission is granted.</summary>
     internal static void UnblockPermission(int deviceId)
     {
         if (_permBlocks.TryGetValue(deviceId, out var tcs))
-            tcs.TrySetResult();
+            tcs.TrySetResult(true);
     }
 }

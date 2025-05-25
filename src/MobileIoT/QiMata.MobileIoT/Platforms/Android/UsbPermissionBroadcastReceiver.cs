@@ -1,3 +1,4 @@
+#if ANDROID
 using Android.App;
 using Android.Content;
 using Android.Hardware.Usb;
@@ -22,3 +23,4 @@ public sealed class UsbPermissionBroadcastReceiver : BroadcastReceiver
         }
     }
 }
+#endif
