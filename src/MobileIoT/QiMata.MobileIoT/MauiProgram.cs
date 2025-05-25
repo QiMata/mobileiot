@@ -6,6 +6,7 @@ using QiMata.MobileIoT.Services;
 using QiMata.MobileIoT.Views;
 using QiMata.MobileIoT.Usb;
 using Plugin.NFC;
+using ZXing.Net.Maui;
 
 namespace QiMata.MobileIoT
 {
@@ -16,6 +17,7 @@ namespace QiMata.MobileIoT
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseBarcodeReader()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -52,6 +54,8 @@ namespace QiMata.MobileIoT
             builder.Services.AddSingleton<ISerialDeviceService, Platforms.iOS.ExternalAccessorySerialDeviceService>();
 #endif
 #endif
+
+            builder.Services.AddSingleton<IQrScanningService, QrScanningService>();
 
 
             builder.Services.AddTransient<ViewModels.NfcPageViewModel>();
