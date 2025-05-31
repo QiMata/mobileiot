@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
-	<application android:allowBackup="true" android:icon="@mipmap/appicon" android:roundIcon="@mipmap/appicon_round" android:supportsRtl="true"></application>
         <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
         <uses-permission android:name="android.permission.INTERNET" />
         <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -19,7 +18,7 @@
         <uses-feature android:name="android.hardware.usb.host" android:required="true" />
         <uses-permission android:name="android.permission.USB_PERMISSION" tools:node="remove"/>
 
-  <application android:label="MyMauiApp">
+  <application android:label="MyMauiApp" android:allowBackup="true" android:icon="@mipmap/appicon" android:roundIcon="@mipmap/appicon_round" android:supportsRtl="true">
     <receiver android:name="QiMata.MobileIoT.Platforms.Android.UsbPermissionBroadcastReceiver" />
     <activity android:name="crc64fa985e60e8a4f16e.MainActivity"
               android:exported="true"
