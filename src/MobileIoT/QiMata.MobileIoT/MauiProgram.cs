@@ -57,6 +57,7 @@ namespace QiMata.MobileIoT
 #endif
 
             builder.Services.AddSingleton<IQrScanningService, QrScanningService>();
+            builder.Services.AddSingleton<ImageClassificationService>();
 
 
             builder.Services.AddTransient<ViewModels.NfcPageViewModel>();
