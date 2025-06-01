@@ -1,12 +1,18 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="QiMata.MobileIoT.Views.UsbPage"
-             Title="UsbPage">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
+             Title="USB">
+    <VerticalStackLayout Padding="20" Spacing="12">
+        <Button Text="Connect"
+                Command="{Binding ConnectCommand}" />
+
+        <Button Text="Send Ping"
+                Command="{Binding SendPingCommand}" />
+
+        <ScrollView>
+            <Label Text="{Binding Log}"
+                   LineBreakMode="WordWrap" />
+        </ScrollView>
     </VerticalStackLayout>
 </ContentPage>

@@ -110,9 +110,6 @@
           <Compile Update="Views\WifiDirectPage.xaml.cs">
             <DependentUpon>WifiDirectPage.xaml</DependentUpon>
           </Compile>
-          <Compile Update="Views\UsbDemoPage.xaml.cs">
-            <DependentUpon>UsbDemoPage.xaml</DependentUpon>
-          </Compile>
         </ItemGroup>
 
 	<ItemGroup>
@@ -135,9 +132,6 @@
             <Generator>MSBuild:Compile</Generator>
           </MauiXaml>
           <MauiXaml Update="Views\BleScannerPage.xaml">
-            <Generator>MSBuild:Compile</Generator>
-          </MauiXaml>
-          <MauiXaml Update="Views\UsbDemoPage.xaml">
             <Generator>MSBuild:Compile</Generator>
           </MauiXaml>
         </ItemGroup>

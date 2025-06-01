@@ -30,34 +30,50 @@ namespace QiMata.MobileIoT
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
+            bool isDesign = true;
+
 #if ANDROID
-            builder.Services.AddSingleton<IBeaconScanner, BeaconScanner_Android>();
-            builder.Services.AddSingleton<INfcService, AndroidNfcService>();
-            builder.Services.AddSingleton<INfcP2PService, NfcP2PService_Android>();
-            builder.Services.AddSingleton<IP2PService, Platforms.Android.WifiDirectService>();
-            builder.Services.AddSingleton<IUsbCommunicator, Platforms.Android.UsbCommunicatorAndroid>();
-            builder.Services.AddSingleton<ISerialDeviceService, Platforms.Android.UsbSerialDeviceService>();
+            if (!isDesign)
+            {
+                builder.Services.AddSingleton<IBeaconScanner, BeaconScanner_Android>();
+                builder.Services.AddSingleton<INfcService, AndroidNfcService>();
+                builder.Services.AddSingleton<INfcP2PService, NfcP2PService_Android>();
+                builder.Services.AddSingleton<IP2PService, Platforms.Android.WifiDirectService>();
+                builder.Services.AddSingleton<IUsbCommunicator, Platforms.Android.UsbCommunicatorAndroid>();
+                builder.Services.AddSingleton<ISerialDeviceService, Platforms.Android.UsbSerialDeviceService>();
+            }
 
-            builder.Services.AddSingleton<IBluetoothService, BluetoothService>();
-            builder.Services.AddSingleton<IBleDemoService, BleDemoService>();
+
 #elif IOS
-            builder.Services.AddSingleton<IBeaconScanner, BeaconScanner_iOS>();
-            builder.Services.AddSingleton<INfcService, IosNfcService>();
-            builder.Services.AddSingleton<INfcP2PService, NfcP2PService_iOS>();
-            builder.Services.AddSingleton<IP2PService, Platforms.iOS.MultipeerService>();
-            builder.Services.AddSingleton<IUsbCommunicator,Platforms.iOS.UsbCommunicatoriOS>();
-            builder.Services.AddSingleton<ISerialDeviceService, Platforms.iOS.ExternalAccessorySerialDeviceService>();
-
-            builder.Services.AddSingleton<IBluetoothService, BluetoothService>();
-            builder.Services.AddSingleton<IBleDemoService, BleDemoService>();
-#elif DEBUG
-            builder.Logging.AddDebug();
-            builder.Services.AddSingleton<IBleDemoService>(MockServiceFactory.CreateBleDemoService());
-            builder.Services.AddSingleton<IBluetoothService>(MockServiceFactory.CreateBluetoothService());
-            builder.Services.AddSingleton<INfcService>(MockServiceFactory.CreateNfcService());
-            builder.Services.AddSingleton<INfcP2PService>(MockServiceFactory.CreateNfcP2PService());
-            builder.Services.AddSingleton<IBeaconScanner>(MockServiceFactory.CreateBeaconScanner());
+            if (!isDesign)
+            {
+                builder.Services.AddSingleton<IBeaconScanner, BeaconScanner_iOS>();
+                builder.Services.AddSingleton<INfcService, IosNfcService>();
+                builder.Services.AddSingleton<INfcP2PService, NfcP2PService_iOS>();
+                builder.Services.AddSingleton<IP2PService, Platforms.iOS.MultipeerService>();
+                builder.Services.AddSingleton<IUsbCommunicator,Platforms.iOS.UsbCommunicatoriOS>();
+                builder.Services.AddSingleton<ISerialDeviceService, Platforms.iOS.ExternalAccessorySerialDeviceService>();
+            }
 #endif
+#if DEBUG
+            builder.Logging.AddDebug();
+#endif
+            if (isDesign)
+            {
+                builder.Services.AddSingleton<IBleDemoService>(MockServiceFactory.CreateBleDemoService());
+                builder.Services.AddSingleton<IBluetoothService>(MockServiceFactory.CreateBluetoothService());
+                builder.Services.AddSingleton<IBeaconScanner>(MockServiceFactory.CreateBeaconScanner());
+                builder.Services.AddSingleton<INfcService>(MockServiceFactory.CreateNfcService());
+                builder.Services.AddSingleton<INfcP2PService>(MockServiceFactory.CreateNfcP2PService());
+                builder.Services.AddSingleton<IP2PService>(MockServiceFactory.CreateP2PService());
+                builder.Services.AddSingleton<IUsbCommunicator>(MockServiceFactory.CreateUsbCommunicator());
+                builder.Services.AddSingleton<ISerialDeviceService>(MockServiceFactory.CreateSerialDeviceService());
+            }
+            else
+            {
+                builder.Services.AddSingleton<IBluetoothService, BluetoothService>();
+                builder.Services.AddSingleton<IBleDemoService, BleDemoService>();
+            }
 
             builder.Services.AddSingleton<IQrScanningService, QrScanningService>();
             builder.Services.AddSingleton<ImageClassificationService>();
@@ -75,8 +91,8 @@ namespace QiMata.MobileIoT
             builder.Services.AddTransient<ViewModels.BeaconScanViewModel>();
             builder.Services.AddTransient<BleScannerPage>();
 
-            builder.Services.AddTransient<ViewModels.UsbDemoViewModel>();
-            builder.Services.AddTransient<UsbDemoPage>();
+            builder.Services.AddTransient<ViewModels.UsbViewModel>();
+            builder.Services.AddTransient<UsbPage>();
 
             return builder.Build();
         }

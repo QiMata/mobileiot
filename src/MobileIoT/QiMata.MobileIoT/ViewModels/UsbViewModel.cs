@@ -1,11 +1,38 @@
-using QiMata.MobileIoT.Usb;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using QiMata.MobileIoT.Services;
 
 namespace QiMata.MobileIoT.ViewModels;
 
-public class UsbViewModel(IUsbCommunicator usb)
+public partial class UsbViewModel : ObservableObject
 {
-    public IEnumerable<UsbDeviceInfo> Devices => usb.ListDevices();
-    public Task<bool> Connect(string id) => Task.FromResult(usb.OpenDevice(id));
-    public Task<int>  Send(byte[] d)    => Task.FromResult(usb.Write(d));
-    public Task<int>  Receive(byte[] b) => Task.FromResult(usb.Read(b));
+    readonly IUsbDeviceService _usb;
+
+    public UsbViewModel(IUsbDeviceService usb)
+        => _usb = usb;
+
+    [ObservableProperty]
+    private string _log = string.Empty;
+
+    [RelayCommand]
+    private async Task ConnectAsync()
+    {
+        var devices = await _usb.ListAsync();
+        if (devices.Any() && await _usb.OpenAsync(devices[0].VendorId, devices[0].ProductId))
+            Log += $"Connected to {devices[0].Name}\n";
+        else
+            Log += "No device or failed to open.\n";
+    }
+
+    [RelayCommand]
+    private async Task SendPingAsync()
+    {
+        if (!_usb.IsOpen)
+            return;
+        await _usb.WriteAsync(new byte[] { 0x50, 0x49, 0x4E, 0x47 });
+        var buf = new byte[64];
+        int n = await _usb.ReadAsync(buf);
+        if (n > 0)
+            Log += $"RX {n} bytes\n";
+    }
 }
