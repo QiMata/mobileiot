@@ -1,11 +1,13 @@
 #nullable enable
 using System;
 using System.Device.Gpio;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.DHTxx;
 using Linux.Bluetooth;
 using Linux.Bluetooth.Extensions;
+using Linux.Bluetooth.Gatt;
 
 namespace PiBleDemo;
 
@@ -26,8 +28,11 @@ internal sealed class Hardware : IAsyncDisposable
 
     public (double t, double h) ReadClimate()
     {
-        if (!_dht.IsLastReadSuccessful) _dht.TryRead();
-        return (_dht.Temperature.DegreesCelsius, _dht.Humidity);
+        if (!_dht.TryReadTemperature(out var temp) ||
+            !_dht.TryReadHumidity(out var hum))
+            throw new IOException("Sensor read failed");
+
+        return (temp.DegreesCelsius, hum.Percent);
     }
 
     public void SetLed(bool on) => _gpio.Write(_ledPin, on ? PinValue.High : PinValue.Low);
@@ -136,7 +141,7 @@ internal static class Program
 {
     static async Task Main()
     {
-        using var hw  = new Hardware();
+        await using var hw  = new Hardware();
         await using var ble = new BleHost(hw);
 
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
