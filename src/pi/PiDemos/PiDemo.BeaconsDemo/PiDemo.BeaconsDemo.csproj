@@ -11,10 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- DBus bindings used to talk directly to BlueZ -->
-    <PackageReference Include="Tmds.DBus" Version="0.15.0" />
-    <!-- Wraps BlueZ D-Bus helpers -->
-    <PackageReference Include="Linux.Bluetooth" Version="6.0.0" />
+    <PackageReference Include="Linux.Bluetooth" Version="6.0.0-pre2" />
   </ItemGroup>
 
 </Project>
