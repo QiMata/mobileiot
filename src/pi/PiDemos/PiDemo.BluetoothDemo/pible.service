@@ -1,0 +1,13 @@
+[Unit]
+Description=Bluetooth DHT22/LED demo
+After=bluetooth.service
+
+[Service]
+Type=simple
+ExecStart=/opt/pible/PiBleDemo
+Restart=always
+User=pi
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN
+
+[Install]
+WantedBy=multi-user.target
