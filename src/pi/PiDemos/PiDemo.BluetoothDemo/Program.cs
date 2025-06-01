@@ -20,7 +20,7 @@ internal sealed class Hardware : IAsyncDisposable
 
     public Hardware(int dhtPin = 4, int ledPin = 17)
     {
-        _dht = new Dht22(dhtPin, useFullSampling: true);
+        _dht = new Dht22(dhtPin);
         _ledPin = ledPin;
         _gpio.OpenPin(_ledPin, PinMode.Output);
         _gpio.Write(_ledPin, PinValue.Low);

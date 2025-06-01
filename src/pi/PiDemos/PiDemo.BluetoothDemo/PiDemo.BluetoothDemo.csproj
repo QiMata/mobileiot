@@ -11,9 +11,9 @@
 
   <ItemGroup>
     <PackageReference Include="Linux.Bluetooth" Version="5.*" />
-    <PackageReference Include="System.Device.Gpio" />
-    <PackageReference Include="Iot.Device.Bindings" />
-    <PackageReference Include="UnitsNet" />
+    <PackageReference Include="System.Device.Gpio" Version="4.0.1" />
+    <PackageReference Include="Iot.Device.Bindings" Version="4.0.1" />
+    <PackageReference Include="System.Text.Json" Version="9.0.5" />
   </ItemGroup>
 
 </Project>
