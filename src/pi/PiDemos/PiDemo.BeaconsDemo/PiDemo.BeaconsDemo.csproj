@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <!-- Wraps BlueZ D-Bus for BLE advertising -->
-    <PackageReference Include="Linux.Bluetooth" Version="5.*" />
+    <PackageReference Include="Linux.Bluetooth" Version="6.0.0-pre2" />
   </ItemGroup>
 
 </Project>

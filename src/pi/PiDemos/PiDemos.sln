@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36127.28 d17.14
+VisualStudioVersion = 17.14.36127.28
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PiDemo.BeaconsDemo", "PiDemo.BeaconsDemo\PiDemo.BeaconsDemo.csproj", "{C3DCD138-63B8-4DBA-B1A3-547B0CEB11FA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PiDemo.BluetoothDemo", "PiDemo.BluetoothDemo\PiDemo.BluetoothDemo.csproj", "{5E82B0E9-B98C-401B-8F99-1D149625B1DE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{C3DCD138-63B8-4DBA-B1A3-547B0CEB11FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3DCD138-63B8-4DBA-B1A3-547B0CEB11FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3DCD138-63B8-4DBA-B1A3-547B0CEB11FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E82B0E9-B98C-401B-8F99-1D149625B1DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E82B0E9-B98C-401B-8F99-1D149625B1DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E82B0E9-B98C-401B-8F99-1D149625B1DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E82B0E9-B98C-401B-8F99-1D149625B1DE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
