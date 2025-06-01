@@ -46,19 +46,25 @@ internal sealed class Hardware : IAsyncDisposable
 }
 
 /// <summary>BLE GATT characteristic for temperature / humidity.</summary>
-internal sealed class ClimateCharacteristic : GattLocalCharacteristic1
+internal sealed class ClimateCharacteristic
 {
     private readonly Hardware _hw;
+    public GattLocalCharacteristic Definition { get; }
 
     public ClimateCharacteristic(Hardware hw)
-        : base("e95d9250-251d-470a-a062-fa1922dfa9a8",
-               GattCharacteristicFlags.Read | GattCharacteristicFlags.Notify,
-               maxLength: 8)
     {
         _hw = hw;
+
+        Definition = new GattLocalCharacteristicBuilder()
+            .WithUuid("e95d9250-251d-470a-a062-fa1922dfa9a8")
+            .WithFlags(
+                GattCharacteristicFlag.Read,
+                GattCharacteristicFlag.Notify)
+            .WithReadHandler(async _ => ReadClimatePacket())
+            .Build();
     }
 
-    protected override byte[] OnReadValue()
+    private byte[] ReadClimatePacket()
     {
         var (t, h) = _hw.ReadClimate();
         Span<byte> data = stackalloc byte[8];
@@ -67,29 +73,34 @@ internal sealed class ClimateCharacteristic : GattLocalCharacteristic1
         return data.ToArray();
     }
 
-    public void PushNotification()
+    public async Task PushNotificationAsync()
     {
-        if (HasSubscribers)
-            Notify(OnReadValue());
+        if (Definition.Subscribers.Any())
+            await Definition.NotifyAsync(ReadClimatePacket());
     }
 }
 
 /// <summary>Write-only LED characteristic (1 = on, 0 = off).</summary>
-internal sealed class LedCharacteristic : GattLocalCharacteristic1
+internal sealed class LedCharacteristic
 {
     private readonly Hardware _hw;
+    public GattLocalCharacteristic Definition { get; }
 
     public LedCharacteristic(Hardware hw)
-        : base("e95d93ee-251d-470a-a062-fa1922dfa9a8",
-               GattCharacteristicFlags.Write | GattCharacteristicFlags.WriteWithoutResponse,
-               maxLength: 1)
     {
         _hw = hw;
-    }
 
-    protected override void OnWriteValue(ReadOnlySpan<byte> value, GattRequestState state)
-    {
-        if (value.Length == 1) _hw.SetLed(value[0] != 0);
+        Definition = new GattLocalCharacteristicBuilder()
+            .WithUuid("e95d93ee-251d-470a-a062-fa1922dfa9a8")
+            .WithFlags(
+                GattCharacteristicFlag.Write,
+                GattCharacteristicFlag.WriteWithoutResponse)
+            .WithWriteHandler((value, _) =>
+            {
+                if (value.Length == 1) _hw.SetLed(value[0] != 0);
+                return Task.CompletedTask;
+            })
+            .Build();
     }
 }
 
@@ -98,42 +109,52 @@ internal sealed class BleHost : IAsyncDisposable
     private readonly Hardware _hw;
     private readonly ClimateCharacteristic _climate;
     private readonly LedCharacteristic _led;
-    private readonly IDisposable _advHandle;
+    private readonly IAsyncDisposable _advHandle;
 
-    public BleHost(Hardware hw)
+    private BleHost(Hardware hw, ClimateCharacteristic climate, LedCharacteristic led, IAsyncDisposable advHandle)
     {
         _hw = hw;
-        _climate = new ClimateCharacteristic(hw);
-        _led     = new LedCharacteristic(hw);
-
-        var service = new GattLocalService1(
-            "e95d93b0-251d-470a-a062-fa1922dfa9a8",
-            _climate, _led);
-
-        // Initialize BlueZ & register GATT service
-        BlueZManager.Initialize();
-        var adapter = BlueZManager.GetFirstAdapter();
-        var gattMgr = adapter.GetGattManager();
-        gattMgr.Register(service);
-
-        // Advertise with a complete name + service UUID
-        var advMgr = adapter.GetLEAdvertisingManager();
-        var adv = new LEAdvertisement
-        {
-            Type = LEAdvertisingType.Peripheral,
-            LocalName = "Pi-DHT-LED",
-            ServiceUUIDs = { service.UUID }
-        };
-        _advHandle = advMgr.RegisterAdvertisement(adv);
-        Console.WriteLine("BLE service started and advertising.");
+        _climate = climate;
+        _led = led;
+        _advHandle = advHandle;
     }
 
-    public void Tick() => _climate.PushNotification();
-
-    public ValueTask DisposeAsync()
+    public static async Task<BleHost> StartAsync(Hardware hw)
     {
-        _advHandle.Dispose();
-        return ValueTask.CompletedTask;
+        var climate = new ClimateCharacteristic(hw);
+        var led = new LedCharacteristic(hw);
+
+        var service = new GattLocalServiceBuilder()
+            .WithUuid("e95d93b0-251d-470a-a062-fa1922dfa9a8")
+            .AddCharacteristic(climate.Definition)
+            .AddCharacteristic(led.Definition)
+            .Build();
+
+        await Bluetooth.InitializeAsync();
+        var adapter = await Bluetooth.GetDefaultAdapterAsync();
+        var gatt = await adapter.GetGattServiceManagerAsync();
+        await gatt.RegisterServiceAsync(service);
+
+        var advertiser = await adapter.LeAdvertisingStartAsync(builder =>
+        {
+            builder
+                .SetAdvertisementType(LEAdvertisementType.Peripheral)
+                .SetLocalName("Pi-DHT-LED")
+                .AddServiceUuid(service.Uuid);
+        });
+
+        Console.WriteLine("BLE service started and advertising.");
+        return new BleHost(hw, climate, led, advertiser);
+    }
+
+    public async Task TickAsync()
+    {
+        await _climate.PushNotificationAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _advHandle.DisposeAsync();
     }
 }
 
@@ -142,13 +163,13 @@ internal static class Program
     static async Task Main()
     {
         await using var hw  = new Hardware();
-        await using var ble = new BleHost(hw);
+        await using var ble = await BleHost.StartAsync(hw);
 
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
         Console.CancelKeyPress += (_, e) => { e.Cancel = true; timer.Dispose(); };
 
         while (await timer.WaitForNextTickAsync())
-            ble.Tick();
+            await ble.TickAsync();
 
         Console.WriteLine("Shutting down cleanly.");
     }
