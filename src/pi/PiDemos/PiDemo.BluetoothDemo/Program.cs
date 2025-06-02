@@ -45,38 +45,79 @@ internal sealed class Hardware : IAsyncDisposable
     }
 }
 
-/// <summary>BLE GATT characteristic for temperature / humidity.</summary>
-internal sealed class ClimateCharacteristic
+/// <summary>BLE GATT characteristic for temperature.</summary>
+internal sealed class TemperatureCharacteristic
 {
     private readonly Hardware _hw;
     public GattLocalCharacteristic Definition { get; }
 
-    public ClimateCharacteristic(Hardware hw)
+    public TemperatureCharacteristic(Hardware hw)
     {
         _hw = hw;
 
         Definition = new GattLocalCharacteristicBuilder()
-            .WithUuid("e95d9250-251d-470a-a062-fa1922dfa9a8")
+            .WithUuid("00002A6E-0000-1000-8000-00805F9B34FB")
             .WithFlags(
                 GattCharacteristicFlag.Read,
                 GattCharacteristicFlag.Notify)
-            .WithReadHandler(async _ => ReadClimatePacket())
+            .WithReadHandler(_ => Task.FromResult(ReadTemperatureBytes()))
             .Build();
     }
 
-    private byte[] ReadClimatePacket()
+    private byte[] ReadTemperatureBytes()
     {
-        var (t, h) = _hw.ReadClimate();
-        Span<byte> data = stackalloc byte[8];
-        BitConverter.TryWriteBytes(data[..4], (float)t);
-        BitConverter.TryWriteBytes(data.Slice(4, 4), (float)h);
+        var (t, _) = _hw.ReadClimate();
+        Span<byte> data = stackalloc byte[2];
+        BitConverter.TryWriteBytes(data, (short)Math.Round(t * 100));
         return data.ToArray();
     }
 
-    public async Task PushNotificationAsync()
+    public async Task NotifyAsync(double t)
     {
         if (Definition.Subscribers.Any())
-            await Definition.NotifyAsync(ReadClimatePacket());
+        {
+            Span<byte> data = stackalloc byte[2];
+            BitConverter.TryWriteBytes(data, (short)Math.Round(t * 100));
+            await Definition.NotifyAsync(data.ToArray());
+        }
+    }
+}
+
+/// <summary>BLE GATT characteristic for humidity.</summary>
+internal sealed class HumidityCharacteristic
+{
+    private readonly Hardware _hw;
+    public GattLocalCharacteristic Definition { get; }
+
+    public HumidityCharacteristic(Hardware hw)
+    {
+        _hw = hw;
+
+        Definition = new GattLocalCharacteristicBuilder()
+            .WithUuid("00002A6F-0000-1000-8000-00805F9B34FB")
+            .WithFlags(
+                GattCharacteristicFlag.Read,
+                GattCharacteristicFlag.Notify)
+            .WithReadHandler(_ => Task.FromResult(ReadHumidityBytes()))
+            .Build();
+    }
+
+    private byte[] ReadHumidityBytes()
+    {
+        var (_, h) = _hw.ReadClimate();
+        Span<byte> data = stackalloc byte[2];
+        BitConverter.TryWriteBytes(data, (ushort)Math.Round(h * 100));
+        return data.ToArray();
+    }
+
+    public async Task NotifyAsync(double h)
+    {
+        if (Definition.Subscribers.Any())
+        {
+            Span<byte> data = stackalloc byte[2];
+            BitConverter.TryWriteBytes(data, (ushort)Math.Round(h * 100));
+            await Definition.NotifyAsync(data.ToArray());
+        }
     }
 }
 
@@ -91,7 +132,7 @@ internal sealed class LedCharacteristic
         _hw = hw;
 
         Definition = new GattLocalCharacteristicBuilder()
-            .WithUuid("e95d93ee-251d-470a-a062-fa1922dfa9a8")
+            .WithUuid("12345679-1234-1234-1234-1234567890AB")
             .WithFlags(
                 GattCharacteristicFlag.Write,
                 GattCharacteristicFlag.WriteWithoutResponse)
@@ -107,26 +148,30 @@ internal sealed class LedCharacteristic
 internal sealed class BleHost : IAsyncDisposable
 {
     private readonly Hardware _hw;
-    private readonly ClimateCharacteristic _climate;
+    private readonly TemperatureCharacteristic _temp;
+    private readonly HumidityCharacteristic _hum;
     private readonly LedCharacteristic _led;
     private readonly IAsyncDisposable _advHandle;
 
-    private BleHost(Hardware hw, ClimateCharacteristic climate, LedCharacteristic led, IAsyncDisposable advHandle)
+    private BleHost(Hardware hw, TemperatureCharacteristic temp, HumidityCharacteristic hum, LedCharacteristic led, IAsyncDisposable advHandle)
     {
         _hw = hw;
-        _climate = climate;
+        _temp = temp;
+        _hum = hum;
         _led = led;
         _advHandle = advHandle;
     }
 
     public static async Task<BleHost> StartAsync(Hardware hw)
     {
-        var climate = new ClimateCharacteristic(hw);
+        var temp = new TemperatureCharacteristic(hw);
+        var hum = new HumidityCharacteristic(hw);
         var led = new LedCharacteristic(hw);
 
         var service = new GattLocalServiceBuilder()
-            .WithUuid("e95d93b0-251d-470a-a062-fa1922dfa9a8")
-            .AddCharacteristic(climate.Definition)
+            .WithUuid("12345678-1234-1234-1234-1234567890AB")
+            .AddCharacteristic(temp.Definition)
+            .AddCharacteristic(hum.Definition)
             .AddCharacteristic(led.Definition)
             .Build();
 
@@ -139,17 +184,27 @@ internal sealed class BleHost : IAsyncDisposable
         {
             builder
                 .SetAdvertisementType(LEAdvertisementType.Peripheral)
-                .SetLocalName("Pi-DHT-LED")
+                .SetLocalName("PiDHTSensor")
                 .AddServiceUuid(service.Uuid);
         });
 
         Console.WriteLine("BLE service started and advertising.");
-        return new BleHost(hw, climate, led, advertiser);
+        return new BleHost(hw, temp, hum, led, advertiser);
     }
 
     public async Task TickAsync()
     {
-        await _climate.PushNotificationAsync();
+        var pushTemp = _temp.Definition.Subscribers.Any();
+        var pushHum  = _hum.Definition.Subscribers.Any();
+
+        if (pushTemp || pushHum)
+        {
+            var (t, h) = _hw.ReadClimate();
+            if (pushTemp)
+                await _temp.NotifyAsync(t);
+            if (pushHum)
+                await _hum.NotifyAsync(h);
+        }
     }
 
     public async ValueTask DisposeAsync()

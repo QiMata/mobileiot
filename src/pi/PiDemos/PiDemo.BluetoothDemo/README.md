@@ -4,6 +4,7 @@ This project exposes a BLE service on a Raspberry Pi with:
 
 - Temperature and humidity from a DHT22 sensor (read/notify)
 - A writable LED toggle
+- Advertises as `PiDHTSensor`
 
 It relies on the [`Linux.Bluetooth`](https://www.nuget.org/packages/Linux.Bluetooth) D-Bus wrapper and the .NET IoT packages.
 
@@ -34,7 +35,8 @@ AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN
 
 | Item                   | UUID                                   | Properties     | Notes                           |
 | ---------------------- | -------------------------------------- | -------------- | ------------------------------- |
-| **Service**            | `e95d93b0-251d-470a-a062-fa1922dfa9a8` | –              | root container                  |
-| Temperature + Humidity | `e95d9250-251d-470a-a062-fa1922dfa9a8` | read, notify   | `float T`, `float RH`           |
-| LED control            | `e95d93ee-251d-470a-a062-fa1922dfa9a8` | write          | 1 byte: 0=off, 1=on             |
+| **Service**            | `12345678-1234-1234-1234-1234567890AB` | -              | root container                  |
+| Temperature            | `00002A6E-0000-1000-8000-00805F9B34FB` | read, notify   | Int16 in hundredths °C          |
+| Humidity               | `00002A6F-0000-1000-8000-00805F9B34FB` | read, notify   | UInt16 in hundredths %RH        |
+| LED control            | `12345679-1234-1234-1234-1234567890AB` | write          | 1 byte: 0=off, 1=on             |
 ```
