@@ -18,3 +18,19 @@ See `src/pi/README.md` or the script itself for full details and instructions.
 ## BLE Beacon Demo
 
 A Raspberry Pi can also act as a simple iBeacon for the .NET MAUI app. The Python script at `src/pi/beacon_demo.py` uses BlueZero to broadcast an iBeacon advertisement with the same UUID used elsewhere in the project. See `src/pi/BEACON_SETUP.md` for setup instructions.
+
+## USB Serial & Device Demos
+
+The Pi can also communicate with the MAUI app over USB. To enable this,
+configure the Pi for **USB gadget mode** (see `src/pi/README.md` for the
+exact steps). Two demos are provided:
+
+1. **USB Serial (CDC ACM)** – load the `g_serial` driver and run
+   `src/pi/serial_demo.py`. The mobile app sends the string `"LED_ON"` and
+   the script toggles an LED on GPIO17, replying with an acknowledgment.
+2. **USB Bulk Ping** – load the `g_zero` gadget. It echoes any bulk data
+   from the host so the MAUI app’s ping function receives the bytes back
+   immediately.
+
+The helper script `src/pi/run_serial_demo.sh` loads `g_serial` if needed
+and launches the Python demo.
