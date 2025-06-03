@@ -1,3 +1,16 @@
 # MobileIoT
 
-This repository contains small .NET demos for Raspberry Pi. Under `src/pi/PiDemos` you can find examples including an iBeacon transmitter and a BLE GATT demo with a DHT22 sensor and LED.
+This repository contains small .NET and Python demos for Raspberry Pi.
+
+The `src/MobileIoT` folder holds the .NET MAUI application, while `src/pi` includes Python utilities that run directly on the Pi hardware.
+
+## BLE GATT Demo
+
+The Python script at `src/pi/bluetoothle_demo.py` implements a Bluetooth Low Energy GATT server exposing temperature, humidity and LED control. It matches the UUIDs that the MobileIoT app expects:
+
+- **Service UUID:** `12345678-1234-1234-1234-1234567890AB`
+- **Temperature Characteristic:** UUID `00002A6E-0000-1000-8000-00805F9B34FB`
+- **Humidity Characteristic:** UUID `00002A6F-0000-1000-8000-00805F9B34FB`
+- **LED Characteristic:** UUID `12345679-1234-1234-1234-1234567890AB`
+
+See `src/pi/README.md` or the script itself for full details and instructions.
