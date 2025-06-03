@@ -13,3 +13,7 @@ python3 bluetoothle_demo.py
 ```
 
 The script relies on the `bluezero`, `Adafruit_DHT` and `RPi.GPIO` packages. Refer to the source code for detailed explanations of the BLE service, characteristic formats and how to enable startup on boot.
+
+## BLE Beacon Demo
+
+The `beacon_demo.py` script turns the Raspberry Pi into an iBeacon transmitter so the MobileIoT app can detect it. The beacon uses the same base UUID as the other demos. See `BEACON_SETUP.md` for a full walkthrough on configuring the Pi and the expected advertisement format.
