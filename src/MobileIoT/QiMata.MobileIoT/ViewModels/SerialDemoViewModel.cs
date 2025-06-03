@@ -30,11 +30,16 @@ public partial class SerialDemoViewModel : ObservableObject
         Log += ok ? "Connected\n" : "Open failed\n";
     }
 
+    private bool _ledOn;
+
     [RelayCommand]
     private async Task SendAsync()
     {
         if (!_serial.IsOpen) { Log += "Not open\n"; return; }
-        await _serial.WriteAsync(Encoding.ASCII.GetBytes("LED_ON\n"));
-        Log += "TX: LED_ON\n";
+
+        string cmd = _ledOn ? "LED_OFF" : "LED_ON";
+        await _serial.WriteAsync(Encoding.ASCII.GetBytes($"{cmd}\n"));
+        Log += $"TX: {cmd}\n";
+        _ledOn = !_ledOn;
     }
 }

@@ -26,8 +26,9 @@ configure the Pi for **USB gadget mode** (see `src/pi/README.md` for the
 exact steps). Two demos are provided:
 
 1. **USB Serial (CDC ACM)** – load the `g_serial` driver and run
-   `src/pi/serial_demo.py`. The mobile app sends the string `"LED_ON"` and
-   the script toggles an LED on GPIO17, replying with an acknowledgment.
+   `src/pi/serial_demo.py`. The MAUI app alternates between the commands
+   `"LED_ON"` and `"LED_OFF"` which toggle an LED on GPIO17 and reply with
+   an acknowledgment.
 2. **USB Bulk Ping** – load the `g_zero` gadget. It echoes any bulk data
    from the host so the MAUI app’s ping function receives the bytes back
    immediately.
