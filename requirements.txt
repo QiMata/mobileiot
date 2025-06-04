@@ -1,0 +1,4 @@
+bluezero
+Adafruit_DHT
+RPi.GPIO
+pyserial
