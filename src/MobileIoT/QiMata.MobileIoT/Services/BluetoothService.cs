@@ -1,17 +1,16 @@
 using Plugin.BLE;
 using Plugin.BLE.Abstractions.Contracts;
+using Plugin.BLE.Abstractions.Extensions;
 using QiMata.MobileIoT.Helpers;
 using QiMata.MobileIoT.Services.I;
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Plugin.BLE.Abstractions.EventArgs;
-using Plugin.BLE.Abstractions.Extensions;
 
 namespace QiMata.MobileIoT.Services;
 
-public sealed class BluetoothService : IBluetoothService
+public sealed class BluetoothService : IBluetoothService, IAsyncDisposable
 {
     private readonly IBluetoothLE _ble = CrossBluetoothLE.Current;
     private readonly IAdapter _adapt = CrossBluetoothLE.Current.Adapter;
@@ -24,28 +23,33 @@ public sealed class BluetoothService : IBluetoothService
     private static readonly Guid HumUuid = Guid.Parse("00002A6F-0000-1000-8000-00805F9B34FB");
     private static readonly Guid LedUuid = Guid.Parse("12345679-1234-1234-1234-1234567890AB");
 
-    public event EventHandler<double>? TemperatureUpdatedC;
-    public event EventHandler<double>? HumidityUpdatedPercent;
-
     public async Task<bool> ConnectAsync(string advertisedName, CancellationToken ct)
     {
         await BlePermissions.EnsureAsync();
 
-        TaskCompletionSource<IDevice?> tcs = new();
-        void handler(object? s, DeviceEventArgs a)
+        var tcs = new TaskCompletionSource<IDevice?>();
+        void handler(object? _, DeviceEventArgs a)
         {
             if (a.Device.Name == advertisedName)
                 tcs.TrySetResult(a.Device);
         }
+
         _adapt.DeviceDiscovered += handler;
-        await _adapt.StartScanningForDevicesAsync(ct);
-        _device = await tcs.Task.WaitAsync(ct);
-        _adapt.DeviceDiscovered -= handler;
+        try
+        {
+            await _adapt.StartScanningForDevicesAsync(ct);
+            _device = await tcs.Task.WaitAsync(ct);
+        }
+        finally
+        {
+            _adapt.DeviceDiscovered -= handler;
+        }
+
         if (_device is null) return false;
 
         await _adapt.ConnectToDeviceAsync(_device, cancellationToken: ct);
-        var service = await _device.GetServiceAsync(ServiceUuid, ct);
-        if (service is null) throw new Exception("Service not found");
+        var service = await _device.GetServiceAsync(ServiceUuid, ct)
+                      ?? throw new Exception("Service not found");
 
         _tempChar = await service.GetCharacteristicAsync(TempUuid);
         _humChar = await service.GetCharacteristicAsync(HumUuid);
@@ -54,29 +58,39 @@ public sealed class BluetoothService : IBluetoothService
         return _tempChar != null && _humChar != null && _ledChar != null;
     }
 
-    public async Task StartSensorNotificationsAsync(CancellationToken ct)
+    public async Task<float> ReadTemperatureAsync(CancellationToken ct)
     {
-        if (_tempChar is null || _humChar is null)
-            throw new InvalidOperationException("Connect first");
+        if (_tempChar is null) throw new InvalidOperationException("Connect first");
 
-        _tempChar.ValueUpdated += (s, e) =>
-        {
-            var raw = BitConverter.ToInt16(e.Characteristic.Value, 0);
-            TemperatureUpdatedC?.Invoke(this, raw / 100.0);
-        };
-        _humChar.ValueUpdated += (s, e) =>
-        {
-            var raw = BitConverter.ToUInt16(e.Characteristic.Value, 0);
-            HumidityUpdatedPercent?.Invoke(this, raw / 100.0);
-        };
+        var result = await _tempChar.ReadAsync(ct);
 
-        await _tempChar.StartUpdatesAsync(ct);
-        await _humChar.StartUpdatesAsync(ct);
+        if (result.resultCode != 0)
+        {
+            return 0f;
+        }
+
+        var raw = BitConverter.ToInt16(result.data, 0);
+        return  raw / 100.0f;
     }
 
-    public Task ToggleLedAsync(bool on, CancellationToken ct)
-        => _ledChar?.WriteAsync([(byte)(on ? 1 : 0)], ct)
-           ?? throw new InvalidOperationException("Connect first");
+    public async Task<float> ReadHumidityAsync(CancellationToken ct)
+    {
+        if (_humChar is null) throw new InvalidOperationException("Connect first");
+
+        var result = await _tempChar.ReadAsync(ct);
+
+        if (result.resultCode != 0)
+        {
+            return 0f;
+        }
+
+        var raw = BitConverter.ToInt16(result.data, 0);
+        return raw / 100.0f;
+    }
+
+    public Task ToggleLedAsync(bool on, CancellationToken ct) =>
+        _ledChar?.WriteAsync(new[] { (byte)(on ? 1 : 0) }, ct)
+        ?? throw new InvalidOperationException("Connect first");
 
     public async Task DisconnectAsync()
     {

@@ -27,28 +27,95 @@ public class AndroidNfcService : Java.Lang.Object, INfcService
         return Task.CompletedTask;
     }
 
-    public Task WriteTextAsync(string text)
+    static byte[] BuildTextPayload(string txt)
+    {
+        // NDEF Text record payload: [status byte][text] (no language code)
+        var textBytes = System.Text.Encoding.UTF8.GetBytes(txt);
+
+        var payload = new byte[1 + textBytes.Length];
+        payload[0] = 0x00; // UTF-8 (bit 7 = 0) + language length = 0
+        Buffer.BlockCopy(textBytes, 0, payload, 1, textBytes.Length);
+
+        return payload;
+    }
+
+
+    bool _startedPublishing = false;
+
+    public async Task WriteTextAsync(string text)
     {
         var record = new NFCNdefRecord
         {
-            TypeFormat = NFCNdefTypeFormat.Mime,
-            MimeType = "application/com.companyname.yourapp",
-            Payload = NFCUtils.EncodeToByteArray(text)
+            TypeFormat = NFCNdefTypeFormat.WellKnown,
+            Payload = BuildTextPayload(text)
         };
 
+        var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        
 
-        CrossNFC.Current.OnTagDiscovered += (tagInfo, format) =>
+        void Cleanup()
         {
-            if (tagInfo.IsWritable)
-            {
-                tagInfo.Records = [record];
-                CrossNFC.Current.PublishMessage(tagInfo);
-            }
-        };
+            if (_startedPublishing)
+                CrossNFC.Current.StopPublishing();
 
-        CrossNFC.Current.StartPublishing();
-        return Task.CompletedTask;
+            CrossNFC.Current.OnTagDiscovered -= TagHandler;
+        }
+
+        void TagHandler(ITagInfo tagInfo, bool _)
+        {
+            try
+            {
+                if (tagInfo?.IsWritable == true)
+                {
+                    tagInfo.Records = new[] { record };
+                    CrossNFC.Current.PublishMessage(tagInfo);
+                    tcs.TrySetResult(true);
+                }
+                else
+                {
+                    tcs.TrySetException(new InvalidOperationException("Tag is not writable."));
+                }
+            }
+            catch (Exception ex)
+            {
+                tcs.TrySetException(ex);
+            }
+            finally
+            {
+                Cleanup();
+            }
+        }
+
+        CrossNFC.Current.OnTagDiscovered += TagHandler;
+
+        if (!_startedPublishing)
+        {
+            CrossNFC.Current.StartPublishing();
+            _startedPublishing = true;
+        }
+
+        try
+        {
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            using (timeoutCts.Token.Register(() => tcs.TrySetCanceled()))
+            {
+                await tcs.Task.ConfigureAwait(false);
+            }
+        }
+        catch (TaskCanceledException)
+        {
+            tcs.TrySetCanceled();
+        }
+        catch (Exception ex)
+        {
+            tcs.TrySetException(ex);
+        }
+        finally
+        {
+            Cleanup();
+        }
     }
+
 
     public event EventHandler<string>? MessageReceived;
 

@@ -30,7 +30,7 @@ namespace QiMata.MobileIoT.Services.Mock
                 .ReturnsAsync(true);
             mock.Setup(m => m.DisconnectAsync()).Returns(Task.CompletedTask);
 
-            mock.Setup(m => m.ReadDht22Async())
+            mock.Setup(m => m.ReadDht22Async(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(() =>
                 {
                     var temperature = random.NextDouble() * 20 + 15; // 15-35 °C
@@ -55,30 +55,14 @@ namespace QiMata.MobileIoT.Services.Mock
             // Standard async members
             mock.Setup(m => m.ConnectAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
-            mock.Setup(m => m.StartSensorNotificationsAsync(It.IsAny<CancellationToken>()))
-                .Returns(Task.CompletedTask);
             mock.Setup(m => m.ToggleLedAsync(It.IsAny<bool>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
             mock.Setup(m => m.DisconnectAsync()).Returns(Task.CompletedTask);
             mock.Setup(m => m.DisposeAsync()).Returns(ValueTask.CompletedTask);
-
-            // Capture event subscriptions so tests can invoke them later
-            EventHandler<double>? tempHandler = null;
-            EventHandler<double>? humidityHandler = null;
-
-            mock.SetupAdd(m => m.TemperatureUpdatedC += It.IsAny<EventHandler<double>>())
-                .Callback<EventHandler<double>>(h => tempHandler = h);
-            mock.SetupRemove(m => m.TemperatureUpdatedC -= It.IsAny<EventHandler<double>>())
-                .Callback<EventHandler<double>>(_ => tempHandler = null);
-
-            mock.SetupAdd(m => m.HumidityUpdatedPercent += It.IsAny<EventHandler<double>>())
-                .Callback<EventHandler<double>>(h => humidityHandler = h);
-            mock.SetupRemove(m => m.HumidityUpdatedPercent -= It.IsAny<EventHandler<double>>())
-                .Callback<EventHandler<double>>(_ => humidityHandler = null);
-
-            // Optionally fire initial readings
-            tempHandler?.Invoke(mock.Object, 25.0);
-            humidityHandler?.Invoke(mock.Object, 50.0);
+            mock.Setup(m => m.ReadHumidityAsync(It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(25.0f));
+            mock.Setup(m => m.ReadTemperatureAsync(It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(25.0f));
 
             return mock.Object;
         }

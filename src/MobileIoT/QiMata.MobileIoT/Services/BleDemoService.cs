@@ -15,48 +15,18 @@ public sealed class BleDemoService : IBleDemoService
     public async Task<bool> ConnectAsync(string deviceName, CancellationToken ct)
     {
         bool ok = await _ble.ConnectAsync(deviceName, ct);
-        if (ok)
-            await _ble.StartSensorNotificationsAsync(ct);
+        //if (ok)
+        //    await _ble.StartSensorNotificationsAsync(ct);
         return ok;
     }
 
     public Task DisconnectAsync() => _ble.DisconnectAsync();
 
-    public async Task<(double temp, double humidity)> ReadDht22Async()
+    public async Task<(double temp, double humidity)> ReadDht22Async(CancellationToken cancellationToken)
     {
-        var tcs = new TaskCompletionSource<(double, double)>();
-
-        EventHandler<double>? tempHandler = null;
-        EventHandler<double>? humHandler = null;
-
-        double? temp = null;
-        double? hum = null;
-
-        tempHandler = (_, v) =>
-        {
-            temp = v;
-            if (temp.HasValue && hum.HasValue)
-                tcs.TrySetResult((temp.Value, hum.Value));
-        };
-
-        humHandler = (_, v) =>
-        {
-            hum = v;
-            if (temp.HasValue && hum.HasValue)
-                tcs.TrySetResult((temp.Value, hum.Value));
-        };
-
-        _ble.TemperatureUpdatedC += tempHandler;
-        _ble.HumidityUpdatedPercent += humHandler;
-
-        await _ble.StartSensorNotificationsAsync(CancellationToken.None);
-
-        var reading = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(10));
-
-        _ble.TemperatureUpdatedC -= tempHandler;
-        _ble.HumidityUpdatedPercent -= humHandler;
-
-        return reading;
+        var temp = await _ble.ReadTemperatureAsync(cancellationToken);
+        var humidity = await _ble.ReadHumidityAsync(cancellationToken);
+        return (temp, humidity);
     }
 
     public async Task<bool> ToggleLedAsync()

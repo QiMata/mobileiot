@@ -36,7 +36,7 @@ public partial class BleViewModel : ObservableObject
     [RelayCommand]
     private async Task RefreshSensor()
     {
-        (Temperature, Humidity) = await _ble.ReadDht22Async();
+        (Temperature, Humidity) = await _ble.ReadDht22Async(CancellationToken.None);
     }
 
     [RelayCommand]
@@ -44,7 +44,7 @@ public partial class BleViewModel : ObservableObject
     {
         if (!_isConnected)
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             bool ok = await _ble.ConnectAsync("PiSensor", cts.Token);
             if (ok)
             {

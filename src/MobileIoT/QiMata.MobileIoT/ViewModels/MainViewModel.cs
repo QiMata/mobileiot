@@ -18,8 +18,6 @@ public partial class MainViewModel : ObservableObject
     {
         _ble = ble;
         _qrScanner = qrScanner;
-        _ble.TemperatureUpdatedC += (_, v) => TempC = v;
-        _ble.HumidityUpdatedPercent += (_, v) => Humidity = v;
     }
 
     [RelayCommand]
@@ -27,7 +25,6 @@ public partial class MainViewModel : ObservableObject
     {
         using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
         bool ok = await _ble.ConnectAsync("PiDHTSensor", cts.Token);
-        if (ok) await _ble.StartSensorNotificationsAsync(cts.Token);
     }
 
     [RelayCommand]

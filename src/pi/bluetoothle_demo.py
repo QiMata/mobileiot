@@ -58,11 +58,12 @@ def hum_read_callback():
 
 def led_read_callback():
     """Return current LED state as 1 byte (0x01 or 0x00)."""
-    state = GPIO.input(LED_PIN)
-    return [0x01] if state == GPIO.HIGH else [0x00]
+    return True
+    #
 
 def led_write_callback(value):
     """Handle write to LED characteristic (turn LED on/off)."""
+    GPIO.setup(LED_PIN, GPIO.OUT, initial=GPIO.LOW)
     if value and value[0] == 0x01:  # value is a list of bytes
         GPIO.output(LED_PIN, GPIO.HIGH)   # LED ON
     else:
