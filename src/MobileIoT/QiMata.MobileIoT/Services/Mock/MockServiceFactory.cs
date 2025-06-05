@@ -26,6 +26,10 @@ namespace QiMata.MobileIoT.Services.Mock
             var random = new Random();
             var ledState = false;
 
+            mock.Setup(m => m.ConnectAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(true);
+            mock.Setup(m => m.DisconnectAsync()).Returns(Task.CompletedTask);
+
             mock.Setup(m => m.ReadDht22Async())
                 .ReturnsAsync(() =>
                 {

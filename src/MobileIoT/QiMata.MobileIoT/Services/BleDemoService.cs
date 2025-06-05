@@ -12,6 +12,16 @@ public sealed class BleDemoService : IBleDemoService
 
     public BleDemoService(IBluetoothService ble) => _ble = ble;
 
+    public async Task<bool> ConnectAsync(string deviceName, CancellationToken ct)
+    {
+        bool ok = await _ble.ConnectAsync(deviceName, ct);
+        if (ok)
+            await _ble.StartSensorNotificationsAsync(ct);
+        return ok;
+    }
+
+    public Task DisconnectAsync() => _ble.DisconnectAsync();
+
     public async Task<(double temp, double humidity)> ReadDht22Async()
     {
         var tcs = new TaskCompletionSource<(double, double)>();
