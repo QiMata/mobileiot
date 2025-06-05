@@ -30,7 +30,7 @@ namespace QiMata.MobileIoT
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-            bool isDesign = false;
+            bool isDesign = true;
 
 #if ANDROID
             if (!isDesign)

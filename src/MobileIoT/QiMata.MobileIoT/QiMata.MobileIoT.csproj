@@ -59,6 +59,7 @@
 
         <ItemGroup>
             <EmbeddedResource Include="Resources\Models\imagenet_labels.txt" />
+            <EmbeddedResource Include="Resources\Models\mobilenetv2.onnx" />
         </ItemGroup>
 
 	<ItemGroup>
