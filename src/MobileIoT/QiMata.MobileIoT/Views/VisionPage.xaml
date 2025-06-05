@@ -4,6 +4,11 @@
              x:Class="QiMata.MobileIoT.Views.VisionPage"
              Title="Computer Vision">
     <VerticalStackLayout Padding="20" Spacing="12">
+        <Button Text="Scan QR Code"
+                Command="{Binding ScanQrCommand}" />
+
+        <Label Text="{Binding QrResult}" FontSize="18" />
+
         <Button Text="Capture Photo"
                 Command="{Binding CapturePhotoCommand}" />
 
