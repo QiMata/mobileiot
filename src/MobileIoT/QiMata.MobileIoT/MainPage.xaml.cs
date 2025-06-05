@@ -20,7 +20,8 @@ namespace QiMata.MobileIoT
                 ["NfcP2PPage"] = () => Task.FromResult(true),
                 ["UsbPage"] = () => Task.FromResult(true),
                 ["SerialPage"] = () => Task.FromResult(true),
-                ["WifiDirectPage"] = EnsurePermission<Permissions.NetworkState>
+                ["WifiDirectPage"] = EnsurePermission<Permissions.NetworkState>,
+                ["VisionPage"] = EnsurePermission<Permissions.Camera>
             };
 
             NavigateCommand = new Command<string>(async route => await NavigateToPage(route));

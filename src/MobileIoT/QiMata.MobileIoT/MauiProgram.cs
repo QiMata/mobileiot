@@ -94,6 +94,9 @@ namespace QiMata.MobileIoT
             builder.Services.AddTransient<ViewModels.UsbViewModel>();
             builder.Services.AddTransient<UsbPage>();
 
+            builder.Services.AddTransient<ViewModels.VisionViewModel>();
+            builder.Services.AddTransient<VisionPage>();
+
             return builder.Build();
         }
     }
