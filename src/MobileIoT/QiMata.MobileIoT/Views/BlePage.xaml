@@ -28,6 +28,16 @@
                    Padding="20"
                    HasShadow="True">
                 <VerticalStackLayout Spacing="20">
+                    <Button Text="{Binding ConnectButtonText}"
+                            BackgroundColor="#2563EB"
+                            TextColor="White"
+                            CornerRadius="8"
+                            Command="{Binding ToggleConnectionCommand}" />
+
+                    <Label Text="{Binding ConnectionStatus}"
+                           FontSize="18"
+                           TextColor="#111827"
+                           HorizontalOptions="Center" />
 
                     <!-- DHT22 Sensor -->
                     <Label Text="DHT22 Sensor"
