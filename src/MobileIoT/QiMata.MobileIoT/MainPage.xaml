@@ -80,6 +80,13 @@
                             Command="{Binding NavigateCommand}"
                             CommandParameter="WifiDirectPage" />
 
+                    <Button Text="Computer Vision"
+                            BackgroundColor="#2563EB"
+                            TextColor="White"
+                            CornerRadius="8"
+                            Command="{Binding NavigateCommand}"
+                            CommandParameter="VisionPage" />
+
                 </VerticalStackLayout>
             </Frame>
         </ScrollView>
