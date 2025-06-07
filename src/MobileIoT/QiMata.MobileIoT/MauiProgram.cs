@@ -77,6 +77,7 @@ namespace QiMata.MobileIoT
 
             builder.Services.AddSingleton<IQrScanningService, QrScanningService>();
             builder.Services.AddSingleton<ImageClassificationService>();
+            builder.Services.AddSingleton<IAudioModemService, AudioModemService>();
 
 
             builder.Services.AddTransient<ViewModels.NfcPageViewModel>();
@@ -96,6 +97,9 @@ namespace QiMata.MobileIoT
 
             builder.Services.AddTransient<ViewModels.VisionViewModel>();
             builder.Services.AddTransient<VisionPage>();
+
+            builder.Services.AddTransient<ViewModels.AudioDemoViewModel>();
+            builder.Services.AddTransient<AudioPage>();
 
             return builder.Build();
         }
