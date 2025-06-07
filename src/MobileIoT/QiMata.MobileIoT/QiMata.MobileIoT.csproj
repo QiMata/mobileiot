@@ -72,6 +72,7 @@
       <PackageReference Include="Plugin.NFC" Version="0.1.26" />
       <PackageReference Include="SkiaSharp" Version="3.119.0" />
       <PackageReference Include="ZXing.Net.Maui.Controls" />
+      <PackageReference Include="Plugin.Maui.Audio" Version="1.4.0" />
       <!-- Cross-platform USB libraries -->
       <PackageReference Include="Device.Net" Version="4.2.1" />
       <PackageReference Include="Usb.Net" Version="4.2.1" />
@@ -115,9 +116,12 @@
           <Compile Update="Views\VisionPage.xaml.cs">
             <DependentUpon>VisionPage.xaml</DependentUpon>
           </Compile>
+          <Compile Update="Views\AudioPage.xaml.cs">
+            <DependentUpon>AudioPage.xaml</DependentUpon>
+          </Compile>
         </ItemGroup>
 
-	<ItemGroup>
+        <ItemGroup>
 	  <MauiXaml Update="Views\BeaconPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
@@ -140,6 +144,9 @@
             <Generator>MSBuild:Compile</Generator>
           </MauiXaml>
           <MauiXaml Update="Views\VisionPage.xaml">
+            <Generator>MSBuild:Compile</Generator>
+          </MauiXaml>
+          <MauiXaml Update="Views\AudioPage.xaml">
             <Generator>MSBuild:Compile</Generator>
           </MauiXaml>
         </ItemGroup>

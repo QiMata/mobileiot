@@ -18,6 +18,7 @@ namespace QiMata.MobileIoT
             Routing.RegisterRoute(nameof(UsbPage), typeof(QiMata.MobileIoT.Views.UsbPage));
             Routing.RegisterRoute(nameof(WifiDirectPage), typeof(QiMata.MobileIoT.Views.WifiDirectPage));
             Routing.RegisterRoute(nameof(VisionPage), typeof(QiMata.MobileIoT.Views.VisionPage));
+            Routing.RegisterRoute(nameof(AudioPage), typeof(QiMata.MobileIoT.Views.AudioPage));
         }
     }
 }

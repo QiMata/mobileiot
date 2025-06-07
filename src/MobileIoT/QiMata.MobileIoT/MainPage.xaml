@@ -80,6 +80,13 @@
                             Command="{Binding NavigateCommand}"
                             CommandParameter="WifiDirectPage" />
 
+                    <Button Text="Audio Jack"
+                            BackgroundColor="#2563EB"
+                            TextColor="White"
+                            CornerRadius="8"
+                            Command="{Binding NavigateCommand}"
+                            CommandParameter="AudioPage" />
+
                     <Button Text="Computer Vision"
                             BackgroundColor="#2563EB"
                             TextColor="White"
