@@ -49,4 +49,20 @@ On the host side, the Pi will enumerate as a serial COM port. The MobileIoT app 
 
 Because the echo functionality is handled in the Pi’s kernel module, **no separate Python script is required for this demo** – the Pi effectively acts as a USB echo device as soon as `g_zero` is enabled. This demo demonstrates how a Raspberry Pi can emulate a custom USB data interface, useful for high-throughput data exchange or testing USB communications. It highlights an IoT integration scenario where a device communicates over USB at the raw data level (bulk endpoints) rather than through a higher-level protocol.
 
+## Audio Jack Telemetry Demo
+
+**Purpose:** This experimental demo sends sensor data through the Pi’s audio output so a mobile device can receive it via the headphone microphone pin. It illustrates how an audio cable can serve as a low-speed data link when no network or USB connection is available.
+
+**Hardware:** A Raspberry Pi with a 3.5mm audio jack and a TRRS cable to connect to the phone’s headset jack. A small resistor divider and capacitor should condition the Pi’s line-out level for the phone’s mic input (see `docs/audio_jack_demo.md`). Optionally attach a sensor such as a DHT22 to provide real data.
+
+**How it Works:** The script `audio_demo.py` reads a value (for example the CPU temperature) and transmits it as FSK tones using the Linux `minimodem` tool. The mobile app records from the mic and decodes the tones back into text. Each reading is sent every few seconds so the app can display the latest value.
+
+Run the demo with:
+
+```bash
+python3 audio_demo.py
+```
+
+Ensure `minimodem` is installed (`sudo apt-get install minimodem`) and the Pi audio output volume is set low enough not to clip the phone input.
+
 Overall, these Raspberry Pi demos cover a range of IoT interaction models: **wireless sensor/actuator control via BLE**, **proximity detection via BLE beacon**, and **wired command/data exchange via USB**. Developers can refer to these examples as a guide for integrating Raspberry Pi hardware with mobile or other client applications, adapting the concepts to fit their specific IoT workflows and communication needs. Each demo provides a template for connecting physical hardware (sensors, LEDs, etc.) with software, using industry-standard protocols and Raspberry Pi’s capabilities to bridge the physical and digital worlds in an IoT solution.

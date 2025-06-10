@@ -35,3 +35,10 @@ exact steps). Two demos are provided:
 
 The helper script `src/pi/run_serial_demo.sh` loads `g_serial` if needed
 and launches the Python demo.
+
+## Audio Jack Telemetry
+
+An additional demo shows how to transmit sensor data through the Pi’s audio jack. See
+`docs/audio_jack_demo.md` and the script `src/pi/audio_demo.py` for details on
+connecting a TRRS cable and using the `minimodem` tool to send readings as audio
+tones.
