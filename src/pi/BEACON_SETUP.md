@@ -46,50 +46,18 @@ With the environment prepared, we can now create the Python script to broadcast 
 
 ## Python Script to Broadcast the iBeacon
 
-Below is a Python script that uses BlueZero to advertise an iBeacon with the specified parameters. This script sets up a non-connectable BLE broadcaster with the UUID, Major, Minor, and TX power matching the demo’s expected values:
+The repository includes a ready-to-use helper at `src/pi/beacon_demo.py` that wraps the BlueZero calls and exposes convenient command-line arguments for tuning the broadcast parameters. Launch it like so:
 
-```python
-from bluezero import broadcaster
-import uuid as uuidlib
-
-# Define the iBeacon parameters (must match the demo expectations)
-BEACON_UUID = uuidlib.UUID("12345678-1234-1234-1234-1234567890AB")
-MAJOR = 1
-MINOR = 2
-TX_POWER = -59  # Measured RSSI at 1m, in dBm (use -59 dBm as a typical value)
-
-# Convert parameters to bytes for advertisement
-uuid_bytes = BEACON_UUID.bytes  # 16-byte UUID in big-endian byte order
-major_bytes = MAJOR.to_bytes(2, byteorder='big')
-minor_bytes = MINOR.to_bytes(2, byteorder='big')
-# TX power byte: convert signed int to unsigned byte (0-255)
-tx_power_byte = ((TX_POWER & 0xFF) if TX_POWER < 0 else TX_POWER).to_bytes(1, byteorder='big')
-
-# Construct the manufacturer-specific payload for iBeacon
-ibeacon_prefix = b'\x02\x15'  # iBeacon indicator: 0x02 (type), 0x15 (length)
-ibeacon_data = ibeacon_prefix + uuid_bytes + major_bytes + minor_bytes + tx_power_byte
-
-# Initialize the Beacon broadcaster (non-connectable advertisement)
-beacon = broadcaster.Beacon()  # uses default Bluetooth adapter (hci0)
-
-# Add Apple manufacturer ID (0x004C) and the iBeacon payload
-beacon.add_manufacturer_data('4c00', ibeacon_data)
-
-# Begin advertising the iBeacon
-beacon.start_beacon()
-print("iBeacon advertising started. UUID=%s, Major=%d, Minor=%d" % (BEACON_UUID, MAJOR, MINOR))
-
-try:
-    # Keep the program running to continue broadcasting
-    while True:
-        pass
-except KeyboardInterrupt:
-    # Stop advertising when script is interrupted
-    beacon.stop_beacon()
-    print("iBeacon advertising stopped.")
+```bash
+sudo python3 beacon_demo.py \
+  --uuid 12345678-1234-1234-1234-1234567890AB \
+  --major 1 \
+  --minor 2 \
+  --tx-power -59 \
+  --adapter hci0
 ```
 
-**How this works:** We use `bluezero.broadcaster.Beacon` to create a non-connectable advertising beacon. We then call `add_manufacturer_data()` with Apple’s company ID `0x004C` (represented as `'4c00'` in hex) and the raw iBeacon payload. The payload is composed of the standard iBeacon prefix `0x02 0x15`, followed by the 16-byte UUID, 2-byte Major, 2-byte Minor, and the 1-byte TX power. Finally, `start_beacon()` registers the advertisement with BlueZ and begins broadcasting. The script prints a confirmation and then enters an infinite loop to keep running (since the beacon advertising runs asynchronously in the background). Press **Ctrl+C** to terminate the script, which will call `stop_beacon()` to clean up.
+Optional flags let you run the broadcast for a fixed `--duration` (in seconds) or point to an alternate Bluetooth adapter. Under the hood, the script constructs the manufacturer payload (`0x02 0x15` prefix, UUID, major/minor, TX power) and registers it with BlueZ. Logging output confirms when advertising starts and stops, and `Ctrl+C` performs a graceful shutdown.
 
 **Advertisement Interval:** By default, BlueZ will advertise periodically (often around 100 ms interval by default for non-connectable beacons). This interval can be tuned via BlueZ configurations or HCI commands if needed, but the default is suitable for most beacon use-cases. In the beacon example above, we rely on BlueZ’s default advertising interval, which is typically on the order of 100 ms – making the beacon easily discoverable without excessive power usage.
 

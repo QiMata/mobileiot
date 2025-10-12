@@ -19,19 +19,23 @@ When the BLE GATT server is running, a mobile app or other BLE central device ca
 
 ### Forwarding BLE telemetry to Azure services
 
-The Bluetooth sensor readings can now be relayed directly to Azure. The `azure_retransmit.py` helpers provide publishers for Azure IoT Hub and Azure IoT Operations Edge along with a background relay that queues sensor messages. Configure the relay once during startup so every GATT read automatically forwards the latest values:
+The Bluetooth sensor readings can now be relayed directly to Azure without editing the script. Pass one or both of the following options when starting `bluetoothle_demo.py`:
 
-```python
-from azure_retransmit import AzureIoTHubPublisher, BackgroundTelemetryRelay, IoTOpsEdgePublisher
-import bluetoothle_demo
+| Option | Purpose |
+| --- | --- |
+| `--azure-iot-hub-connection-string` | Enables forwarding to Azure IoT Hub using the provided device connection string. |
+| `--azure-iot-ops-ingest-url` | Sends telemetry to the specified Azure IoT Operations Edge ingest endpoint. Combine with `--azure-iot-ops-api-key` and `--azure-iot-ops-api-key-header` if authentication is required. |
 
-hub = AzureIoTHubPublisher("<iot-hub-connection-string>")
-ops = IoTOpsEdgePublisher("https://<edge-host>/ingest", api_key="<api-key>")
-relay = BackgroundTelemetryRelay([hub, ops])
-bluetoothle_demo.set_telemetry_relay(relay)
+Example:
+
+```bash
+python3 bluetoothle_demo.py \
+  --azure-iot-hub-connection-string "$IOTHUB_DEVICE_CONNECTION_STRING" \
+  --azure-iot-ops-ingest-url "https://edge-host/api/data" \
+  --azure-iot-ops-api-key "$IOTOPS_API_KEY"
 ```
 
-Shut down the relay during application exit (for example by calling `relay.close()`) to flush any queued telemetry before the process terminates.
+The script instantiates the appropriate publishers and queues telemetry in the background so every temperature and humidity read is mirrored to the configured services. When the process exits the queue is flushed and the publishers are shut down automatically.
 
 ## BLE Beacon Demo (iBeacon Advertisement)
 
@@ -65,18 +69,22 @@ On the host side, the Pi will enumerate as a serial COM port. The MobileIoT app 
 
 Because the echo functionality is handled in the Pi’s kernel module, **no separate Python script is required for this demo** – the Pi effectively acts as a USB echo device as soon as `g_zero` is enabled. This demo demonstrates how a Raspberry Pi can emulate a custom USB data interface, useful for high-throughput data exchange or testing USB communications. It highlights an IoT integration scenario where a device communicates over USB at the raw data level (bulk endpoints) rather than through a higher-level protocol.
 
+To toggle the gadget modules without remembering the modprobe commands, run `sudo ./run_usb_bulk_echo.sh`. The helper script unloads `g_serial` if it is present and loads `g_zero`, printing status updates so you know when the bulk echo device is ready for the app.
+
 ## Audio Jack Telemetry Demo
 
 **Purpose:** This experimental demo sends sensor data through the Pi’s audio output so a mobile device can receive it via the headphone microphone pin. It illustrates how an audio cable can serve as a low-speed data link when no network or USB connection is available.
 
 **Hardware:** A Raspberry Pi with a 3.5mm audio jack and a TRRS cable to connect to the phone’s headset jack. A small resistor divider and capacitor should condition the Pi’s line-out level for the phone’s mic input (see `docs/audio_jack_demo.md`). Optionally attach a sensor such as a DHT22 to provide real data.
 
-**How it Works:** The script `audio_demo.py` reads a value (for example the CPU temperature) and transmits it as FSK tones using the Linux `minimodem` tool. The mobile app records from the mic and decodes the tones back into text. Each reading is sent every few seconds so the app can display the latest value.
+**How it Works:** The script `audio_demo.py` reads sensor values and transmits them as FSK tones using the Linux `minimodem` tool. The mobile app records from the mic and decodes the tones back into text. Each reading is sent every few seconds so the app can display the latest value. The script can stream the CPU temperature, a DHT22 sensor, or values from a JSON file and formats the telemetry as comma-separated key/value pairs (for example `cpuTempC=48.21`).
 
 Run the demo with:
 
 ```bash
-python3 audio_demo.py
+python3 audio_demo.py --sensor cpu-temp --interval 2
+python3 audio_demo.py --sensor dht22 --dht22-pin 4
+python3 audio_demo.py --sensor json-file --input-path ./telemetry.json --interval 10
 ```
 
 Ensure `minimodem` is installed (`sudo apt-get install minimodem`) and the Pi audio output volume is set low enough not to clip the phone input.
