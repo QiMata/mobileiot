@@ -65,4 +65,29 @@ python3 audio_demo.py
 
 Ensure `minimodem` is installed (`sudo apt-get install minimodem`) and the Pi audio output volume is set low enough not to clip the phone input.
 
+## Camera Capture to Azure IoT Operations Edge Demo
+
+**Purpose:** This integration provides the plumbing required to upload images from a Raspberry Pi camera to the Azure IoT Operations Edge **Media Connector**. The `camera_iot.py` module manages payload formatting, Media Connector ingest requests, and upload cadence so you only need to implement the device-specific capture routine.
+
+**Hardware:** Any camera supported on the Raspberry Pi can be used. The capture logic is intentionally left as a TODO placeholder – replace the `MediaConnectorCamera.capture_frame` method with calls to your preferred camera SDK (libcamera, OpenCV, vendor APIs, etc.).
+
+**How it Works:** Once the camera capture logic is in place, the script reads raw image bytes, wraps them in a JSON payload (base64 encoded), and posts them to the Media Connector ingest endpoint that is configured for your IoT Operations Edge deployment. Payload metadata includes the MIME content type, a capture timestamp, and the stream identifier to make downstream processing simpler. The default client uses `aiohttp` to perform the HTTPS POST, but you can provide your own client factory for custom authentication flows.
+
+Run the uploader with:
+
+```bash
+export IOTOPS_MEDIA_CONNECTOR_INGEST_URL="https://<edge fqdn>/media/ingest"
+export IOTOPS_MEDIA_CONNECTOR_STREAM_ID="<your-stream-id>"
+# Optional: provide an API key or token header used by the ingest endpoint
+export IOTOPS_MEDIA_CONNECTOR_API_KEY="<api-key-or-token>"
+export IOTOPS_MEDIA_CONNECTOR_API_KEY_HEADER="Authorization"
+python3 camera_iot.py
+```
+
+Optional environment variables:
+
+* `CAMERA_CAPTURE_INTERVAL` – Seconds between uploads (default: 30 seconds).
+
+> **TODO:** Implement the `capture_frame` method inside `camera_iot.py` with code that interfaces with your specific camera hardware and returns raw image bytes. The provided structure handles everything else required to deliver the frames to Azure IoT Operations Edge.
+
 Overall, these Raspberry Pi demos cover a range of IoT interaction models: **wireless sensor/actuator control via BLE**, **proximity detection via BLE beacon**, and **wired command/data exchange via USB**. Developers can refer to these examples as a guide for integrating Raspberry Pi hardware with mobile or other client applications, adapting the concepts to fit their specific IoT workflows and communication needs. Each demo provides a template for connecting physical hardware (sensors, LEDs, etc.) with software, using industry-standard protocols and Raspberry Pi’s capabilities to bridge the physical and digital worlds in an IoT solution.
