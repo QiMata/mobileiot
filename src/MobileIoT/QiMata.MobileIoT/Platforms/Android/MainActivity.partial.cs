@@ -4,7 +4,7 @@ using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.PlatformConfiguration;
 using QiMata.MobileIoT.Platforms.Android;
 using QiMata.MobileIoT.Services;
-using QiMata.MobileIoT.Services.I;
+using QiMata.MobileIoT.Services.Interfaces;
 
 namespace QiMata.MobileIoT;
 

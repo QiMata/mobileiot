@@ -1,5 +1,5 @@
 using Android.Content;
-using QiMata.MobileIoT.Services.I;
+using QiMata.MobileIoT.Services.Interfaces;
 
 using Android.Nfc;
 using Microsoft.Maui.ApplicationModel;

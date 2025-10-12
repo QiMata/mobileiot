@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Controls;
 using Plugin.NFC;
 #if ANDROID
 using QiMata.MobileIoT.Platforms.Android;
@@ -7,7 +8,7 @@ using QiMata.MobileIoT.Platforms.Android;
 using QiMata.MobileIoT.Platforms.iOS;
 #endif
 using QiMata.MobileIoT.Services;
-using QiMata.MobileIoT.Services.I;
+using QiMata.MobileIoT.Services.Interfaces;
 using QiMata.MobileIoT.Services.Mock;
 using QiMata.MobileIoT.Usb;
 using QiMata.MobileIoT.Views;
@@ -30,7 +31,7 @@ namespace QiMata.MobileIoT
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-            bool isDesign = false;
+            bool isDesign = DesignMode.IsDesignModeEnabled;
 
 #if ANDROID
             if (!isDesign)
@@ -77,6 +78,7 @@ namespace QiMata.MobileIoT
 
             builder.Services.AddSingleton<IQrScanningService, QrScanningService>();
             builder.Services.AddSingleton<ImageClassificationService>();
+            builder.Services.AddSingleton<IAudioDecoder, RootMeanSquareAudioDecoder>();
             builder.Services.AddSingleton<IAudioModemService, AudioModemService>();
 
 
