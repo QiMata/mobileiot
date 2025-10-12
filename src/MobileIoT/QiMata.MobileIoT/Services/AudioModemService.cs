@@ -8,13 +8,19 @@ public class AudioModemService : IAudioModemService
     private readonly IAudioRecorder _recorder;
     private readonly IAudioDecoder _decoder;
     private CancellationTokenSource? _cts;
+    private readonly Func<Task> _requestMicrophonePermission;
 
     public event EventHandler<string>? DataReceived;
 
-    public AudioModemService(IAudioManager audioManager, IAudioDecoder decoder)
+    public AudioModemService(
+        IAudioManager audioManager,
+        IAudioDecoder decoder,
+        Func<Task>? requestMicrophonePermission = null,
+        IAudioRecorder? recorder = null)
     {
-        _recorder = audioManager.CreateAudioRecorder();
+        _recorder = recorder ?? audioManager.CreateAudioRecorder();
         _decoder = decoder;
+        _requestMicrophonePermission = requestMicrophonePermission ?? (() => Permissions.RequestAsync<Permissions.Microphone>());
     }
 
     public async Task StartAsync(CancellationToken ct = default)
@@ -22,7 +28,7 @@ public class AudioModemService : IAudioModemService
         if (_cts != null)
             return;
 
-        await Permissions.RequestAsync<Permissions.Microphone>();
+        await _requestMicrophonePermission().ConfigureAwait(false);
         _cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
         await _recorder.StartAsync();
         _ = Task.Run(() => DecodeLoopAsync(_cts.Token));
