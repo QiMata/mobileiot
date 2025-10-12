@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import logging
 import time
@@ -11,7 +12,13 @@ from typing import Dict, List, Optional, Sequence, Tuple
 import Adafruit_DHT  # Library for DHT22 sensor (ensure it's installed)
 import RPi.GPIO as GPIO  # GPIO library for LED control
 from bluezero import adapter, peripheral
-from azure_retransmit import BackgroundTelemetryRelay, build_sensor_payload
+from azure_retransmit import (
+    AzureIoTHubPublisher,
+    BackgroundTelemetryRelay,
+    IoTOpsEdgePublisher,
+    TelemetryPublisher,
+    build_sensor_payload,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -149,9 +156,31 @@ def led_write_callback(value: Sequence[int]) -> None:
         LOGGER.info("LED turned OFF")
 
 
-def build_peripheral(constants: Dict[str, str]) -> peripheral.Peripheral:
+def _build_publishers_from_args(args: argparse.Namespace) -> List[TelemetryPublisher]:
+    publishers: List[TelemetryPublisher] = []
+
+    if args.azure_iot_hub_connection_string:
+        publishers.append(AzureIoTHubPublisher(args.azure_iot_hub_connection_string))
+
+    if args.azure_iot_ops_ingest_url:
+        publishers.append(
+            IoTOpsEdgePublisher(
+                args.azure_iot_ops_ingest_url,
+                api_key=args.azure_iot_ops_api_key,
+                api_key_header=args.azure_iot_ops_api_key_header,
+            )
+        )
+
+    return publishers
+
+
+def build_peripheral(constants: Dict[str, str], *, device_name: str) -> peripheral.Peripheral:
     adapter_address = next(iter(adapter.Adapter.available())).address
-    ble_periph = peripheral.Peripheral(adapter_address, local_name=DEFAULT_DEVICE_NAME, appearance=0x0340)
+    ble_periph = peripheral.Peripheral(
+        adapter_address,
+        local_name=device_name,
+        appearance=0x0340,
+    )
 
     ble_periph.add_service(srv_id=1, uuid=constants["serviceUuid"], primary=True)
     ble_periph.add_characteristic(
@@ -190,9 +219,9 @@ def build_peripheral(constants: Dict[str, str]) -> peripheral.Peripheral:
     return ble_periph
 
 
-def run_event_loop(periph: peripheral.Peripheral) -> None:
+def run_event_loop(periph: peripheral.Peripheral, *, device_name: str) -> None:
     periph.publish()
-    LOGGER.info("BLE GATT server started (Advertising as '%s'). Press Ctrl+C to exit.", DEFAULT_DEVICE_NAME)
+    LOGGER.info("BLE GATT server started (Advertising as '%s'). Press Ctrl+C to exit.", device_name)
     try:
         while True:
             time.sleep(1)
@@ -205,16 +234,65 @@ def run_event_loop(periph: peripheral.Peripheral) -> None:
             periph.unpublish()
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="BLE GATT sensor hub demo")
+    parser.add_argument("--device-name", default=DEFAULT_DEVICE_NAME, help="Bluetooth device name to advertise")
+    parser.add_argument(
+        "--azure-iot-hub-connection-string",
+        help="Connection string for Azure IoT Hub telemetry forwarding",
+    )
+    parser.add_argument(
+        "--azure-iot-ops-ingest-url",
+        help="Azure IoT Operations Edge ingest endpoint for telemetry forwarding",
+    )
+    parser.add_argument(
+        "--azure-iot-ops-api-key",
+        help="API key or token used when publishing to Azure IoT Operations Edge",
+    )
+    parser.add_argument(
+        "--azure-iot-ops-api-key-header",
+        default="Authorization",
+        help="HTTP header name used for the IoT Operations Edge API key",
+    )
+    parser.add_argument(
+        "--telemetry-queue-size",
+        type=int,
+        default=100,
+        help="Maximum number of telemetry payloads buffered for Azure forwarding",
+    )
+    parser.add_argument(
+        "--log-level",
+        default="INFO",
+        choices=["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"],
+        help="Logging verbosity",
+    )
+    return parser.parse_args()
+
+
 def main() -> None:
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+    args = parse_args()
+    log_level = getattr(logging, args.log_level)
+    logging.basicConfig(level=log_level, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
     constants = load_ble_constants()
     configure_gpio()
 
+    telemetry_relay: Optional[BackgroundTelemetryRelay] = None
+    publishers = _build_publishers_from_args(args)
+    if publishers:
+        telemetry_relay = BackgroundTelemetryRelay(publishers, max_queue_size=args.telemetry_queue_size)
+        set_telemetry_relay(telemetry_relay)
+        LOGGER.info("Azure telemetry forwarding enabled to %d target(s)", len(publishers))
+    else:
+        LOGGER.info("Azure telemetry forwarding disabled")
+
     try:
-        ble_periph = build_peripheral(constants)
-        run_event_loop(ble_periph)
+        ble_periph = build_peripheral(constants, device_name=args.device_name)
+        run_event_loop(ble_periph, device_name=args.device_name)
     finally:
+        if telemetry_relay is not None:
+            telemetry_relay.close()
+        set_telemetry_relay(None)
         cleanup_gpio()
 
 
