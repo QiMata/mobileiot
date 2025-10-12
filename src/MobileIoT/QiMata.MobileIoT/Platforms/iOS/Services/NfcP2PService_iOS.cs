@@ -1,5 +1,5 @@
 using QiMata.MobileIoT.Services;
-using QiMata.MobileIoT.Services.I;
+using QiMata.MobileIoT.Services.Interfaces;
 
 namespace QiMata.MobileIoT.Platforms.iOS;
 

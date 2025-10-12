@@ -4,7 +4,7 @@ using CoreNFC;
 using Foundation;
 using Microsoft.Maui.Controls;
 using System.Linq;
-using QiMata.MobileIoT.Services.I;
+using QiMata.MobileIoT.Services.Interfaces;
 
 namespace QiMata.MobileIoT;
 

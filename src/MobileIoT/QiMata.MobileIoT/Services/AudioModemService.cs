@@ -1,17 +1,20 @@
 using Plugin.Maui.Audio;
+using QiMata.MobileIoT.Services.Interfaces;
 
 namespace QiMata.MobileIoT.Services;
 
 public class AudioModemService : IAudioModemService
 {
     private readonly IAudioRecorder _recorder;
+    private readonly IAudioDecoder _decoder;
     private CancellationTokenSource? _cts;
 
     public event EventHandler<string>? DataReceived;
 
-    public AudioModemService(IAudioManager audioManager)
+    public AudioModemService(IAudioManager audioManager, IAudioDecoder decoder)
     {
         _recorder = audioManager.CreateAudioRecorder();
+        _decoder = decoder;
     }
 
     public async Task StartAsync(CancellationToken ct = default)
@@ -41,11 +44,17 @@ public class AudioModemService : IAudioModemService
         var buffer = new byte[4096];
         while (!token.IsCancellationRequested)
         {
-            int read = await stream.ReadAsync(buffer, 0, buffer.Length, token);
-            if (read <= 0) continue;
-            // TODO: implement FSK/DTMF decoding of 'buffer'.
-            // For demo purposes we just report raw sample count.
-            DataReceived?.Invoke(this, $"RX {read} bytes");
+            int read = await stream.ReadAsync(buffer, 0, buffer.Length, token).ConfigureAwait(false);
+            if (read <= 0)
+            {
+                continue;
+            }
+
+            var result = await _decoder.TryDecodeAsync(buffer.AsMemory(0, read), token).ConfigureAwait(false);
+            if (!string.IsNullOrWhiteSpace(result))
+            {
+                DataReceived?.Invoke(this, result);
+            }
         }
     }
 }
