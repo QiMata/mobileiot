@@ -43,3 +43,10 @@ An additional demo shows how to transmit sensor data through the Pi’s audio ja
 connecting a TRRS cable and using the `minimodem` tool to send readings as audio
 tones. The MobileIoT app has an "Audio Jack" page that listens on the microphone
 and displays the decoded messages.
+
+## Manual hardware test project
+
+Run the interactive prompts with `python -m pytest tests/manual --run-manual` whenever you want to record manual
+verification alongside automated results.
+
+Detailed procedures for multi-device manual verification live in [`tests/manual`](tests/manual/README.md). Use these checklists when you have access to two phones or a phone and Raspberry Pi hardware to exercise the BLE, NFC, USB, audio, and vision demos end-to-end.
