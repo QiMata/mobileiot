@@ -17,6 +17,22 @@ This README summarizes the Raspberry Pi demonstration scripts included in the Qi
 
 When the BLE GATT server is running, a mobile app or other BLE central device can connect to the Pi and interact with these characteristics. The app can **read** or subscribe to notifications from the Temperature and Humidity characteristics to get sensor measurements, and it can **write** to the LED characteristic to remotely toggle the Pi’s LED. Under the hood, the script reads the DHT22 sensor on-demand for updates and uses callbacks to update the characteristic values. For example, when a write of `0x01` is received on the LED characteristic, the Pi sets the GPIO17 high to turn on the LED (and `0x00` turns it off). This demo illustrates a classic IoT pattern: a Raspberry Pi acting as a BLE-based environmental sensor and actuator module, communicating wirelessly with an application over GATT.
 
+### Forwarding BLE telemetry to Azure services
+
+The Bluetooth sensor readings can now be relayed directly to Azure. The `azure_retransmit.py` helpers provide publishers for Azure IoT Hub and Azure IoT Operations Edge along with a background relay that queues sensor messages. Configure the relay once during startup so every GATT read automatically forwards the latest values:
+
+```python
+from azure_retransmit import AzureIoTHubPublisher, BackgroundTelemetryRelay, IoTOpsEdgePublisher
+import bluetoothle_demo
+
+hub = AzureIoTHubPublisher("<iot-hub-connection-string>")
+ops = IoTOpsEdgePublisher("https://<edge-host>/ingest", api_key="<api-key>")
+relay = BackgroundTelemetryRelay([hub, ops])
+bluetoothle_demo.set_telemetry_relay(relay)
+```
+
+Shut down the relay during application exit (for example by calling `relay.close()`) to flush any queued telemetry before the process terminates.
+
 ## BLE Beacon Demo (iBeacon Advertisement)
 
 **Purpose:** This demo showcases how a Raspberry Pi can operate as a Bluetooth LE **beacon**. Using the `beacon_demo.py` script, the Pi advertises itself as an **iBeacon**, allowing the MobileIoT app (or any BLE scanner) to detect its presence and approximate proximity. Unlike the GATT server demo, the beacon is a one-way broadcast – there is no connection or data exchange beyond the advertisement itself.

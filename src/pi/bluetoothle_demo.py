@@ -6,16 +6,20 @@ import json
 import logging
 import time
 from pathlib import Path
-from typing import Dict, List, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple
 
 import Adafruit_DHT  # Library for DHT22 sensor (ensure it's installed)
 import RPi.GPIO as GPIO  # GPIO library for LED control
 from bluezero import adapter, peripheral
+from azure_retransmit import BackgroundTelemetryRelay, build_sensor_payload
 
 LOGGER = logging.getLogger(__name__)
 
 BLE_CONFIG_PATH = Path(__file__).resolve().parents[1] / "shared" / "ble_constants.json"
 DEFAULT_DEVICE_NAME = "PiSensor"
+
+TELEMETRY_SOURCE = "bluetoothle_demo"
+_TELEMETRY_RELAY: Optional[BackgroundTelemetryRelay] = None
 
 DHT_SENSOR = Adafruit_DHT.DHT22
 DHT_PIN = 4
@@ -25,6 +29,30 @@ _SENSOR_SAMPLE_INTERVAL = 2.0
 _last_temp_c = 0.0
 _last_humidity = 0.0
 _last_sample_ts = 0.0
+
+
+def set_telemetry_relay(relay: Optional[BackgroundTelemetryRelay]) -> None:
+    """Configure the telemetry relay used to forward sensor data to Azure services."""
+
+    global _TELEMETRY_RELAY
+    _TELEMETRY_RELAY = relay
+
+
+def _emit_sensor_telemetry(measurement: str, value: float, unit: str) -> None:
+    if _TELEMETRY_RELAY is None:
+        return
+
+    payload = build_sensor_payload(
+        measurement,
+        value,
+        unit,
+        source=TELEMETRY_SOURCE,
+        metadata={"transport": "bluetooth-le"},
+    )
+    try:
+        _TELEMETRY_RELAY.emit(payload)
+    except RuntimeError:
+        LOGGER.debug("Telemetry relay is closed; dropping %s payload", measurement)
 
 
 class SensorReadError(RuntimeError):
@@ -95,6 +123,7 @@ def temperature_read_callback() -> List[int]:
         LOGGER.warning("Falling back to last known temperature: %s", exc)
         temp_c = _last_temp_c
 
+    _emit_sensor_telemetry("temperature", temp_c, "C")
     encoded = _int16_bytes(int(round(temp_c * 100)))
     return encoded
 
@@ -106,6 +135,7 @@ def humidity_read_callback() -> List[int]:
         LOGGER.warning("Falling back to last known humidity: %s", exc)
         humidity = _last_humidity
 
+    _emit_sensor_telemetry("humidity", humidity, "%")
     encoded = _uint16_bytes(int(round(humidity * 100)))
     return encoded
 
