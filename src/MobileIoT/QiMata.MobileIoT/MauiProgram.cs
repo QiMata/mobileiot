@@ -9,6 +9,8 @@ using QiMata.MobileIoT.Platforms.iOS;
 using QiMata.MobileIoT.Services;
 using QiMata.MobileIoT.Services.I;
 using QiMata.MobileIoT.Services.Mock;
+using QiMata.MobileIoT.ThreadDemoCore.Services;
+using QiMata.MobileIoT.ThreadDemoCore.ViewModels;
 using QiMata.MobileIoT.Usb;
 using QiMata.MobileIoT.Views;
 using ZXing.Net.Maui;
@@ -77,6 +79,7 @@ namespace QiMata.MobileIoT
 
             builder.Services.AddSingleton<IQrScanningService, QrScanningService>();
             builder.Services.AddSingleton<ImageClassificationService>();
+            builder.Services.AddSingleton<IPiCameraService, PiCameraService>();
 
 
             builder.Services.AddTransient<ViewModels.NfcPageViewModel>();
@@ -96,6 +99,22 @@ namespace QiMata.MobileIoT
 
             builder.Services.AddTransient<ViewModels.VisionViewModel>();
             builder.Services.AddTransient<VisionPage>();
+
+            builder.Services.AddTransient<ViewModels.SerialDemoViewModel>();
+            builder.Services.AddTransient<SerialPage>();
+
+            builder.Services.AddTransient<ViewModels.WifiDirectViewModel>();
+            builder.Services.AddTransient<WifiDirectPage>();
+
+            builder.Services.AddTransient<ViewModels.NfcProvisioningViewModel>();
+            builder.Services.AddTransient<NfcProvisioningPage>();
+
+            builder.Services.AddSingleton<HttpClient>();
+            builder.Services.AddSingleton<IThreadBridgeClient, ThreadBridgeClient>();
+            builder.Services.AddSingleton<IThreadDemoService, ThreadDemoService>();
+            builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
+            builder.Services.AddTransient<ThreadViewModel>();
+            builder.Services.AddTransient<ThreadPage>();
 
             return builder.Build();
         }

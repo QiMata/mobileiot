@@ -14,11 +14,13 @@ public partial class BleViewModel : ObservableObject
     public BleViewModel(IBleDemoService ble)
     {
         _ble = ble;
+        _ble.SensorDataReceived += OnSensorData;
         ConnectButtonText = "Connect";
         ConnectionStatus  = "Disconnected";
         LedButtonText  = "Turn LED On";
         LedButtonColor = Color.FromArgb("#2563EB");
         LedStatus      = "LED is Off";
+        StreamButtonText = "Start Streaming";
     }
 
     // --- DHT22 bindables ---
@@ -31,6 +33,19 @@ public partial class BleViewModel : ObservableObject
     [ObservableProperty] private string _ledStatus;
     [ObservableProperty] private string _connectButtonText = string.Empty;
     [ObservableProperty] private string _connectionStatus = string.Empty;
+
+    // --- Streaming bindables ---
+    [ObservableProperty] private bool _isStreaming;
+    [ObservableProperty] private string _streamButtonText;
+
+    private void OnSensorData(object? sender, (double temp, double humidity) data)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            Temperature = data.temp;
+            Humidity = data.humidity;
+        });
+    }
 
     // --- Commands ---
     [RelayCommand]
@@ -59,10 +74,29 @@ public partial class BleViewModel : ObservableObject
         }
         else
         {
+            if (IsStreaming)
+                await ToggleStreaming();
             await _ble.DisconnectAsync();
             _isConnected = false;
             ConnectionStatus = "Disconnected";
             ConnectButtonText = "Connect";
+        }
+    }
+
+    [RelayCommand]
+    private async Task ToggleStreaming()
+    {
+        if (!IsStreaming)
+        {
+            await _ble.StartStreamingAsync(CancellationToken.None);
+            IsStreaming = true;
+            StreamButtonText = "Stop Streaming";
+        }
+        else
+        {
+            await _ble.StopStreamingAsync(CancellationToken.None);
+            IsStreaming = false;
+            StreamButtonText = "Start Streaming";
         }
     }
 

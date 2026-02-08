@@ -1,0 +1,53 @@
+ble:
+  enabled: true
+  scan_interval_s: 10.0
+  scan_duration_s: 5.0
+  service_filter:
+    - "12345678-1234-1234-1234-1234567890AB"
+  name_filter:
+    - "PiSensor"
+  read_interval_s: 2.0
+  write_allowlist:
+    - "12345679-1234-1234-1234-1234567890AB"
+
+serial:
+  enabled: true
+  port_patterns:
+    - "/dev/ttyUSB*"
+    - "/dev/ttyACM*"
+  baud_rate: 9600
+  poll_interval_s: 5.0
+  write_allowlist:
+    - LED_ON
+    - LED_OFF
+    - GPIO_WRITE
+
+wifi_direct:
+  enabled: true
+  listen_host: "127.0.0.1"
+  listen_port: 8988
+  telemetry_request_on_connect: true
+  reconnect_delay_s: 10.0
+
+opcua:
+  endpoint: "opc.tcp://0.0.0.0:4840"
+  server_name: "MobileIoT Gateway"
+  namespace_uri: "urn:qimata:mobileiot:gateway"
+  security_policy: "Basic256Sha256"
+  security_mode: "SignAndEncrypt"
+  certificate_path: "/etc/mobileiot/opcua/certs/server_cert.pem"
+  private_key_path: "/etc/mobileiot/opcua/private/server_key.pem"
+  trust_path: "/etc/mobileiot/opcua/trust/"
+  anonymous_allowed: false
+
+registry:
+  heartbeat_timeout_s: 60.0
+  offline_after_s: 120.0
+  persist_path: "/var/lib/mobileiot/registry.json"
+
+health:
+  enabled: true
+  host: "0.0.0.0"
+  port: 8081
+
+log_level: INFO

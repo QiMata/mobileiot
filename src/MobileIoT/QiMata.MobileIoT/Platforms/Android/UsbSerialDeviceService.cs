@@ -44,7 +44,7 @@ public sealed class UsbSerialDeviceService : ISerialDeviceService
         var dev = _usb.DeviceList.Values.FirstOrDefault(d => d.VendorId == vid && d.ProductId == pid);
         if (dev == null) return false;
 
-        //-- Request runtime permission if we don't have it ––––––––––––––––––––––
+        //-- Request runtime permission if we don't have it ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         if (!_usb.HasPermission(dev))
         {
             var tcs = new TaskCompletionSource<bool>();
@@ -58,7 +58,7 @@ public sealed class UsbSerialDeviceService : ISerialDeviceService
             _usb.RequestPermission(dev, pi);
             await tcs.Task.WaitAsync(ct);
         }
-        //-- Open connection / configure port –––––––––––––––––––––––––––––––––––
+        //-- Open connection / configure port ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         _conn = _usb.OpenDevice(dev);
         if (_conn == null) return false;
 
@@ -116,7 +116,7 @@ public sealed class UsbSerialDeviceService : ISerialDeviceService
     /// <summary>Called by the broadcast receiver once permission is granted.</summary>
     internal static void UnblockPermission(int deviceId)
     {
-        if (_permBlocks.TryGetValue(deviceId, out var tcs))
+        if (_permBlocks.Remove(deviceId, out var tcs))
             tcs.TrySetResult(true);
     }
 }

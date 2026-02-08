@@ -23,6 +23,9 @@ public sealed class BluetoothService : IBluetoothService, IAsyncDisposable
     private static readonly Guid HumUuid = Guid.Parse("00002A6F-0000-1000-8000-00805F9B34FB");
     private static readonly Guid LedUuid = Guid.Parse("12345679-1234-1234-1234-1234567890AB");
 
+    public event EventHandler<float>? TemperatureChanged;
+    public event EventHandler<float>? HumidityChanged;
+
     public async Task<bool> ConnectAsync(string advertisedName, CancellationToken ct)
     {
         await BlePermissions.EnsureAsync();
@@ -77,7 +80,7 @@ public sealed class BluetoothService : IBluetoothService, IAsyncDisposable
     {
         if (_humChar is null) throw new InvalidOperationException("Connect first");
 
-        var result = await _tempChar.ReadAsync(ct);
+        var result = await _humChar.ReadAsync(ct);
 
         if (result.resultCode != 0)
         {
@@ -92,8 +95,47 @@ public sealed class BluetoothService : IBluetoothService, IAsyncDisposable
         _ledChar?.WriteAsync(new[] { (byte)(on ? 1 : 0) }, ct)
         ?? throw new InvalidOperationException("Connect first");
 
+    public async Task StartSensorNotificationsAsync(CancellationToken ct)
+    {
+        if (_tempChar is null || _humChar is null)
+            throw new InvalidOperationException("Connect first");
+
+        _tempChar.ValueUpdated += OnTempUpdated;
+        await _tempChar.StartUpdatesAsync(ct);
+
+        _humChar.ValueUpdated += OnHumUpdated;
+        await _humChar.StartUpdatesAsync(ct);
+    }
+
+    public async Task StopSensorNotificationsAsync(CancellationToken ct)
+    {
+        if (_tempChar is not null)
+        {
+            _tempChar.ValueUpdated -= OnTempUpdated;
+            await _tempChar.StopUpdatesAsync(ct);
+        }
+        if (_humChar is not null)
+        {
+            _humChar.ValueUpdated -= OnHumUpdated;
+            await _humChar.StopUpdatesAsync(ct);
+        }
+    }
+
+    private void OnTempUpdated(object? sender, CharacteristicUpdatedEventArgs e)
+    {
+        var raw = BitConverter.ToInt16(e.Characteristic.Value, 0);
+        TemperatureChanged?.Invoke(this, raw / 100.0f);
+    }
+
+    private void OnHumUpdated(object? sender, CharacteristicUpdatedEventArgs e)
+    {
+        var raw = BitConverter.ToInt16(e.Characteristic.Value, 0);
+        HumidityChanged?.Invoke(this, raw / 100.0f);
+    }
+
     public async Task DisconnectAsync()
     {
+        await StopSensorNotificationsAsync(CancellationToken.None);
         if (_device is not null && _adapt.ConnectedDevices.Contains(_device))
             await _adapt.DisconnectDeviceAsync(_device);
     }

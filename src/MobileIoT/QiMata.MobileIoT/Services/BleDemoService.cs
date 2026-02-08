@@ -9,14 +9,23 @@ public sealed class BleDemoService : IBleDemoService
 {
     private readonly IBluetoothService _ble;
     private bool _ledState;
+    private double _lastTemp, _lastHum;
 
-    public BleDemoService(IBluetoothService ble) => _ble = ble;
+    public event EventHandler<(double temp, double humidity)>? SensorDataReceived;
+
+    public BleDemoService(IBluetoothService ble)
+    {
+        _ble = ble;
+        _ble.TemperatureChanged += (_, t) => { _lastTemp = t; FireSensor(); };
+        _ble.HumidityChanged += (_, h) => { _lastHum = h; FireSensor(); };
+    }
+
+    private void FireSensor() =>
+        SensorDataReceived?.Invoke(this, (_lastTemp, _lastHum));
 
     public async Task<bool> ConnectAsync(string deviceName, CancellationToken ct)
     {
         bool ok = await _ble.ConnectAsync(deviceName, ct);
-        //if (ok)
-        //    await _ble.StartSensorNotificationsAsync(ct);
         return ok;
     }
 
@@ -35,4 +44,10 @@ public sealed class BleDemoService : IBleDemoService
         await _ble.ToggleLedAsync(_ledState, CancellationToken.None);
         return _ledState;
     }
+
+    public Task StartStreamingAsync(CancellationToken ct) =>
+        _ble.StartSensorNotificationsAsync(ct);
+
+    public Task StopStreamingAsync(CancellationToken ct) =>
+        _ble.StopSensorNotificationsAsync(ct);
 }

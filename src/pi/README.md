@@ -49,4 +49,66 @@ On the host side, the Pi will enumerate as a serial COM port. The MobileIoT app 
 
 Because the echo functionality is handled in the Pi’s kernel module, **no separate Python script is required for this demo** – the Pi effectively acts as a USB echo device as soon as `g_zero` is enabled. This demo demonstrates how a Raspberry Pi can emulate a custom USB data interface, useful for high-throughput data exchange or testing USB communications. It highlights an IoT integration scenario where a device communicates over USB at the raw data level (bulk endpoints) rather than through a higher-level protocol.
 
-Overall, these Raspberry Pi demos cover a range of IoT interaction models: **wireless sensor/actuator control via BLE**, **proximity detection via BLE beacon**, and **wired command/data exchange via USB**. Developers can refer to these examples as a guide for integrating Raspberry Pi hardware with mobile or other client applications, adapting the concepts to fit their specific IoT workflows and communication needs. Each demo provides a template for connecting physical hardware (sensors, LEDs, etc.) with software, using industry-standard protocols and Raspberry Pi’s capabilities to bridge the physical and digital worlds in an IoT solution.
+## Thread Protocol Demo (OTBR + CoAP Bridge)
+
+**Purpose:** This demo bridges an OpenThread Border Router (OTBR) Thread mesh network to the MobileIoT MAUI app via HTTP. The Pi runs `thread_demo.py`, which exposes Thread diagnostic data through `ot-ctl` and provides a CoAP echo endpoint for ping testing.
+
+**Prerequisites:**
+
+1. Install OTBR on the Raspberry Pi and commission a Thread network (see [openthread.io](https://openthread.io/guides/border-router)).
+2. Install Python dependencies:
+   ```bash
+   pip install aiocoap aiohttp
+   ```
+
+**Running:**
+
+```bash
+# Copy and customise settings (optional)
+cp thread_demo.env.example thread_demo.env
+
+# Start the bridge
+python3 thread_demo.py
+```
+
+The script starts:
+- **HTTP bridge** on port 8080 (configurable via `THREAD_HTTP_PORT`)
+- **CoAP echo server** on port 5683 (configurable via `THREAD_COAP_PORT`)
+
+**HTTP API:**
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET`  | `/healthz` | Health check – returns `{"status":"ok"}` |
+| `GET`  | `/thread/status` | Thread network status via `ot-ctl` |
+| `POST` | `/thread/ping` | CoAP echo ping to a Thread node |
+
+**Sample curl calls:**
+
+```bash
+# Health check
+curl http://raspberrypi.local:8080/healthz
+
+# Thread status
+curl http://raspberrypi.local:8080/thread/status
+
+# CoAP ping
+curl -X POST http://raspberrypi.local:8080/thread/ping \
+  -H "Content-Type: application/json" \
+  -d '{"target":"fd00::1","payload":"hello","timeoutMs":3000}'
+```
+
+**Troubleshooting:**
+- If `/thread/status` returns `ok: false`, verify OTBR is running (`sudo ot-ctl state`).
+- If CoAP pings time out, ensure the target node is reachable from the Pi and is running a CoAP echo resource.
+- The script requires `sudo` for `ot-ctl` access.
+
+**Running tests:**
+
+```bash
+python -m pytest src/pi/tests -q
+```
+
+---
+
+Overall, these Raspberry Pi demos cover a range of IoT interaction models: **wireless sensor/actuator control via BLE**, **proximity detection via BLE beacon**, **wired command/data exchange via USB**, and **Thread mesh networking via OTBR and CoAP**. Developers can refer to these examples as a guide for integrating Raspberry Pi hardware with mobile or other client applications, adapting the concepts to fit their specific IoT workflows and communication needs. Each demo provides a template for connecting physical hardware (sensors, LEDs, etc.) with software, using industry-standard protocols and Raspberry Pi's capabilities to bridge the physical and digital worlds in an IoT solution.

@@ -26,7 +26,10 @@ public sealed class WifiDirectService : Java.Lang.Object, IP2PService,
     readonly Context _ctx = Application.Context;
     TaskCompletionSource<bool>? _pendingDiscover;
     TaskCompletionSource<bool>? _pendingConnect;
+    /// <summary>Tracks which TCS the current IActionListener callback should resolve.</summary>
+    TaskCompletionSource<bool>? _pendingAction;
     Socket? _socket;
+    ServerSocket? _serverSocket;
     CancellationTokenSource? _recvCts;
 
     public WifiDirectService()
@@ -45,6 +48,7 @@ public sealed class WifiDirectService : Java.Lang.Object, IP2PService,
             return false;
 
         _pendingDiscover = new();
+        _pendingAction = _pendingDiscover;
         _manager.DiscoverPeers(_channel, this);
         return await _pendingDiscover.Task.WaitAsync(ct);
     }
@@ -52,6 +56,7 @@ public sealed class WifiDirectService : Java.Lang.Object, IP2PService,
     public Task<bool> ConnectToPeerAsync(string deviceAddress, CancellationToken ct = default)
     {
         _pendingConnect = new();
+        _pendingAction = _pendingConnect;
         var cfg = new WifiP2pConfig { DeviceAddress = deviceAddress };
         _manager.Connect(_channel, cfg, this);
         return _pendingConnect.Task.WaitAsync(ct);
@@ -80,6 +85,8 @@ public sealed class WifiDirectService : Java.Lang.Object, IP2PService,
     public Task StopAsync()
     {
         _socket?.Close();
+        _serverSocket?.Close();
+        _serverSocket = null;
         _manager.RemoveGroup(_channel, null);
         _recvCts?.Cancel();
         return Task.CompletedTask;
@@ -88,12 +95,14 @@ public sealed class WifiDirectService : Java.Lang.Object, IP2PService,
     // ---- IActionListener ----
     public void OnSuccess()
     {
-        (_pendingDiscover ?? _pendingConnect)?.TrySetResult(true);
+        _pendingAction?.TrySetResult(true);
+        _pendingAction = null;
     }
 
     public void OnFailure([GeneratedEnum] WifiP2pFailureReason reason)
     {
-        (_pendingDiscover ?? _pendingConnect)?.TrySetResult(false);
+        _pendingAction?.TrySetResult(false);
+        _pendingAction = null;
     }
 
     // ---- IPeerListListener ----
@@ -110,17 +119,27 @@ public sealed class WifiDirectService : Java.Lang.Object, IP2PService,
     {
         if (!info.GroupFormed) return;
 
-        if (info.IsGroupOwner)
+        try
         {
-            var server = new ServerSocket(8988);
-            _socket = await server.AcceptAsync();
-        }
-        else
-        {
-            _socket = new Socket();
-            await _socket.ConnectAsync(new InetSocketAddress(info.GroupOwnerAddress, 8988), 10_000);
-        }
+            if (info.IsGroupOwner)
+            {
+                _serverSocket = new ServerSocket(8988);
+                _serverSocket.SoTimeout = 30_000; // 30s accept timeout
+                _socket = await _serverSocket.AcceptAsync();
+                _serverSocket.Close();
+                _serverSocket = null;
+            }
+            else
+            {
+                _socket = new Socket();
+                await _socket.ConnectAsync(new InetSocketAddress(info.GroupOwnerAddress, 8988), 10_000);
+            }
 
-        _pendingConnect?.TrySetResult(_socket?.IsConnected ?? false);
+            _pendingConnect?.TrySetResult(_socket?.IsConnected ?? false);
+        }
+        catch (Java.IO.IOException)
+        {
+            _pendingConnect?.TrySetResult(false);
+        }
     }
 }

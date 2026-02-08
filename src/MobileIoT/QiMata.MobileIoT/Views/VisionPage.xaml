@@ -2,23 +2,113 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="QiMata.MobileIoT.Views.VisionPage"
+             BackgroundColor="#F3F4F6"
              Title="Computer Vision">
-    <VerticalStackLayout Padding="20" Spacing="12">
-        <Button Text="Scan QR Code"
-                Command="{Binding ScanQrCommand}" />
 
-        <Label Text="{Binding QrResult}" FontSize="18" />
+    <Grid Padding="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-        <Button Text="Capture Photo"
-                Command="{Binding CapturePhotoCommand}" />
+        <!-- Header -->
+        <Label Text="Computer Vision"
+               FontSize="26"
+               FontAttributes="Bold"
+               TextColor="#374151"
+               HorizontalOptions="Center"
+               Margin="0,20"/>
 
-        <Image Source="{Binding Photo}" HeightRequest="200" />
+        <!-- Content -->
+        <ScrollView Grid.Row="1">
+            <Frame BackgroundColor="White"
+                   CornerRadius="10"
+                   Padding="20"
+                   HasShadow="True">
+                <VerticalStackLayout Spacing="16">
 
-        <Label Text="{Binding Result}" FontSize="18" />
+                    <!-- Local Camera -->
+                    <Label Text="Local Camera"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           TextColor="#374151" />
 
-        <Button Text="Back"
-                BackgroundColor="#6B7280"
-                TextColor="White"
-                Command="{Binding NavigateBackCommand}" />
-    </VerticalStackLayout>
+                    <HorizontalStackLayout Spacing="12">
+                        <Button Text="Scan QR Code"
+                                BackgroundColor="#2563EB"
+                                TextColor="White"
+                                CornerRadius="8"
+                                Command="{Binding ScanQrCommand}" />
+                        <Button Text="Capture Photo"
+                                BackgroundColor="#2563EB"
+                                TextColor="White"
+                                CornerRadius="8"
+                                Command="{Binding CapturePhotoCommand}" />
+                    </HorizontalStackLayout>
+
+                    <Label Text="{Binding QrResult}"
+                           FontSize="16"
+                           TextColor="#111827" />
+
+                    <Image Source="{Binding Photo}" HeightRequest="200" />
+
+                    <Label Text="{Binding Result}"
+                           FontSize="18"
+                           TextColor="#111827" />
+
+                    <BoxView HeightRequest="1" BackgroundColor="#E5E7EB" Margin="0,10"/>
+
+                    <!-- Pi Camera -->
+                    <Label Text="Pi Camera"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           TextColor="#374151" />
+
+                    <HorizontalStackLayout Spacing="8">
+                        <Entry Placeholder="Pi address"
+                               Text="{Binding PiAddress}"
+                               WidthRequest="200" />
+                        <Button Text="Check"
+                                BackgroundColor="#2563EB"
+                                TextColor="White"
+                                CornerRadius="8"
+                                Command="{Binding CheckPiConnectionCommand}" />
+                    </HorizontalStackLayout>
+
+                    <Label Text="{Binding PiStatus}"
+                           FontSize="14"
+                           TextColor="#6B7280" />
+
+                    <HorizontalStackLayout Spacing="12">
+                        <Button Text="Capture Frame"
+                                BackgroundColor="#2563EB"
+                                TextColor="White"
+                                CornerRadius="8"
+                                Command="{Binding CapturePiFrameCommand}" />
+                        <Button Text="Classify on Pi"
+                                BackgroundColor="#059669"
+                                TextColor="White"
+                                CornerRadius="8"
+                                Command="{Binding ClassifyOnPiCommand}" />
+                    </HorizontalStackLayout>
+
+                    <Image Source="{Binding PiPhoto}" HeightRequest="200" />
+
+                    <Label Text="{Binding PiCameraResult}"
+                           FontSize="18"
+                           TextColor="#111827" />
+
+                    <BoxView HeightRequest="1" BackgroundColor="#E5E7EB" Margin="0,10"/>
+
+                    <!-- Back -->
+                    <Button Text="Back"
+                            BackgroundColor="#6B7280"
+                            TextColor="White"
+                            CornerRadius="8"
+                            Command="{Binding NavigateBackCommand}" />
+
+                </VerticalStackLayout>
+            </Frame>
+        </ScrollView>
+    </Grid>
 </ContentPage>

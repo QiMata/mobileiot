@@ -1,0 +1,24 @@
+[Unit]
+Description=MobileIoT OPC UA Gateway
+After=network-online.target bluetooth.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+EnvironmentFile=/etc/mobileiot/gateway.env
+WorkingDirectory=/home/pi/mobileiot/src/pi
+ExecStart=/home/pi/mobileiot/src/pi/.venv/bin/python -m gateway
+Restart=on-failure
+RestartSec=10
+WatchdogSec=120
+
+# Hardening
+ProtectSystem=strict
+ReadWritePaths=/var/lib/mobileiot /etc/mobileiot/opcua
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

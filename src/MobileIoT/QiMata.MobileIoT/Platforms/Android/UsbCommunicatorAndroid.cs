@@ -29,8 +29,20 @@ public sealed class UsbCommunicatorAndroid : IUsbCommunicator
         if (dev is null || !_mgr.HasPermission(dev)) return false;
 
         var intf = dev.GetInterface(0);
-        _in = intf.GetEndpoint(0);
-        _out = intf.GetEndpoint(1);
+        for (int i = 0; i < intf.EndpointCount; i++)
+        {
+            var ep = intf.GetEndpoint(i);
+            if (ep.Type == UsbAddressing.XferBulk)
+            {
+                if (ep.Direction == UsbAddressing.In)
+                    _in = ep;
+                else
+                    _out = ep;
+            }
+        }
+
+        if (_in is null || _out is null) return false;
+
         _conn = _mgr.OpenDevice(dev);
         return _conn?.ClaimInterface(intf, true) ?? false;
     }

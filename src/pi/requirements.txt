@@ -2,3 +2,13 @@ bluezero
 Adafruit_DHT
 RPi.GPIO
 pyserial
+flask
+picamera2
+numpy
+Pillow
+tflite-runtime
+ndeflib
+adafruit-circuitpython-pn532
+adafruit-blinka
+aiocoap
+aiohttp

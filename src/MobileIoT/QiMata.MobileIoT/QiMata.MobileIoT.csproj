@@ -82,6 +82,10 @@
         <TrimmerRootAssembly Include="Plugin.BLE" />
       </ItemGroup>
 
+      <ItemGroup>
+        <ProjectReference Include="..\QiMata.MobileIoT.ThreadDemoCore\QiMata.MobileIoT.ThreadDemoCore.csproj" />
+      </ItemGroup>
+
       <!-- Android permissions + feature -->
       <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-android'">
         <AndroidManifest Include="Platforms\Android\AndroidManifest.xml" />
@@ -115,6 +119,9 @@
           <Compile Update="Views\VisionPage.xaml.cs">
             <DependentUpon>VisionPage.xaml</DependentUpon>
           </Compile>
+          <Compile Update="Views\ThreadPage.xaml.cs">
+            <DependentUpon>ThreadPage.xaml</DependentUpon>
+          </Compile>
         </ItemGroup>
 
 	<ItemGroup>
@@ -140,6 +147,9 @@
             <Generator>MSBuild:Compile</Generator>
           </MauiXaml>
           <MauiXaml Update="Views\VisionPage.xaml">
+            <Generator>MSBuild:Compile</Generator>
+          </MauiXaml>
+          <MauiXaml Update="Views\ThreadPage.xaml">
             <Generator>MSBuild:Compile</Generator>
           </MauiXaml>
         </ItemGroup>

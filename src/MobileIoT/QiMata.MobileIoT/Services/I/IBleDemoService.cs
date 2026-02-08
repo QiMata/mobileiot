@@ -8,4 +8,8 @@ public interface IBleDemoService
     Task DisconnectAsync();
     Task<(double temp, double humidity)> ReadDht22Async(CancellationToken ct);
     Task<bool> ToggleLedAsync();
+
+    event EventHandler<(double temp, double humidity)>? SensorDataReceived;
+    Task StartStreamingAsync(CancellationToken ct);
+    Task StopStreamingAsync(CancellationToken ct);
 }

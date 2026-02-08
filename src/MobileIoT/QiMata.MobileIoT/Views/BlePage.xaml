@@ -59,6 +59,12 @@
                             CornerRadius="8"
                             Command="{Binding RefreshSensorCommand}" />
 
+                    <Button Text="{Binding StreamButtonText}"
+                            BackgroundColor="#059669"
+                            TextColor="White"
+                            CornerRadius="8"
+                            Command="{Binding ToggleStreamingCommand}" />
+
                     <BoxView HeightRequest="1"
                              BackgroundColor="#E5E7EB"
                              Margin="0,10"/>

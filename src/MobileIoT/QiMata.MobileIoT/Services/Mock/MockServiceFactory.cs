@@ -45,6 +45,11 @@ namespace QiMata.MobileIoT.Services.Mock
                     return ledState;
                 });
 
+            mock.Setup(m => m.StartStreamingAsync(It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+            mock.Setup(m => m.StopStreamingAsync(It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
             return mock.Object;
         }
 
@@ -63,6 +68,10 @@ namespace QiMata.MobileIoT.Services.Mock
                 .Returns(Task.FromResult(25.0f));
             mock.Setup(m => m.ReadTemperatureAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(25.0f));
+            mock.Setup(m => m.StartSensorNotificationsAsync(It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+            mock.Setup(m => m.StopSensorNotificationsAsync(It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
             return mock.Object;
         }

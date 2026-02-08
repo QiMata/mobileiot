@@ -87,6 +87,20 @@
                             Command="{Binding NavigateCommand}"
                             CommandParameter="VisionPage" />
 
+                    <Button Text="NFC Provisioning"
+                            BackgroundColor="#2563EB"
+                            TextColor="White"
+                            CornerRadius="8"
+                            Command="{Binding NavigateCommand}"
+                            CommandParameter="NfcProvisioningPage" />
+
+                    <Button Text="Thread"
+                            BackgroundColor="#2563EB"
+                            TextColor="White"
+                            CornerRadius="8"
+                            Command="{Binding NavigateCommand}"
+                            CommandParameter="ThreadPage" />
+
                 </VerticalStackLayout>
             </Frame>
         </ScrollView>

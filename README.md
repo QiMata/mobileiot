@@ -35,3 +35,44 @@ exact steps). Two demos are provided:
 
 The helper script `src/pi/run_serial_demo.sh` loads `g_serial` if needed
 and launches the Python demo.
+
+## Thread Protocol Demo
+
+The Thread demo shows how the MAUI app can interact with a Thread mesh
+network through a Raspberry Pi running OpenThread Border Router (OTBR).
+
+**Hybrid mock/live mode** – the app starts in mock mode with deterministic
+synthetic data so it can be used immediately on any platform. Toggle the
+"Use Live Bridge" switch and enter the Pi's bridge URL to query real Thread
+status via `ot-ctl` and perform CoAP echo pings to mesh nodes.
+
+### App side
+
+The core logic lives in `QiMata.MobileIoT.ThreadDemoCore`, a plain `net8.0`
+class library with no MAUI dependencies. The MAUI app references it and
+provides `ThreadPage.xaml` with controls for status refresh, CoAP ping, and
+a scrollable log capped at 200 entries.
+
+### Pi side
+
+`src/pi/thread_demo.py` runs an HTTP bridge on port 8080 and a CoAP echo
+server on port 5683. Endpoints:
+
+| Method | Path              | Description                   |
+|--------|-------------------|-------------------------------|
+| GET    | `/healthz`        | Health check                  |
+| GET    | `/thread/status`  | Thread network status         |
+| POST   | `/thread/ping`    | CoAP echo ping to a mesh node |
+
+Prerequisites: OTBR installed and a Thread network commissioned. See
+`src/pi/README.md` for setup and run commands.
+
+### Running tests
+
+```bash
+# .NET (from src/MobileIoT/)
+dotnet test QiMata.MobileIoT.ThreadDemoCore.Tests
+
+# Python (from repo root)
+python -m pytest src/pi/tests -q
+```

@@ -45,6 +45,16 @@
                                    FontFamily="Courier New"
                                    FontSize="12"
                                    TextColor="#2563EB"/>
+                            <VerticalStackLayout IsVisible="{Binding IsTelemetryBeacon}" Spacing="2">
+                                <Label Text="{Binding DecodedTemp, StringFormat='Temp: {0:F1} °C'}"
+                                       FontSize="16"
+                                       FontAttributes="Bold"
+                                       TextColor="#059669"/>
+                                <Label Text="{Binding DecodedHumidity, StringFormat='Humidity: {0:F1}%'}"
+                                       FontSize="16"
+                                       FontAttributes="Bold"
+                                       TextColor="#059669"/>
+                            </VerticalStackLayout>
                         </VerticalStackLayout>
                     </Frame>
                 </DataTemplate>

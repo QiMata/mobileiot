@@ -1,0 +1,7 @@
+asyncua>=1.0.0
+bleak>=0.21.0
+pyserial>=3.5
+pyserial-asyncio>=0.6
+aiohttp>=3.9.0
+PyYAML>=6.0
+cryptography>=41.0.0

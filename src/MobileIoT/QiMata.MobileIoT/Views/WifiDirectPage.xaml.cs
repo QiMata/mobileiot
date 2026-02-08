@@ -2,8 +2,9 @@ namespace QiMata.MobileIoT.Views;
 
 public partial class WifiDirectPage : ContentPage
 {
-        public WifiDirectPage()
-        {
-                InitializeComponent();
-        }
+	public WifiDirectPage(ViewModels.WifiDirectViewModel vm)
+	{
+		InitializeComponent();
+		BindingContext = vm;
+	}
 }
