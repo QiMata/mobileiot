@@ -2,7 +2,7 @@
 using CoreBluetooth;
 using CoreFoundation;
 using Foundation;
-using QiMata.MobileIoT.Services.I;
+using QiMata.MobileIoT.Services.Interfaces;
 
 namespace QiMata.MobileIoT.Platforms.iOS;
 

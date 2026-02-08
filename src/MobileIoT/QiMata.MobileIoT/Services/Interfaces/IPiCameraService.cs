@@ -1,4 +1,4 @@
-namespace QiMata.MobileIoT.Services.I;
+namespace QiMata.MobileIoT.Services.Interfaces;
 
 public interface IPiCameraService
 {

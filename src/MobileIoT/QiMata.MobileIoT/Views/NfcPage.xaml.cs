@@ -1,4 +1,4 @@
-using QiMata.MobileIoT.Services.I;
+using QiMata.MobileIoT.Services.Interfaces;
 using QiMata.MobileIoT.ViewModels;
 
 namespace QiMata.MobileIoT.Views;

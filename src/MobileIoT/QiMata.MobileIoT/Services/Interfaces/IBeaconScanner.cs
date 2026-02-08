@@ -1,4 +1,4 @@
-namespace QiMata.MobileIoT.Services.I;
+namespace QiMata.MobileIoT.Services.Interfaces;
 
 /// <summary>
 /// Advertisement details from a BLE beacon.

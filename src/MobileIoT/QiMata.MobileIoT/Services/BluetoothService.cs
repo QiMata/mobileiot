@@ -2,7 +2,7 @@ using Plugin.BLE;
 using Plugin.BLE.Abstractions.Contracts;
 using Plugin.BLE.Abstractions.Extensions;
 using QiMata.MobileIoT.Helpers;
-using QiMata.MobileIoT.Services.I;
+using QiMata.MobileIoT.Services.Interfaces;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,10 +18,7 @@ public sealed class BluetoothService : IBluetoothService, IAsyncDisposable
     private IDevice? _device;
     private ICharacteristic? _tempChar, _humChar, _ledChar;
 
-    private static readonly Guid ServiceUuid = Guid.Parse("12345678-1234-1234-1234-1234567890AB");
-    private static readonly Guid TempUuid = Guid.Parse("00002A6E-0000-1000-8000-00805F9B34FB");
-    private static readonly Guid HumUuid = Guid.Parse("00002A6F-0000-1000-8000-00805F9B34FB");
-    private static readonly Guid LedUuid = Guid.Parse("12345679-1234-1234-1234-1234567890AB");
+    private static readonly BleUuidConfig.BleUuidValues Uuids = BleUuidConfig.Values;
 
     public event EventHandler<float>? TemperatureChanged;
     public event EventHandler<float>? HumidityChanged;
@@ -51,12 +48,12 @@ public sealed class BluetoothService : IBluetoothService, IAsyncDisposable
         if (_device is null) return false;
 
         await _adapt.ConnectToDeviceAsync(_device, cancellationToken: ct);
-        var service = await _device.GetServiceAsync(ServiceUuid, ct)
+        var service = await _device.GetServiceAsync(Uuids.ServiceUuid, ct)
                       ?? throw new Exception("Service not found");
 
-        _tempChar = await service.GetCharacteristicAsync(TempUuid);
-        _humChar = await service.GetCharacteristicAsync(HumUuid);
-        _ledChar = await service.GetCharacteristicAsync(LedUuid);
+        _tempChar = await service.GetCharacteristicAsync(Uuids.TemperatureCharacteristicUuid);
+        _humChar = await service.GetCharacteristicAsync(Uuids.HumidityCharacteristicUuid);
+        _ledChar = await service.GetCharacteristicAsync(Uuids.LedCharacteristicUuid);
 
         return _tempChar != null && _humChar != null && _ledChar != null;
     }

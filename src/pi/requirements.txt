@@ -1,7 +1,12 @@
-bluezero
-Adafruit_DHT
-RPi.GPIO
-pyserial
+﻿# Core dependencies for the Raspberry Pi demos. Versions are pinned to known-good releases
+# where practical to avoid regressions from upstream breaking changes.
+bluezero>=0.7.0,<0.8
+Adafruit_DHT>=1.4.0,<1.5
+RPi.GPIO>=0.7.1,<0.8
+pyserial>=3.5,<4
+aiohttp>=3.9.0,<4
+
+# Optional dependencies used by specific demos.
 flask
 picamera2
 numpy
@@ -11,4 +16,3 @@ ndeflib
 adafruit-circuitpython-pn532
 adafruit-blinka
 aiocoap
-aiohttp

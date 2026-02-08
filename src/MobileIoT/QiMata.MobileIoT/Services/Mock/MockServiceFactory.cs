@@ -1,5 +1,6 @@
-﻿using Moq;
-using QiMata.MobileIoT.Services.I;
+using Moq;
+using QiMata.MobileIoT.Models;
+using QiMata.MobileIoT.Services.Interfaces;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -240,11 +241,11 @@ namespace QiMata.MobileIoT.Services.Mock
         {
             var mock = new Mock<IUsbCommunicator>(MockBehavior.Strict);
 
-            var devices = new List<Usb.UsbDeviceInfo>
+            var devices = new List<UsbDeviceDescriptor>
             {
-                new Usb.UsbDeviceInfo("Device1", 0x1234, 0x5678),
-                new Usb.UsbDeviceInfo("Device2", 0x8765, 0x4321),
-                new Usb.UsbDeviceInfo("Device3", 0x1111, 0x2222)
+                new("Device1", 0x1234, 0x5678, "Demo Device 1"),
+                new("Device2", 0x8765, 0x4321, "Demo Device 2"),
+                new("Device3", 0x1111, 0x2222, "Demo Device 3")
             };
 
             string? currentDevice = null;
@@ -256,7 +257,7 @@ namespace QiMata.MobileIoT.Services.Mock
             mock.Setup(c => c.OpenDevice(It.IsAny<string>()))
                 .Returns((string idOrProtocol) =>
                 {
-                    if (devices.Exists(d => d.Id == idOrProtocol))
+                    if (devices.Exists(d => d.Identifier == idOrProtocol))
                     {
                         currentDevice = idOrProtocol;
                         return true;

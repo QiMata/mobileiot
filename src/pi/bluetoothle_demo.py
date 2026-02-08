@@ -1,127 +1,345 @@
-import time
+﻿"""Raspberry Pi BLE peripheral demo for the DHT22 sensor and LED control."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import logging
 import threading
+import time
+from pathlib import Path
+from typing import Dict, List, Optional, Sequence, Tuple
+
 import Adafruit_DHT  # Library for DHT22 sensor (ensure it's installed)
 import RPi.GPIO as GPIO  # GPIO library for LED control
-
-# BlueZero library for BLE peripheral (install via pip if needed)
 from bluezero import adapter, peripheral
 
-# BLE UUIDs (must match the mobile app expectations)
-SERVICE_UUID    = "12345678-1234-1234-1234-1234567890AB"
-TEMP_CHAR_UUID  = "00002A6E-0000-1000-8000-00805F9B34FB"  # Temperature (16-bit, °C*100)
-HUM_CHAR_UUID   = "00002A6F-0000-1000-8000-00805F9B34FB"  # Humidity (16-bit, %*100)
-LED_CHAR_UUID   = "12345679-1234-1234-1234-1234567890AB"  # LED control (1 byte)
+from azure_retransmit import (
+    AzureIoTHubPublisher,
+    BackgroundTelemetryRelay,
+    IoTOpsEdgePublisher,
+    TelemetryPublisher,
+    build_sensor_payload,
+)
 
-# Hardware setup: define sensor and LED pins
+LOGGER = logging.getLogger(__name__)
+
+BLE_CONFIG_PATH = Path(__file__).resolve().parents[1] / "shared" / "ble_constants.json"
+DEFAULT_DEVICE_NAME = "PiSensor"
+
+TELEMETRY_SOURCE = "bluetoothle_demo"
+_TELEMETRY_RELAY: Optional[BackgroundTelemetryRelay] = None
+
 DHT_SENSOR = Adafruit_DHT.DHT22
-DHT_PIN    = 4    # BCM GPIO4 for DHT22 data line (with 10k pull-up to 3.3V)
-LED_PIN    = 17   # BCM GPIO17 for LED (wired with a resistor to ground)
+DHT_PIN = 4
+LED_PIN = 17
 
-# Initialize GPIO for LED
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(LED_PIN, GPIO.OUT, initial=GPIO.LOW)
-
-# Notification state
+_SENSOR_SAMPLE_INTERVAL = 2.0
+_last_temp_c = 0.0
+_last_humidity = 0.0
+_last_sample_ts = 0.0
 _notify_temp = False
 _notify_hum = False
 
-def read_dht22():
-    """Read temperature and humidity from DHT22 sensor."""
+
+def set_telemetry_relay(relay: Optional[BackgroundTelemetryRelay]) -> None:
+    """Configure the telemetry relay used to forward sensor data to Azure services."""
+
+    global _TELEMETRY_RELAY
+    _TELEMETRY_RELAY = relay
+
+
+def _emit_sensor_telemetry(measurement: str, value: float, unit: str) -> None:
+    if _TELEMETRY_RELAY is None:
+        return
+
+    payload = build_sensor_payload(
+        measurement,
+        value,
+        unit,
+        source=TELEMETRY_SOURCE,
+        metadata={"transport": "bluetooth-le"},
+    )
+    try:
+        _TELEMETRY_RELAY.emit(payload)
+    except RuntimeError:
+        LOGGER.debug("Telemetry relay is closed; dropping %s payload", measurement)
+
+
+class SensorReadError(RuntimeError):
+    """Raised when the DHT22 sensor fails to provide a reading."""
+
+
+def load_ble_constants(path: Path = BLE_CONFIG_PATH) -> Dict[str, str]:
+    if not path.exists():
+        raise FileNotFoundError(f"BLE constants file missing at {path}")
+
+    with path.open("r", encoding="utf-8") as handle:
+        data = json.load(handle)
+
+    required = {
+        "serviceUuid",
+        "temperatureCharacteristicUuid",
+        "humidityCharacteristicUuid",
+        "ledCharacteristicUuid",
+    }
+    missing = sorted(required - data.keys())
+    if missing:
+        raise KeyError(f"BLE constants file missing keys: {', '.join(missing)}")
+
+    return {key: str(value) for key, value in data.items()}
+
+
+def configure_gpio() -> None:
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(LED_PIN, GPIO.OUT, initial=GPIO.LOW)
+
+
+def cleanup_gpio() -> None:
+    try:
+        GPIO.cleanup()
+    except RuntimeError:
+        LOGGER.debug("GPIO cleanup failed; hardware may already be released")
+
+
+def _read_dht22(now: float | None = None) -> Tuple[float, float]:
+    global _last_temp_c, _last_humidity, _last_sample_ts
+
+    timestamp = now if now is not None else time.time()
+    if timestamp - _last_sample_ts < _SENSOR_SAMPLE_INTERVAL:
+        return _last_temp_c, _last_humidity
+
     humidity, temperature = Adafruit_DHT.read_retry(DHT_SENSOR, DHT_PIN)
-    if temperature is None:
-        temperature = 0.0
-    if humidity is None:
-        humidity = 0.0
-    return temperature, humidity
+    if humidity is None or temperature is None:
+        raise SensorReadError("DHT22 read returned None")
 
-def temp_read_callback():
-    """Return temperature in 2-byte little-endian format (Int16)."""
-    temp, hum = read_dht22()
-    int_temp = int(temp * 100)
-    temp_bytes = int_temp.to_bytes(2, byteorder='little', signed=True)
-    return [temp_bytes[0], temp_bytes[1]]
+    _last_temp_c = float(temperature)
+    _last_humidity = float(humidity)
+    _last_sample_ts = timestamp
+    return _last_temp_c, _last_humidity
 
-def hum_read_callback():
-    """Return humidity in 2-byte little-endian format (Int16)."""
-    temp, hum = read_dht22()
-    int_hum = int(hum * 100)
-    hum_bytes = int_hum.to_bytes(2, byteorder='little', signed=True)
-    return [hum_bytes[0], hum_bytes[1]]
 
-def led_write_callback(value):
-    """Handle write to LED characteristic (turn LED on/off)."""
+def _int16_bytes(value: int) -> List[int]:
+    return list(int(value).to_bytes(2, byteorder="little", signed=True))
+
+
+def _uint16_bytes(value: int) -> List[int]:
+    return list(int(value).to_bytes(2, byteorder="little", signed=False))
+
+
+def temperature_read_callback() -> List[int]:
+    try:
+        temp_c, _ = _read_dht22()
+    except SensorReadError as exc:
+        LOGGER.warning("Falling back to last known temperature: %s", exc)
+        temp_c = _last_temp_c
+
+    _emit_sensor_telemetry("temperature", temp_c, "C")
+    return _int16_bytes(int(round(temp_c * 100)))
+
+
+def humidity_read_callback() -> List[int]:
+    try:
+        _, humidity = _read_dht22()
+    except SensorReadError as exc:
+        LOGGER.warning("Falling back to last known humidity: %s", exc)
+        humidity = _last_humidity
+
+    _emit_sensor_telemetry("humidity", humidity, "%")
+    return _uint16_bytes(int(round(humidity * 100)))
+
+
+def led_write_callback(value: Sequence[int]) -> None:
     if value and value[0] == 0x01:
         GPIO.output(LED_PIN, GPIO.HIGH)
+        LOGGER.info("LED turned ON")
     else:
         GPIO.output(LED_PIN, GPIO.LOW)
+        LOGGER.info("LED turned OFF")
 
-def temp_notify_callback(notifying, characteristic):
-    """Called when a client subscribes/unsubscribes to temperature notifications."""
+
+def temp_notify_callback(notifying: bool, characteristic: object | None = None) -> None:
+    del characteristic
     global _notify_temp
-    _notify_temp = notifying
+    _notify_temp = bool(notifying)
 
-def hum_notify_callback(notifying, characteristic):
-    """Called when a client subscribes/unsubscribes to humidity notifications."""
+
+def hum_notify_callback(notifying: bool, characteristic: object | None = None) -> None:
+    del characteristic
     global _notify_hum
-    _notify_hum = notifying
+    _notify_hum = bool(notifying)
 
-def notification_loop(periph):
-    """Background thread that pushes sensor data every 2s when notifications are active."""
-    while True:
-        if _notify_temp or _notify_hum:
-            temp, hum = read_dht22()
-            if _notify_temp:
-                int_temp = int(temp * 100)
-                periph.update_value(srv_id=1, chr_id=1,
-                    value=list(int_temp.to_bytes(2, 'little', signed=True)))
-            if _notify_hum:
-                int_hum = int(hum * 100)
-                periph.update_value(srv_id=1, chr_id=2,
-                    value=list(int_hum.to_bytes(2, 'little', signed=True)))
-        time.sleep(2)
 
-if __name__ == "__main__":
-    adapter_addr = list(adapter.Adapter.available())[0].address
-    ble_periph = peripheral.Peripheral(adapter_addr, local_name="PiSensor", appearance=0x0340)
-    ble_periph.add_service(srv_id=1, uuid=SERVICE_UUID, primary=True)
-    # Temperature characteristic (read + notify)
-    ble_periph.add_characteristic(srv_id=1, chr_id=1, uuid=TEMP_CHAR_UUID,
-                                  value=[0x00, 0x00],
-                                  notifying=False,
-                                  flags=['read', 'notify'],
-                                  read_callback=temp_read_callback,
-                                  write_callback=None,
-                                  notify_callback=temp_notify_callback)
-    # Humidity characteristic (read + notify)
-    ble_periph.add_characteristic(srv_id=1, chr_id=2, uuid=HUM_CHAR_UUID,
-                                  value=[0x00, 0x00],
-                                  notifying=False,
-                                  flags=['read', 'notify'],
-                                  read_callback=hum_read_callback,
-                                  write_callback=None,
-                                  notify_callback=hum_notify_callback)
-    # LED characteristic (write)
-    ble_periph.add_characteristic(srv_id=1, chr_id=3, uuid=LED_CHAR_UUID,
-                                  value=[0x00],
-                                  notifying=False,
-                                  flags=['write'],
-                                  read_callback=None,
-                                  write_callback=led_write_callback)
+def _notification_loop(periph: peripheral.Peripheral, stop_event: threading.Event) -> None:
+    while not stop_event.wait(2.0):
+        if not (_notify_temp or _notify_hum):
+            continue
 
-    # Start notification background thread
-    t = threading.Thread(target=notification_loop, args=(ble_periph,), daemon=True)
-    t.start()
+        try:
+            temp_c, humidity = _read_dht22()
+        except SensorReadError as exc:
+            LOGGER.warning("Notification update skipped: %s", exc)
+            temp_c = _last_temp_c
+            humidity = _last_humidity
 
-    ble_periph.publish()
-    print("BLE GATT server started (Advertising as 'PiSensor'). Press Ctrl+C to exit.")
-    print("Notifications enabled for Temperature and Humidity (2s interval when subscribed).")
+        if not hasattr(periph, "update_value"):
+            continue
+
+        if _notify_temp:
+            periph.update_value(srv_id=1, chr_id=1, value=_int16_bytes(int(round(temp_c * 100))))
+        if _notify_hum:
+            periph.update_value(srv_id=1, chr_id=2, value=_uint16_bytes(int(round(humidity * 100))))
+
+
+def _build_publishers_from_args(args: argparse.Namespace) -> List[TelemetryPublisher]:
+    publishers: List[TelemetryPublisher] = []
+
+    if args.azure_iot_hub_connection_string:
+        publishers.append(AzureIoTHubPublisher(args.azure_iot_hub_connection_string))
+
+    if args.azure_iot_ops_ingest_url:
+        publishers.append(
+            IoTOpsEdgePublisher(
+                args.azure_iot_ops_ingest_url,
+                api_key=args.azure_iot_ops_api_key,
+                api_key_header=args.azure_iot_ops_api_key_header,
+            )
+        )
+
+    return publishers
+
+
+def build_peripheral(constants: Dict[str, str], *, device_name: str) -> peripheral.Peripheral:
+    adapter_address = next(iter(adapter.Adapter.available())).address
+    ble_periph = peripheral.Peripheral(
+        adapter_address,
+        local_name=device_name,
+        appearance=0x0340,
+    )
+
+    ble_periph.add_service(srv_id=1, uuid=constants["serviceUuid"], primary=True)
+    ble_periph.add_characteristic(
+        srv_id=1,
+        chr_id=1,
+        uuid=constants["temperatureCharacteristicUuid"],
+        value=[0x00, 0x00],
+        notifying=False,
+        flags=["read", "notify"],
+        read_callback=temperature_read_callback,
+        write_callback=None,
+        notify_callback=temp_notify_callback,
+    )
+    ble_periph.add_characteristic(
+        srv_id=1,
+        chr_id=2,
+        uuid=constants["humidityCharacteristicUuid"],
+        value=[0x00, 0x00],
+        notifying=False,
+        flags=["read", "notify"],
+        read_callback=humidity_read_callback,
+        write_callback=None,
+        notify_callback=hum_notify_callback,
+    )
+    ble_periph.add_characteristic(
+        srv_id=1,
+        chr_id=3,
+        uuid=constants["ledCharacteristicUuid"],
+        value=[0x00],
+        notifying=False,
+        flags=["write"],
+        read_callback=None,
+        write_callback=lambda data: led_write_callback(data),
+    )
+
+    return ble_periph
+
+
+def run_event_loop(periph: peripheral.Peripheral, *, device_name: str) -> None:
+    notification_stop = threading.Event()
+    notification_thread = threading.Thread(
+        target=_notification_loop,
+        args=(periph, notification_stop),
+        daemon=True,
+    )
+
+    periph.publish()
+    notification_thread.start()
+    LOGGER.info("BLE GATT server started (Advertising as '%s'). Press Ctrl+C to exit.", device_name)
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("Stopping GATT server...")
+        LOGGER.info("Stopping GATT server...")
+    finally:
+        notification_stop.set()
+        notification_thread.join(timeout=0.5)
         try:
-            ble_periph.quit()
+            periph.quit()
         except AttributeError:
-            ble_periph.unpublish()
-        GPIO.cleanup()
+            periph.unpublish()
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="BLE GATT sensor hub demo")
+    parser.add_argument("--device-name", default=DEFAULT_DEVICE_NAME, help="Bluetooth device name to advertise")
+    parser.add_argument(
+        "--azure-iot-hub-connection-string",
+        help="Connection string for Azure IoT Hub telemetry forwarding",
+    )
+    parser.add_argument(
+        "--azure-iot-ops-ingest-url",
+        help="Azure IoT Operations Edge ingest endpoint for telemetry forwarding",
+    )
+    parser.add_argument(
+        "--azure-iot-ops-api-key",
+        help="API key or token used when publishing to Azure IoT Operations Edge",
+    )
+    parser.add_argument(
+        "--azure-iot-ops-api-key-header",
+        default="Authorization",
+        help="HTTP header name used for the IoT Operations Edge API key",
+    )
+    parser.add_argument(
+        "--telemetry-queue-size",
+        type=int,
+        default=100,
+        help="Maximum number of telemetry payloads buffered for Azure forwarding",
+    )
+    parser.add_argument(
+        "--log-level",
+        default="INFO",
+        choices=["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"],
+        help="Logging verbosity",
+    )
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
+    log_level = getattr(logging, args.log_level)
+    logging.basicConfig(level=log_level, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+
+    constants = load_ble_constants()
+    configure_gpio()
+
+    telemetry_relay: Optional[BackgroundTelemetryRelay] = None
+    publishers = _build_publishers_from_args(args)
+    if publishers:
+        telemetry_relay = BackgroundTelemetryRelay(publishers, max_queue_size=args.telemetry_queue_size)
+        set_telemetry_relay(telemetry_relay)
+        LOGGER.info("Azure telemetry forwarding enabled to %d target(s)", len(publishers))
+    else:
+        LOGGER.info("Azure telemetry forwarding disabled")
+
+    try:
+        ble_periph = build_peripheral(constants, device_name=args.device_name)
+        run_event_loop(ble_periph, device_name=args.device_name)
+    finally:
+        if telemetry_relay is not None:
+            telemetry_relay.close()
+        set_telemetry_relay(None)
+        cleanup_gpio()
+
+
+if __name__ == "__main__":
+    main()

@@ -1,5 +1,5 @@
 using System.Net.Http.Json;
-using QiMata.MobileIoT.Services.I;
+using QiMata.MobileIoT.Services.Interfaces;
 
 namespace QiMata.MobileIoT.Services;
 

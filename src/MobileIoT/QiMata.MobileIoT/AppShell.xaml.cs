@@ -20,6 +20,7 @@ namespace QiMata.MobileIoT
             Routing.RegisterRoute(nameof(VisionPage), typeof(QiMata.MobileIoT.Views.VisionPage));
             Routing.RegisterRoute(nameof(NfcProvisioningPage), typeof(QiMata.MobileIoT.Views.NfcProvisioningPage));
             Routing.RegisterRoute(nameof(ThreadPage), typeof(QiMata.MobileIoT.Views.ThreadPage));
+            Routing.RegisterRoute(nameof(AudioPage), typeof(QiMata.MobileIoT.Views.AudioPage));
         }
     }
 }

@@ -5,7 +5,7 @@ using Microsoft.Maui;
 using Microsoft.Maui.Dispatching;
 using System.Collections.ObjectModel;
 using System.Linq;
-using QiMata.MobileIoT.Services.I;
+using QiMata.MobileIoT.Services.Interfaces;
 
 namespace QiMata.MobileIoT.ViewModels;
 

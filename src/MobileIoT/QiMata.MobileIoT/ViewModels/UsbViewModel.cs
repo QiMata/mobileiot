@@ -19,7 +19,12 @@ public partial class UsbViewModel : ObservableObject
     {
         var devices = await _usb.ListAsync();
         if (devices.Any() && await _usb.OpenAsync(devices[0].VendorId, devices[0].ProductId))
-            Log += $"Connected to {devices[0].Name}\n";
+        {
+            var displayName = string.IsNullOrWhiteSpace(devices[0].Name)
+                ? devices[0].Identifier
+                : devices[0].Name;
+            Log += $"Connected to {displayName}\n";
+        }
         else
             Log += "No device or failed to open.\n";
     }

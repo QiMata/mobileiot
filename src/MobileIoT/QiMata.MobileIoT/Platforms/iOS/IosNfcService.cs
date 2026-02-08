@@ -3,7 +3,7 @@ using CoreFoundation;
 using CoreNFC;
 using Foundation;
 using System.Linq;
-using QiMata.MobileIoT.Services.I;
+using QiMata.MobileIoT.Services.Interfaces;
 
 namespace QiMata.MobileIoT;
 

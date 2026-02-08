@@ -1,6 +1,7 @@
 #if IOS
 using ExternalAccessory;
 using Foundation;
+using QiMata.MobileIoT.Models;
 using QiMata.MobileIoT.Usb;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,9 +13,9 @@ public sealed class UsbCommunicatoriOS : IUsbCommunicator
     EAAccessory? _acc;  EASession? _sess;
     NSInputStream? _in; NSOutputStream? _out;
 
-    public IEnumerable<UsbDeviceInfo> ListDevices() =>
+    public IEnumerable<UsbDeviceDescriptor> ListDevices() =>
         EAAccessoryManager.SharedAccessoryManager.ConnectedAccessories
-            .Select(a => new UsbDeviceInfo(a.SerialNumber, 0, 0));
+            .Select(a => new UsbDeviceDescriptor(a.SerialNumber, 0, 0, a.Name));
 
     public bool OpenDevice(string protocol)
     {

@@ -2,6 +2,7 @@
 using Android.Content;
 using Android.Hardware.Usb;
 using Microsoft.Maui.ApplicationModel;
+using QiMata.MobileIoT.Models;
 using QiMata.MobileIoT.Usb;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,9 +20,12 @@ public sealed class UsbCommunicatorAndroid : IUsbCommunicator
         _mgr = (UsbManager)(Platform.CurrentActivity?.GetSystemService(Context.UsbService) ??
                             global::Android.App.Application.Context.GetSystemService(Context.UsbService))!;
 
-    public IEnumerable<UsbDeviceInfo> ListDevices() =>
-        _mgr.DeviceList.Values.Select(d => new UsbDeviceInfo(
-            d.DeviceName, d.VendorId, d.ProductId));
+    public IEnumerable<UsbDeviceDescriptor> ListDevices() =>
+        _mgr.DeviceList.Values.Select(d => new UsbDeviceDescriptor(
+            d.DeviceName,
+            (ushort)d.VendorId,
+            (ushort)d.ProductId,
+            d.ProductName));
 
     public bool OpenDevice(string id)
     {

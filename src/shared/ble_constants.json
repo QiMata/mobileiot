@@ -1,0 +1,6 @@
+{
+  "serviceUuid": "12345678-1234-1234-1234-1234567890AB",
+  "temperatureCharacteristicUuid": "00002A6E-0000-1000-8000-00805F9B34FB",
+  "humidityCharacteristicUuid": "00002A6F-0000-1000-8000-00805F9B34FB",
+  "ledCharacteristicUuid": "12345679-1234-1234-1234-1234567890AB"
+}
