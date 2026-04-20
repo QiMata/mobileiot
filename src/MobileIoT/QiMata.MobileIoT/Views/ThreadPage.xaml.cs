@@ -1,4 +1,4 @@
-using QiMata.MobileIoT.ThreadDemoCore.ViewModels;
+using QiMata.MobileIoT.ViewModels;
 
 namespace QiMata.MobileIoT.Views;
 

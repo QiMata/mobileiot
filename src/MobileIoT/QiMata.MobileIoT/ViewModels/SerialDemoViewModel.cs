@@ -54,7 +54,11 @@ public partial class SerialDemoViewModel : ObservableObject
             if (string.IsNullOrEmpty(line))
                 continue;
 
+#if ANDROID || IOS || MACCATALYST || WINDOWS
             MainThread.BeginInvokeOnMainThread(() => ParseResponse(line));
+#else
+            ParseResponse(line);
+#endif
         }
     }
 
@@ -148,5 +152,12 @@ public partial class SerialDemoViewModel : ObservableObject
     private Task SendStatusAsync() => SendCommandAsync("STATUS");
 
     [RelayCommand]
-    private Task NavigateBack() => Shell.Current.GoToAsync("..");
+    private Task NavigateBack()
+    {
+#if ANDROID || IOS || MACCATALYST || WINDOWS
+        return Shell.Current.GoToAsync("..");
+#else
+        return Task.CompletedTask;
+#endif
+    }
 }

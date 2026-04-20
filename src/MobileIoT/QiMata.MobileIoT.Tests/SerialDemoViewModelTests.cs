@@ -21,7 +21,7 @@ public class SerialDemoViewModelTests
 
         var vm = new SerialDemoViewModel(service.Object);
 
-        await vm.ConnectAsyncCommand.ExecuteAsync(null);
+        await vm.ConnectCommand.ExecuteAsync(null);
 
         Assert.Contains("No devices found", vm.Log);
     }
@@ -40,7 +40,7 @@ public class SerialDemoViewModelTests
 
         var vm = new SerialDemoViewModel(service.Object);
 
-        await vm.ConnectAsyncCommand.ExecuteAsync(null);
+        await vm.ConnectCommand.ExecuteAsync(null);
 
         Assert.Contains("Connected", vm.Log);
     }
@@ -53,9 +53,9 @@ public class SerialDemoViewModelTests
 
         var vm = new SerialDemoViewModel(service.Object);
 
-        await vm.SendAsyncCommand.ExecuteAsync(null);
+        await vm.SendLedOnCommand.ExecuteAsync(null);
 
-        Assert.Contains("Not open", vm.Log);
+        Assert.Contains("Not connected", vm.Log);
         service.Verify(s => s.WriteAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
@@ -69,8 +69,8 @@ public class SerialDemoViewModelTests
 
         var vm = new SerialDemoViewModel(service.Object);
 
-        await vm.SendAsyncCommand.ExecuteAsync(null);
-        await vm.SendAsyncCommand.ExecuteAsync(null);
+        await vm.SendLedOnCommand.ExecuteAsync(null);
+        await vm.SendLedOffCommand.ExecuteAsync(null);
 
         service.Verify(s => s.WriteAsync(It.Is<byte[]>(data => Encoding.ASCII.GetString(data) == "LED_ON\n"), It.IsAny<CancellationToken>()), Times.Once);
         service.Verify(s => s.WriteAsync(It.Is<byte[]>(data => Encoding.ASCII.GetString(data) == "LED_OFF\n"), It.IsAny<CancellationToken>()), Times.Once);

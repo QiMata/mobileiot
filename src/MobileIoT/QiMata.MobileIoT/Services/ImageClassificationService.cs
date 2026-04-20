@@ -1,11 +1,12 @@
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
+using QiMata.MobileIoT.Services.Interfaces;
 using SkiaSharp;
 using System.Reflection;
 
 namespace QiMata.MobileIoT.Services;
 
-public class ImageClassificationService
+public class ImageClassificationService : IImageClassificationService
 {
     private InferenceSession _session;
     private readonly string[] _labels;

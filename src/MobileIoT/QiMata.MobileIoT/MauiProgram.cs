@@ -10,8 +10,11 @@ using QiMata.MobileIoT.Platforms.iOS;
 using QiMata.MobileIoT.Services;
 using QiMata.MobileIoT.Services.Interfaces;
 using QiMata.MobileIoT.Services.Mock;
+#if TEST_HARNESS
+using QiMata.MobileIoT.Services.TestHarness;
+#endif
 using QiMata.MobileIoT.ThreadDemoCore.Services;
-using QiMata.MobileIoT.ThreadDemoCore.ViewModels;
+using QiMata.MobileIoT.ViewModels;
 using QiMata.MobileIoT.Usb;
 using QiMata.MobileIoT.Views;
 using ZXing.Net.Maui;
@@ -80,6 +83,7 @@ namespace QiMata.MobileIoT
 
             builder.Services.AddSingleton<IQrScanningService, QrScanningService>();
             builder.Services.AddSingleton<ImageClassificationService>();
+            builder.Services.AddSingleton<IImageClassificationService>(sp => sp.GetRequiredService<ImageClassificationService>());
             builder.Services.AddSingleton<IPiCameraService, PiCameraService>();
             builder.Services.AddSingleton<IAudioDecoder, RootMeanSquareAudioDecoder>();
             builder.Services.AddSingleton<IAudioModemService, AudioModemService>();
@@ -121,7 +125,29 @@ namespace QiMata.MobileIoT
             builder.Services.AddTransient<ViewModels.AudioDemoViewModel>();
             builder.Services.AddTransient<AudioPage>();
 
-            return builder.Build();
+#if TEST_HARNESS
+            builder.Services.AddMobileIoTHarness();
+#endif
+
+            var app = builder.Build();
+
+#if TEST_HARNESS
+            if (IsTestHarnessEnabled())
+            {
+                var host = app.Services.GetRequiredService<HarnessHttpHost>();
+                host.Start();
+            }
+#endif
+
+            return app;
         }
+
+#if TEST_HARNESS
+        private static bool IsTestHarnessEnabled()
+        {
+            var env = Environment.GetEnvironmentVariable("MIOT_TEST_MODE");
+            return !string.IsNullOrEmpty(env) && env != "0";
+        }
+#endif
     }
 }

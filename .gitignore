@@ -401,3 +401,11 @@ FodyWeavers.xsd
 *.sln.iml
 
 src/pi/.idea/
+
+# MobileIoT test harness
+harness/runs/
+harness/**/__pycache__/
+harness/*.egg-info/
+devices.local.yaml
+.env.harness
+

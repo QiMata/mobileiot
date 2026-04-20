@@ -18,9 +18,18 @@ public class AudioModemService : IAudioModemService
         Func<Task>? requestMicrophonePermission = null,
         IAudioRecorder? recorder = null)
     {
-        _recorder = recorder ?? audioManager.CreateAudioRecorder();
+        _recorder = recorder ?? audioManager.CreateRecorder();
         _decoder = decoder;
-        _requestMicrophonePermission = requestMicrophonePermission ?? (() => Permissions.RequestAsync<Permissions.Microphone>());
+        _requestMicrophonePermission = requestMicrophonePermission ?? RequestMicrophonePermissionAsync;
+    }
+
+    private static Task RequestMicrophonePermissionAsync()
+    {
+#if ANDROID || IOS || MACCATALYST || WINDOWS
+        return Permissions.RequestAsync<Permissions.Microphone>();
+#else
+        return Task.CompletedTask;
+#endif
     }
 
     public async Task StartAsync(CancellationToken ct = default)
@@ -31,7 +40,6 @@ public class AudioModemService : IAudioModemService
         await _requestMicrophonePermission().ConfigureAwait(false);
         _cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
         await _recorder.StartAsync();
-        _ = Task.Run(() => DecodeLoopAsync(_cts.Token));
     }
 
     public async Task StopAsync()
@@ -39,27 +47,28 @@ public class AudioModemService : IAudioModemService
         if (_cts == null)
             return;
         _cts.Cancel();
-        await _recorder.StopAsync();
+        var source = await _recorder.StopAsync();
+        await DecodeAsync(source.GetAudioStream(), CancellationToken.None).ConfigureAwait(false);
         _cts.Dispose();
         _cts = null;
     }
 
-    private async Task DecodeLoopAsync(CancellationToken token)
+    private async Task DecodeAsync(Stream stream, CancellationToken token)
     {
-        using var stream = _recorder.GetAudioStream();
-        var buffer = new byte[4096];
-        while (!token.IsCancellationRequested)
+        using (stream)
         {
-            int read = await stream.ReadAsync(buffer, 0, buffer.Length, token).ConfigureAwait(false);
-            if (read <= 0)
+            var buffer = new byte[4096];
+            while (!token.IsCancellationRequested)
             {
-                continue;
-            }
+                int read = await stream.ReadAsync(buffer, 0, buffer.Length, token).ConfigureAwait(false);
+                if (read <= 0)
+                    break;
 
-            var result = await _decoder.TryDecodeAsync(buffer.AsMemory(0, read), token).ConfigureAwait(false);
-            if (!string.IsNullOrWhiteSpace(result))
-            {
-                DataReceived?.Invoke(this, result);
+                var result = await _decoder.TryDecodeAsync(buffer.AsMemory(0, read), token).ConfigureAwait(false);
+                if (!string.IsNullOrWhiteSpace(result))
+                {
+                    DataReceived?.Invoke(this, result);
+                }
             }
         }
     }

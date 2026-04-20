@@ -1,0 +1,41 @@
+# MobileIoT device inventory (committed, no secrets).
+#
+# Each machine can override fields by creating a `devices.local.yaml` file next to this one
+# (gitignored). Overrides match by `id` and replace the entry entirely.
+#
+# Capabilities are free-form tags; tests declare the caps they need, and the harness
+# skips hardware-tier tests when no online device matches.
+
+devices:
+  - id: pixel-a
+    kind: android
+    adb_serial: REPLACE_ME_ADB_SERIAL
+    capabilities: [ble, nfc, wifi_direct, usb_host, audio_out, camera]
+
+  - id: pixel-b
+    kind: android
+    adb_serial: REPLACE_ME_ADB_SERIAL
+    capabilities: [ble, nfc, wifi_direct]
+
+  - id: iphone
+    kind: ios
+    udid: REPLACE_ME_IOS_UDID
+    capabilities: [ble, nfc, wifi_direct, audio_out]
+
+  - id: windows-local
+    kind: windows
+    capabilities: [ble, audio_out, vision]
+
+  - id: pi-lab
+    kind: pi
+    usb_gadget_ip: 192.168.7.2
+    ssh_user: pi
+    capabilities:
+      - ble
+      - serial_gadget
+      - usb_bulk
+      - wifi_direct
+      - thread
+      - audio_in
+      - camera
+      - opcua

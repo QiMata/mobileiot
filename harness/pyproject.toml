@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mobileiot_harness"
+version = "0.1.0"
+description = "Cross-platform test harness for the MobileIoT project (drives phones + Pi from a Windows or Mac dev box)."
+requires-python = ">=3.11"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "QiMata" }]
+
+dependencies = [
+    "typer>=0.12",
+    "rich>=13.7",
+    "structlog>=24.1",
+    "PyYAML>=6.0",
+    "paramiko>=3.4",
+    "zeroconf>=0.132",
+    "requests>=2.31",
+    "pytest>=8.0",
+    "pytest-timeout>=2.2",
+    "pydantic>=2.5",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+ios = ["pymobiledevice3>=3.1"]
+ble = ["bleak>=0.21"]
+serial = ["pyserial>=3.5"]
+dev = ["pytest-cov>=5.0", "ruff>=0.5"]
+
+[project.scripts]
+mobileiot-harness = "harness.cli:app"
+
+[project.entry-points."mobileiot_harness.integrations"]
+_smoke = "harness.integrations._smoke:plugin"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["harness*"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+markers = [
+    "mock: mock-tier test (no hardware required)",
+    "hardware: hardware-tier test (requires physical devices)",
+]
+filterwarnings = ["ignore::DeprecationWarning"]

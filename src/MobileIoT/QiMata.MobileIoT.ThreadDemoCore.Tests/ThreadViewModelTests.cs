@@ -1,8 +1,8 @@
 using FluentAssertions;
 using Moq;
+using QiMata.MobileIoT.ViewModels;
 using QiMata.MobileIoT.ThreadDemoCore.Models;
 using QiMata.MobileIoT.ThreadDemoCore.Services;
-using QiMata.MobileIoT.ThreadDemoCore.ViewModels;
 using Xunit;
 
 namespace QiMata.MobileIoT.ThreadDemoCore.Tests;

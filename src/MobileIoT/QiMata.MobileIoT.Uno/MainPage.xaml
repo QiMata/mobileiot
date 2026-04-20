@@ -1,0 +1,24 @@
+﻿<Page x:Class="QiMata.MobileIoT.Uno.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:local="using:QiMata.MobileIoT.Uno"
+      Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+  <ScrollViewer>
+    <StackPanel Padding="24" Spacing="12" MaxWidth="720">
+      <TextBlock Text="MobileIoT Uno Demo" FontSize="32" FontWeight="SemiBold" />
+      <TextBlock Text="Choose an integration." TextWrapping="Wrap" />
+      <Button Content="BLE GATT" Tag="ble" Click="OnNavigate" />
+      <Button Content="BLE Beacon Scan" Tag="beacon" Click="OnNavigate" />
+      <Button Content="NFC Tag" Tag="nfc" Click="OnNavigate" />
+      <Button Content="NFC Peer-to-Peer" Tag="nfc-p2p" Click="OnNavigate" />
+      <Button Content="NFC Provisioning" Tag="nfc-provisioning" Click="OnNavigate" />
+      <Button Content="WiFi Direct" Tag="wifi-direct" Click="OnNavigate" />
+      <Button Content="Peer Messaging" Tag="p2p" Click="OnNavigate" />
+      <Button Content="USB Bulk" Tag="usb" Click="OnNavigate" />
+      <Button Content="USB Serial" Tag="serial" Click="OnNavigate" />
+      <Button Content="Vision + Pi Camera" Tag="vision" Click="OnNavigate" />
+      <Button Content="Audio Modem" Tag="audio" Click="OnNavigate" />
+      <Button Content="Thread" Tag="thread" Click="OnNavigate" />
+    </StackPanel>
+  </ScrollViewer>
+</Page>

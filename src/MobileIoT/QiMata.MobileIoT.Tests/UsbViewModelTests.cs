@@ -29,7 +29,7 @@ public class UsbViewModelTests
 
         var vm = new UsbViewModel(service.Object);
 
-        await vm.ConnectAsyncCommand.ExecuteAsync(null);
+        await vm.ConnectCommand.ExecuteAsync(null);
 
         Assert.Contains("Connected to dev1", vm.Log);
     }
@@ -43,7 +43,7 @@ public class UsbViewModelTests
 
         var vm = new UsbViewModel(service.Object);
 
-        await vm.ConnectAsyncCommand.ExecuteAsync(null);
+        await vm.ConnectCommand.ExecuteAsync(null);
 
         Assert.Contains("No device or failed to open", vm.Log);
     }
@@ -64,7 +64,7 @@ public class UsbViewModelTests
 
         var vm = new UsbViewModel(service.Object);
 
-        await vm.ConnectAsyncCommand.ExecuteAsync(null);
+        await vm.ConnectCommand.ExecuteAsync(null);
 
         Assert.Contains("No device or failed to open", vm.Log);
     }
@@ -77,7 +77,7 @@ public class UsbViewModelTests
 
         var vm = new UsbViewModel(service.Object);
 
-        await vm.SendPingAsyncCommand.ExecuteAsync(null);
+        await vm.SendPingCommand.ExecuteAsync(null);
 
         service.Verify(s => s.WriteAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()), Times.Never);
         Assert.Equal(string.Empty, vm.Log);
@@ -102,7 +102,7 @@ public class UsbViewModelTests
 
         var vm = new UsbViewModel(service.Object);
 
-        await vm.SendPingAsyncCommand.ExecuteAsync(null);
+        await vm.SendPingCommand.ExecuteAsync(null);
 
         service.Verify(s => s.WriteAsync(It.Is<ReadOnlyMemory<byte>>(data => data.ToArray().SequenceEqual(new byte[] { 0x50, 0x49, 0x4E, 0x47 })), It.IsAny<CancellationToken>()), Times.Once);
         Assert.Contains("RX 3 bytes", vm.Log);

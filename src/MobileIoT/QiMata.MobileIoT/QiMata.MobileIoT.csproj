@@ -20,12 +20,15 @@
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<CheckEolTargetFramework>false</CheckEolTargetFramework>
+		<CheckEolWorkloads>false</CheckEolWorkloads>
+		<MauiVersion>8.0.90</MauiVersion>
 
 		<!-- Display name -->
 		<ApplicationTitle>QiMata.MobileIoT</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.qimata.mobileiot</ApplicationId>
+		<ApplicationId>com.qimata.mobileiot</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -37,6 +40,18 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+
+		<Configurations>Debug;Release;TestHarness</Configurations>
+	</PropertyGroup>
+
+	<!-- TestHarness build: DEBUG + TEST_HARNESS define. Produces binaries that start the in-app
+	     HTTP test hook (HarnessHttpHost) when the MIOT_TEST_MODE env var / intent extra is set.
+	     Never use for App Store / release channels. -->
+	<PropertyGroup Condition="'$(Configuration)'=='TestHarness'">
+		<DefineConstants>$(DefineConstants);DEBUG;TEST_HARNESS</DefineConstants>
+		<DebugSymbols>true</DebugSymbols>
+		<DebugType>portable</DebugType>
+		<Optimize>false</Optimize>
 	</PropertyGroup>
 
         <ItemGroup>
@@ -58,7 +73,7 @@
         </ItemGroup>
 
         <ItemGroup>
-            <EmbeddedResource Include="..\shared\ble_constants.json" LogicalName="BleConstants.json" />
+            <EmbeddedResource Include="..\..\shared\ble_constants.json" LogicalName="BleConstants.json" />
         </ItemGroup>
 
         <ItemGroup>
@@ -75,8 +90,8 @@
       <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.0" />
       <PackageReference Include="Plugin.NFC" Version="0.1.26" />
       <PackageReference Include="SkiaSharp" Version="3.119.0" />
-      <PackageReference Include="ZXing.Net.Maui.Controls" />
-      <PackageReference Include="Plugin.Maui.Audio" Version="1.4.0" />
+      <PackageReference Include="ZXing.Net.Maui.Controls" Version="0.4.0" />
+      <PackageReference Include="Plugin.Maui.Audio" Version="2.0.0" />
       <!-- Cross-platform USB libraries -->
       <PackageReference Include="Device.Net" Version="4.2.1" />
       <PackageReference Include="Usb.Net" Version="4.2.1" />
@@ -88,16 +103,13 @@
       </ItemGroup>
 
       <ItemGroup>
-        <ProjectReference Include="..\QiMata.MobileIoT.ThreadDemoCore\QiMata.MobileIoT.ThreadDemoCore.csproj" />
+        <ProjectReference Include="..\QiMata.MobileIoT.Shared\QiMata.MobileIoT.Shared.csproj" GlobalPropertiesToRemove="TargetFramework;TargetPlatformIdentifier;TargetPlatformVersion;TargetPlatformMinVersion;SupportedOSPlatformVersion" />
       </ItemGroup>
 
       <!-- Android permissions + feature -->
-      <ItemGroup Condition="'$(TargetFramework)' == 'net8.0-android'">
+      <ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
         <AndroidManifest Include="Platforms\Android\AndroidManifest.xml" />
         <PackageReference Include="LusoVU.XamarinUsbSerialForAndroid" Version="0.2.3" />
-        <PackageReference Include="UsbSerialForAndroid.Net">
-          <Version>1.0.3</Version>
-        </PackageReference>
       </ItemGroup>
 
       <!-- iOS NFC entitlements -->

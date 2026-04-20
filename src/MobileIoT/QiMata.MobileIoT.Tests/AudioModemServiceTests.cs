@@ -20,8 +20,7 @@ public class AudioModemServiceTests
         var audioManager = new Mock<IAudioManager>();
         var recorder = new Mock<IAudioRecorder>();
         recorder.Setup(r => r.StartAsync()).Returns(Task.CompletedTask).Verifiable();
-        recorder.Setup(r => r.GetAudioStream()).Returns(new FakeAudioStream());
-        audioManager.Setup(a => a.CreateAudioRecorder()).Returns(recorder.Object);
+        audioManager.Setup(a => a.CreateRecorder()).Returns(recorder.Object);
 
         var decoder = new Mock<IAudioDecoder>();
         decoder.Setup(d => d.TryDecodeAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()))
@@ -46,11 +45,12 @@ public class AudioModemServiceTests
         var permissionRequested = 0;
         var audioManager = new Mock<IAudioManager>();
         var recorder = new Mock<IAudioRecorder>();
-        var stream = new FakeAudioStream();
+        var stream = new MemoryStream(new byte[] { 0x01, 0x00, 0x02, 0x00 });
+        var source = new Mock<IAudioSource>();
+        source.Setup(s => s.GetAudioStream()).Returns(stream);
         recorder.Setup(r => r.StartAsync()).Returns(Task.CompletedTask);
-        recorder.Setup(r => r.StopAsync()).Returns(Task.CompletedTask);
-        recorder.Setup(r => r.GetAudioStream()).Returns(stream);
-        audioManager.Setup(a => a.CreateAudioRecorder()).Returns(recorder.Object);
+        recorder.Setup(r => r.StopAsync()).ReturnsAsync(source.Object);
+        audioManager.Setup(a => a.CreateRecorder()).Returns(recorder.Object);
 
         var decoder = new Mock<IAudioDecoder>();
         decoder.Setup(d => d.TryDecodeAsync(It.IsAny<ReadOnlyMemory<byte>>(), It.IsAny<CancellationToken>()))
@@ -72,60 +72,12 @@ public class AudioModemServiceTests
         };
 
         await service.StartAsync();
-        stream.Enqueue(new byte[] { 0x01, 0x00, 0x02, 0x00 });
-
+        await service.StopAsync();
         await Task.WhenAny(tcs.Task, Task.Delay(1000));
 
         Assert.Equal(1, permissionRequested);
         Assert.Equal("decoded", message);
-
-        await service.StopAsync();
         await service.StopAsync();
         recorder.Verify(r => r.StopAsync(), Times.Once);
-    }
-
-    private sealed class FakeAudioStream : Stream
-    {
-        private readonly Channel<byte[]> _channel = Channel.CreateUnbounded<byte[]>();
-
-        public override bool CanRead => true;
-        public override bool CanSeek => false;
-        public override bool CanWrite => false;
-        public override long Length => throw new NotSupportedException();
-        public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
-
-        public void Enqueue(byte[] data)
-        {
-            _channel.Writer.TryWrite(data);
-        }
-
-        public override void Flush()
-        {
-        }
-
-        public override Task FlushAsync(CancellationToken cancellationToken) => Task.CompletedTask;
-
-        public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
-
-        public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-        {
-            try
-            {
-                var data = await _channel.Reader.ReadAsync(cancellationToken);
-                var span = new Span<byte>(buffer, offset, count);
-                data.CopyTo(span);
-                return data.Length;
-            }
-            catch (OperationCanceledException)
-            {
-                return 0;
-            }
-        }
-
-        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
-
-        public override void SetLength(long value) => throw new NotSupportedException();
-
-        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
     }
 }
