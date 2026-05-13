@@ -26,6 +26,10 @@ python -m harness run --integration smoke_uno_windows --app uno --tier hardware
 python -m harness run --tier auto --json > run.jsonl
 ```
 
+## Integration demos
+
+- **NFC HCE ↔ reader (two Androids)**: see [`docs/nfc-demo.md`](docs/nfc-demo.md). One-shot wrapper: `tools/run_nfc_demo.sh`. Mac dev-box setup: `tools/setup_dev_mac.sh`.
+
 ## What's here
 
 This directory contains the **framework skeleton only**. Per-integration test suites live next to the code they exercise (`src/pi/tests/`, `src/MobileIoT/QiMata.MobileIoT.Tests/`) and plug in via entry-point registered `IntegrationPlugin` classes under [`harness/integrations/`](harness/integrations/).
