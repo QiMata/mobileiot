@@ -84,7 +84,7 @@ public class SerialDemoViewModelTests
         var service = new Mock<ISerialDeviceService>();
         var vm = new SerialDemoViewModel(service.Object);
 
-        service.Raise(s => s.DataReceived += null!, service.Object, new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("hello")));
+        service.Raise(s => s.DataReceived += null!, service.Object, new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("hello\n")));
 
         Assert.Contains("RX: hello", vm.Log);
     }
