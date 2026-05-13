@@ -118,7 +118,7 @@ class AppBuilder:
                 capture_output=True,
                 text=True,
                 check=False,
-                timeout=3.0,
+                timeout=10.0,
             ).stdout.strip() or "nogit"
             dirty = subprocess.run(
                 ["git", "status", "--porcelain"],
@@ -126,7 +126,7 @@ class AppBuilder:
                 capture_output=True,
                 text=True,
                 check=False,
-                timeout=3.0,
+                timeout=30.0,
             ).stdout
             return f"{sha}-{hashlib.sha256(dirty.encode()).hexdigest()[:8]}"
         except Exception:
@@ -166,6 +166,39 @@ class AppBuilder:
             shutil.rmtree(out_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
 
+        android = spec.platform == "android"
+
+        if android:
+            # The MAUI csproj's TargetFrameworks is multi-target. On a Mac/Linux
+            # dev box that doesn't have every workload (e.g. maui-maccatalyst)
+            # we scope to a single TFM via `-p:TargetFrameworks=`. That property,
+            # however, propagates to ProjectReferences during restore — which
+            # corrupts the Shared project's assets if Shared is single-target.
+            # So: restore Shared *without* the override, then Main *with* it,
+            # then build with --no-restore.
+            shared_csprojs = [
+                p for p in csproj.parent.parent.rglob("*.Shared.csproj")
+            ]
+            for shared in shared_csprojs:
+                rc = subprocess.run(
+                    ["dotnet", "restore", str(shared)],
+                    cwd=self.repo_root,
+                    check=False,
+                ).returncode
+                if rc != 0:
+                    raise RuntimeError(f"dotnet restore failed for {shared.name} (exit {rc})")
+            rc = subprocess.run(
+                [
+                    "dotnet", "restore", str(csproj),
+                    f"-p:TargetFrameworks={spec.tfm}",
+                    "--no-dependencies",
+                ],
+                cwd=self.repo_root,
+                check=False,
+            ).returncode
+            if rc != 0:
+                raise RuntimeError(f"dotnet restore failed for {csproj.name} (exit {rc})")
+
         cmd = [
             "dotnet",
             "build",
@@ -176,6 +209,16 @@ class AppBuilder:
             spec.tfm,
             f"-p:OutputPath={out_dir}/",
         ]
+        if android:
+            # 1. Scope TargetFrameworks to the one we're building.
+            # 2. Embed assemblies + disable Fast Deployment so the produced APK
+            #    is self-contained and can be `adb install`-ed directly.
+            cmd += [
+                f"-p:TargetFrameworks={spec.tfm}",
+                "-p:EmbedAssembliesIntoApk=true",
+                "-p:AndroidPackageFormat=apk",
+                "--no-restore",
+            ]
         proc = subprocess.run(cmd, cwd=self.repo_root, check=False)
         if proc.returncode != 0:
             raise RuntimeError(f"dotnet build failed for {spec.app}/{spec.platform} (exit {proc.returncode})")
