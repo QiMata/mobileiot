@@ -26,10 +26,20 @@ public partial class MainActivity : MauiAppCompatActivity
 {
     internal static event Action<int, string[], Permission[]>? PermissionsResultReceived;
 
+    public static MainActivity? Current { get; private set; }
+
     protected override void OnCreate(Bundle savedInstanceState)
     {
         base.OnCreate(savedInstanceState);
+        Current = this;
         CrossNFC.Init(this);
+    }
+
+    protected override void OnDestroy()
+    {
+        if (ReferenceEquals(Current, this))
+            Current = null;
+        base.OnDestroy();
     }
 
     public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)

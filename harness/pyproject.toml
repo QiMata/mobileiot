@@ -36,6 +36,7 @@ mobileiot-harness = "harness.cli:app"
 
 [project.entry-points."mobileiot_harness.integrations"]
 _smoke = "harness.integrations._smoke:plugin"
+nfc = "harness.integrations.nfc:plugin"
 
 [tool.setuptools.packages.find]
 where = ["."]

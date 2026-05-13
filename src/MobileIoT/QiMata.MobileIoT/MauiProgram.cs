@@ -47,6 +47,10 @@ namespace QiMata.MobileIoT
                 builder.Services.AddSingleton<IP2PService, Platforms.Android.WifiDirectService>();
                 builder.Services.AddSingleton<IUsbCommunicator, Platforms.Android.UsbCommunicatorAndroid>();
                 builder.Services.AddSingleton<ISerialDeviceService, Platforms.Android.UsbSerialDeviceService>();
+#if TEST_HARNESS
+                builder.Services.AddSingleton<IHceService, Platforms.Android.HceService_Android>();
+                builder.Services.AddSingleton<INfcReaderService, Platforms.Android.NfcReaderService_Android>();
+#endif
             }
 
 
@@ -145,8 +149,12 @@ namespace QiMata.MobileIoT
 #if TEST_HARNESS
         private static bool IsTestHarnessEnabled()
         {
+#if ANDROID
+            return true;
+#else
             var env = Environment.GetEnvironmentVariable("MIOT_TEST_MODE");
             return !string.IsNullOrEmpty(env) && env != "0";
+#endif
         }
 #endif
     }
