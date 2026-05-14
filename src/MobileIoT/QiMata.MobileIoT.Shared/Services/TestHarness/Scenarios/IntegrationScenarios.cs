@@ -286,7 +286,8 @@ public sealed class UsbBulkScenario(IServiceProvider services) : ScenarioBase(se
         {
             ["device"] = target.Identifier,
             ["written"] = written,
-            ["read"] = read
+            ["read"] = read,
+            ["readHex"] = Convert.ToHexString(rx, 0, Math.Max(0, read))
         });
     }
 }
