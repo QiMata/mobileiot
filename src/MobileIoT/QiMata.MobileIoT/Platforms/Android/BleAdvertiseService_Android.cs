@@ -77,8 +77,12 @@ public sealed class BleAdvertiseService_Android : IBleAdvertiseService
             ?.Build()
             ?? throw new InvalidOperationException("Could not build AdvertiseSettings");
 
+        // SetIncludeDeviceName(true) + a 128-bit service UUID exceeds the
+        // 31-byte BLE advertisement limit and the advertiser returns
+        // DataTooLarge. The central side filters by service UUID, so the
+        // device name isn't needed in the advertisement.
         var data = new AdvertiseData.Builder()
-            ?.SetIncludeDeviceName(true)
+            ?.SetIncludeDeviceName(false)
             ?.AddServiceUuid(new ParcelUuid(serviceUuidJava))
             ?.Build()
             ?? throw new InvalidOperationException("Could not build AdvertiseData");
