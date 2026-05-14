@@ -27,7 +27,12 @@ public sealed class BleP2PCentralService_Android : IBleP2PCentralService
         var tcs = new TaskCompletionSource<IDevice?>(TaskCreationOptions.RunContinuationsAsynchronously);
         void OnDiscovered(object? sender, DeviceEventArgs args)
         {
-            if (string.Equals(args.Device?.Name, deviceName, StringComparison.Ordinal))
+            // OS-level scan filter (serviceUuids below) already restricts to
+            // devices advertising our service UUID; we don't filter by name
+            // because BluetoothAdapter.SetName needs BLUETOOTH_PRIVILEGED on
+            // Android 12+ and silently no-ops, so the advertised local name
+            // is the OEM default rather than `deviceName`.
+            if (args.Device is not null)
                 tcs.TrySetResult(args.Device);
         }
 
@@ -35,7 +40,9 @@ public sealed class BleP2PCentralService_Android : IBleP2PCentralService
         IDevice? device = null;
         try
         {
-            await _adapter.StartScanningForDevicesAsync(cancellationToken: ct).ConfigureAwait(false);
+            await _adapter.StartScanningForDevicesAsync(
+                serviceUuids: new[] { serviceUuid },
+                cancellationToken: ct).ConfigureAwait(false);
             try
             {
                 device = await tcs.Task.WaitAsync(ct).ConfigureAwait(false);

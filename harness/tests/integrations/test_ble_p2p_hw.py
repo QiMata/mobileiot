@@ -40,11 +40,22 @@ ADVERTISE_WARMUP_S = 1.0
 
 
 def _install_and_launch_android(transport, device_id: str, apk_path: str) -> None:
-    """Wake, install if needed, force-stop, and launch the MAUI activity."""
+    """Wake, install (always — `-r` reinstall is cheap and avoids stale-APK
+    bugs), force-stop, grant runtime BLE permissions, and launch the MAUI
+    activity."""
     _wake_screen(transport, device_id)
     transport.shell(["svc", "bluetooth", "enable"], timeout=10.0)
-    if "package:" not in transport.shell(["pm", "path", PACKAGE_ID]).stdout:
-        transport.install_apk(apk_path)
+    transport.install_apk(apk_path)
+    # Android 12+ requires runtime BLUETOOTH_SCAN + BLUETOOTH_CONNECT;
+    # MAUI Permissions only covers location. Grant via adb so the test
+    # doesn't hang on a UI permission prompt.
+    for perm in (
+        "android.permission.BLUETOOTH_SCAN",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.BLUETOOTH_ADVERTISE",
+        "android.permission.ACCESS_FINE_LOCATION",
+    ):
+        transport.shell(["pm", "grant", PACKAGE_ID, perm], timeout=5.0)
     resolved = transport.shell(
         ["cmd", "package", "resolve-activity", "--brief", PACKAGE_ID],
         timeout=5.0,

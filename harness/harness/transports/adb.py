@@ -50,7 +50,9 @@ class AndroidTransport(Transport):
 
     def install_apk(self, apk_path: str, *, reinstall: bool = True) -> None:
         args = ["install", "-r", apk_path] if reinstall else ["install", apk_path]
-        r = self._adb(*args, timeout=300.0)
+        # Samsung devices with Play Protect can take several minutes to verify
+        # debug APKs on first install; 300s isn't always enough.
+        r = self._adb(*args, timeout=900.0)
         if not r.ok:
             raise TransportError(f"adb install failed: {r.stderr or r.stdout}")
 

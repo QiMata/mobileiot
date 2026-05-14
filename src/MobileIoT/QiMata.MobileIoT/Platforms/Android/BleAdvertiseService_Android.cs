@@ -47,9 +47,10 @@ public sealed class BleAdvertiseService_Android : IBleAdvertiseService
 
         _payload = payload ?? Array.Empty<byte>();
 
-        // Best-effort: try to set the adapter's friendly name so a name-based
-        // scan on the central side finds us. Requires BLUETOOTH_CONNECT on 31+.
-        try { adapter.SetName(deviceName); } catch (Exception ex) { Debug.WriteLine($"BleAdvertiseService_Android: SetName failed: {ex.Message}"); }
+        // Don't try to mutate the system adapter name (`adapter.SetName`)
+        // — that's the phone's global Bluetooth name and requires
+        // BLUETOOTH_PRIVILEGED on Android 12+. The central side matches by
+        // service UUID, which is included in the advertisement below.
 
         var serviceUuidJava = UUID.FromString(serviceUuid.ToString());
         var service = new BluetoothGattService(ParcelUuid.FromString(serviceUuidJava.ToString())!.Uuid, GattServiceType.Primary);
