@@ -37,6 +37,8 @@ mobileiot-harness = "harness.cli:app"
 [project.entry-points."mobileiot_harness.integrations"]
 _smoke = "harness.integrations._smoke:plugin"
 nfc = "harness.integrations.nfc:plugin"
+ble_central = "harness.integrations.ble_central:plugin"
+ble_p2p = "harness.integrations.ble_p2p:plugin"
 usb = "harness.integrations.usb:plugin"
 
 [tool.setuptools.packages.find]

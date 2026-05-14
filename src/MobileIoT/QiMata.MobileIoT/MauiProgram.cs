@@ -50,6 +50,8 @@ namespace QiMata.MobileIoT
 #if TEST_HARNESS
                 builder.Services.AddSingleton<IHceService, Platforms.Android.HceService_Android>();
                 builder.Services.AddSingleton<INfcReaderService, Platforms.Android.NfcReaderService_Android>();
+                builder.Services.AddSingleton<IBleAdvertiseService, Platforms.Android.BleAdvertiseService_Android>();
+                builder.Services.AddSingleton<IBleP2PCentralService, Platforms.Android.BleP2PCentralService_Android>();
 #endif
             }
 
@@ -63,6 +65,10 @@ namespace QiMata.MobileIoT
                 builder.Services.AddSingleton<IP2PService, Platforms.iOS.MultipeerService>();
                 builder.Services.AddSingleton<IUsbCommunicator,Platforms.iOS.UsbCommunicatoriOS>();
                 builder.Services.AddSingleton<ISerialDeviceService, Platforms.iOS.ExternalAccessorySerialDeviceService>();
+#if TEST_HARNESS
+                builder.Services.AddSingleton<IBleAdvertiseService, Platforms.iOS.BleAdvertiseService_iOS>();
+                builder.Services.AddSingleton<IBleP2PCentralService, Platforms.iOS.BleP2PCentralService_iOS>();
+#endif
             }
 #endif
 #if DEBUG
