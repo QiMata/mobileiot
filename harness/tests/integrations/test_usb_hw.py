@@ -1,13 +1,20 @@
 """Hardware-tier USB tests.
 
-Three scenarios:
+Four scenarios:
 
 1. ``test_usb_host_lists_pi_gadget`` — Android phone enumerates the Pi gadget.
 2. ``test_usb_bulk_round_trip_pi_gadget`` — Android writes a probe payload to
    the Pi's ConfigFS Loopback gadget and reads it back.
-3. ``test_ios_usb_accessory_enumerates`` — iOS structural check. Passes if the
-   scenario either returns a clean ``Skipped("No USB bulk devices found")``
-   (no MFi accessory in lab; verifies the External Accessory pipeline + DI
+3. ``test_android_usb_pipeline_structural`` — Android structural check. Runs
+   on any usb_host-capable Android with no Pi or OTG accessory required.
+   Mirrors the iOS structural test below: passes if the scenario returns
+   either a clean ``Skipped("No USB bulk devices found")`` (no OTG device
+   attached; verifies APK install + ``HarnessHttpHost`` + DI of
+   ``IUsbCommunicator`` + Android ``UsbManager`` query path) OR a real
+   round-trip succeeded (an OTG device is plugged in).
+4. ``test_ios_usb_accessory_enumerates`` — iOS structural check. Same
+   two-mode pass: ``Skipped("No USB bulk devices found")`` (no MFi accessory
+   in lab; verifies the External Accessory pipeline + Info.plist + DI
    wiring only) OR a real round-trip succeeded (MFi accessory present).
 
 The plugin declares ``required_capabilities=set()`` because the harness gate
@@ -147,6 +154,67 @@ def test_usb_bulk_round_trip_pi_gadget(android_phones, pi, app_builder: AppBuild
             pass
 
 
+@pytest.mark.hardware(roles=["android"], capabilities=[])
+@pytest.mark.timeout(180)
+def test_android_usb_pipeline_structural(android_phones, app_builder: AppBuilder):
+    """Structural check: the Android USB host pipeline is wired correctly.
+
+    Runs whenever any usb_host-capable Android is online — no Pi or OTG
+    accessory required. Both outcomes pass:
+
+    - ``status=skipped`` and ``reason`` matches /No USB bulk devices found/i
+      — phone has no OTG device attached. Verifies APK install,
+      ``HarnessHttpHost``, scenario dispatch, DI of ``IUsbCommunicator``, and
+      the ``UsbManager.DeviceList`` query path.
+    - ``status=passed`` and ``written >= 4`` — an OTG device is attached and
+      the round-trip succeeded.
+    """
+    usb_pairs = [(d, t) for d, t in android_phones if "usb_host" in d.capabilities]
+    if not usb_pairs:
+        pytest.skip("need 1+ Android phone with usb_host capability online")
+
+    artifact = app_builder.build("maui", "android")
+    phone_dev, transport = usb_pairs[0]
+
+    _wake_screen(transport, phone_dev.id)
+    _install_and_launch(transport, artifact.path, phone_dev.id)
+
+    local_port = 47821
+    transport.forward_port(local_port, 47821)
+    try:
+        _wait_health(local_port, label=phone_dev.id)
+        response = requests.post(
+            f"http://127.0.0.1:{local_port}/scenario/usb-bulk",
+            json={"message": "PING"},
+            timeout=30,
+        )
+        response.raise_for_status()
+        body = response.json()
+        result = body.get("result", {})
+        status = result.get("status")
+
+        if status == "skipped":
+            reason = result.get("reason") or ""
+            assert re.search(r"No USB bulk devices found", reason, re.IGNORECASE), (
+                f"{phone_dev.id}: usb-bulk skipped with unexpected reason: {body}"
+            )
+            return
+        if status == "passed":
+            written = result.get("written") or 0
+            assert written >= 4, (
+                f"{phone_dev.id}: usb-bulk passed but wrote too little: {body}"
+            )
+            return
+        pytest.fail(
+            f"{phone_dev.id}: usb-bulk returned unexpected status {status!r}: {body}"
+        )
+    finally:
+        try:
+            transport.unforward_port(local_port)
+        except Exception:
+            pass
+
+
 @pytest.mark.hardware(roles=["ios"], capabilities=[])
 @pytest.mark.timeout(360)
 def test_ios_usb_accessory_enumerates(ios_app_driver):
@@ -208,9 +276,10 @@ def _maybe_skip_permission(result: dict) -> None:
 
 
 def _install_and_launch(transport, apk_path, label: str) -> None:
-    """Install the TestHarness APK if missing and start the launcher activity."""
-    if "package:" not in transport.shell(["pm", "path", PACKAGE_ID]).stdout:
-        transport.install_apk(str(apk_path))
+    """Install the TestHarness APK (always — `-r` reinstall is cheap and avoids
+    stale-APK bugs when test code or app code changes) and start the launcher
+    activity."""
+    transport.install_apk(str(apk_path))
     resolved = transport.shell(
         ["cmd", "package", "resolve-activity", "--brief", PACKAGE_ID],
         timeout=5.0,
