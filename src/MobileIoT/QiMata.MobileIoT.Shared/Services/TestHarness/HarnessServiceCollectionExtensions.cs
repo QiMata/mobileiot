@@ -15,6 +15,8 @@ public static class HarnessServiceCollectionExtensions
         services.AddSingleton<IScenario, NfcProvisioningScenario>();
         services.AddSingleton<IScenario, NfcHceEmulateScenario>();
         services.AddSingleton<IScenario, NfcReaderScenario>();
+        services.AddSingleton<IScenario, BlePeripheralScenario>();
+        services.AddSingleton<IScenario, BleP2PCentralScenario>();
         services.AddSingleton<IScenario, WifiDirectScenario>();
         services.AddSingleton<IScenario, UsbBulkScenario>();
         services.AddSingleton<IScenario, UsbSerialScenario>();

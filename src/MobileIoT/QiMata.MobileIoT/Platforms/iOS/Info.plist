@@ -13,6 +13,7 @@
         <array>
                 <string>arm64</string>
                 <string>nfc</string>
+                <string>bluetooth-le</string>
         </array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
@@ -49,6 +50,7 @@
 <key>UIBackgroundModes</key>
 <array>
     <string>external-accessory</string>
+    <string>bluetooth-peripheral</string>
 </array>
 </dict>
 </plist>
