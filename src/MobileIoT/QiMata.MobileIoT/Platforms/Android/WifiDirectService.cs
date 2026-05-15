@@ -1,6 +1,8 @@
 using Android.Content;
 using Android.Net.Wifi.P2p;
+using QiMata.MobileIoT.Constants;
 using QiMata.MobileIoT.Services;
+using QiMata.MobileIoT.Services.Interfaces;
 using QiMata.MobileIoT.Platforms.Android.Helpers;
 using Android.App;
 using Microsoft.Maui.ApplicationModel;
@@ -24,22 +26,25 @@ public sealed class WifiDirectService : Java.Lang.Object, IP2PService,
     readonly WifiP2pManager.Channel _channel;
     readonly BroadcastReceiver _receiver;
     readonly Context _ctx = Application.Context;
+    readonly IAppLogger _logger;
+    bool _receiverRegistered;
     TaskCompletionSource<bool>? _pendingDiscover;
     TaskCompletionSource<bool>? _pendingConnect;
-    /// <summary>Tracks which TCS the current IActionListener callback should resolve.</summary>
     TaskCompletionSource<bool>? _pendingAction;
     Socket? _socket;
     ServerSocket? _serverSocket;
     CancellationTokenSource? _recvCts;
 
-    public WifiDirectService()
+    public WifiDirectService(IAppLogger logger)
     {
+        _logger = logger;
         _manager = (WifiP2pManager)_ctx.GetSystemService(Context.WifiP2pService)!;
         _channel = _manager.Initialize(_ctx, Looper.MainLooper, null);
         _receiver = new WifiP2pBroadcastReceiver(_manager, _channel, this, this);
         var filter = new IntentFilter(WifiP2pManager.WifiP2pPeersChangedAction);
         filter.AddAction(WifiP2pManager.WifiP2pConnectionChangedAction);
         _ctx.RegisterReceiver(_receiver, filter);
+        _receiverRegistered = true;
     }
 
     public async Task<bool> StartDiscoveryAsync(CancellationToken ct = default)
@@ -92,7 +97,17 @@ public sealed class WifiDirectService : Java.Lang.Object, IP2PService,
         return Task.CompletedTask;
     }
 
-    // ---- IActionListener ----
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing && _receiverRegistered)
+        {
+            try { _ctx.UnregisterReceiver(_receiver); }
+            catch (Exception ex) { _logger.Warn("Failed to unregister WifiP2p broadcast receiver", ex); }
+            _receiverRegistered = false;
+        }
+        base.Dispose(disposing);
+    }
+
     public void OnSuccess()
     {
         _pendingAction?.TrySetResult(true);
@@ -105,16 +120,13 @@ public sealed class WifiDirectService : Java.Lang.Object, IP2PService,
         _pendingAction = null;
     }
 
-    // ---- IPeerListListener ----
     public void OnPeersAvailable(WifiP2pDeviceList peers)
     {
-        // Demonstration: auto-pick first device and connect (production code should show UI)
         var first = peers.DeviceList.FirstOrDefault();
         if (first is not null && _pendingConnect is null)
             _ = ConnectToPeerAsync(first.DeviceAddress);
     }
 
-    // ---- IConnectionInfoListener ----
     public async void OnConnectionInfoAvailable(WifiP2pInfo info)
     {
         if (!info.GroupFormed) return;
@@ -123,8 +135,8 @@ public sealed class WifiDirectService : Java.Lang.Object, IP2PService,
         {
             if (info.IsGroupOwner)
             {
-                _serverSocket = new ServerSocket(8988);
-                _serverSocket.SoTimeout = 30_000; // 30s accept timeout
+                _serverSocket = new ServerSocket(TransportConstants.WifiDirectPort);
+                _serverSocket.SoTimeout = TransportConstants.WifiDirectConnectTimeoutSeconds * 1000;
                 _socket = await _serverSocket.AcceptAsync();
                 _serverSocket.Close();
                 _serverSocket = null;
@@ -132,13 +144,16 @@ public sealed class WifiDirectService : Java.Lang.Object, IP2PService,
             else
             {
                 _socket = new Socket();
-                await _socket.ConnectAsync(new InetSocketAddress(info.GroupOwnerAddress, 8988), 10_000);
+                await _socket.ConnectAsync(
+                    new InetSocketAddress(info.GroupOwnerAddress, TransportConstants.WifiDirectPort),
+                    TransportConstants.WifiDirectConnectTimeoutSeconds * 1000);
             }
 
             _pendingConnect?.TrySetResult(_socket?.IsConnected ?? false);
         }
-        catch (Java.IO.IOException)
+        catch (Java.IO.IOException ex)
         {
+            _logger.Warn("WifiDirect connection failed", ex);
             _pendingConnect?.TrySetResult(false);
         }
     }

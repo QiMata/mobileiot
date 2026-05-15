@@ -1,20 +1,24 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using QiMata.MobileIoT.Constants;
 using QiMata.MobileIoT.Services.Interfaces;
 using System;
 using System.Threading;
 
 namespace QiMata.MobileIoT.ViewModels;
 
-public partial class BleViewModel : ObservableObject
+public partial class BleViewModel : BaseViewModel
 {
     private readonly IBleDemoService _ble;
     private bool _isConnected;
 
-    public BleViewModel(IBleDemoService ble)
+    public BleViewModel(IBleDemoService ble, IAppLogger logger) : base(logger)
     {
         _ble = ble;
-        _ble.SensorDataReceived += OnSensorData;
+        Subscribe<(double temp, double humidity)>(
+            h => _ble.SensorDataReceived += h,
+            h => _ble.SensorDataReceived -= h,
+            OnSensorData);
         ConnectButtonText = "Connect";
         ConnectionStatus  = "Disconnected";
         LedButtonText  = "Turn LED On";
@@ -23,31 +27,27 @@ public partial class BleViewModel : ObservableObject
         StreamButtonText = "Start Streaming";
     }
 
-    // --- DHT22 bindables ---
     [ObservableProperty] private double _temperature;
     [ObservableProperty] private double _humidity;
 
-    // --- LED bindables ---
     [ObservableProperty] private string _ledButtonText;
     [ObservableProperty] private Color  _ledButtonColor;
     [ObservableProperty] private string _ledStatus;
     [ObservableProperty] private string _connectButtonText = string.Empty;
     [ObservableProperty] private string _connectionStatus = string.Empty;
 
-    // --- Streaming bindables ---
     [ObservableProperty] private bool _isStreaming;
     [ObservableProperty] private string _streamButtonText;
 
     private void OnSensorData(object? sender, (double temp, double humidity) data)
     {
-        MainThread.BeginInvokeOnMainThread(() =>
+        OnMain(() =>
         {
             Temperature = data.temp;
             Humidity = data.humidity;
         });
     }
 
-    // --- Commands ---
     [RelayCommand]
     private async Task RefreshSensor()
     {
@@ -60,7 +60,7 @@ public partial class BleViewModel : ObservableObject
         if (!_isConnected)
         {
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-            bool ok = await _ble.ConnectAsync("PiSensor", cts.Token);
+            bool ok = await _ble.ConnectAsync(AppConstants.Devices.PiSensor, cts.Token);
             if (ok)
             {
                 _isConnected = true;

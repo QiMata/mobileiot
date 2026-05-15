@@ -1,10 +1,9 @@
 #if IOS && TEST_HARNESS
-using System.Diagnostics;
 using Plugin.BLE;
 using Plugin.BLE.Abstractions.Contracts;
-using Plugin.BLE.Abstractions.EventArgs;
 using QiMata.MobileIoT.Helpers;
 using QiMata.MobileIoT.Services.Interfaces;
+using Debug = System.Diagnostics.Debug;
 
 namespace QiMata.MobileIoT.Platforms.iOS;
 
@@ -16,6 +15,7 @@ namespace QiMata.MobileIoT.Platforms.iOS;
 /// </summary>
 public sealed class BleP2PCentralService_iOS : IBleP2PCentralService
 {
+    const string Tag = "BleP2PCentralService_iOS";
     readonly IBluetoothLE _ble = CrossBluetoothLE.Current;
     readonly IAdapter _adapter = CrossBluetoothLE.Current.Adapter;
 
@@ -29,40 +29,10 @@ public sealed class BleP2PCentralService_iOS : IBleP2PCentralService
         linkedCts.CancelAfter(timeout);
         var ct = linkedCts.Token;
 
-        var tcs = new TaskCompletionSource<IDevice?>(TaskCreationOptions.RunContinuationsAsynchronously);
-        void OnDiscovered(object? sender, DeviceEventArgs args)
-        {
-            // OS-level scan filter (serviceUuids below) already restricts to
-            // devices advertising our service UUID; matching on name is
-            // fragile across stacks (Android can't honor SetName without
-            // BLUETOOTH_PRIVILEGED on 12+).
-            if (args.Device is not null)
-                tcs.TrySetResult(args.Device);
-        }
-
-        _adapter.DeviceDiscovered += OnDiscovered;
-        IDevice? device = null;
-        try
-        {
-            await _adapter.StartScanningForDevicesAsync(
-                serviceUuids: new[] { serviceUuid },
-                cancellationToken: ct).ConfigureAwait(false);
-            try
-            {
-                device = await tcs.Task.WaitAsync(ct).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            {
-                return null;
-            }
-        }
-        finally
-        {
-            _adapter.DeviceDiscovered -= OnDiscovered;
-            try { await _adapter.StopScanningForDevicesAsync().ConfigureAwait(false); }
-            catch (Exception ex) { Debug.WriteLine($"BleP2PCentralService_iOS: StopScan failed: {ex.Message}"); }
-        }
-
+        // OS-level scan filter (serviceUuids) restricts to devices advertising
+        // our service UUID; matching on name is fragile across stacks because
+        // Android can't honor SetName without BLUETOOTH_PRIVILEGED on 12+.
+        var device = await BleScanHelpers.WaitForDeviceAsync(_adapter, serviceUuid, ct, Tag).ConfigureAwait(false);
         if (device is null) return null;
 
         try
@@ -89,7 +59,7 @@ public sealed class BleP2PCentralService_iOS : IBleP2PCentralService
                     if (code == 0 && data is not null && data.Length > 0)
                         response = data;
                 }
-                catch (Exception ex) { Debug.WriteLine($"BleP2PCentralService_iOS: Read failed: {ex.Message}"); }
+                catch (Exception ex) { Debug.WriteLine($"{Tag}: Read failed: {ex.Message}"); }
             }
             return response;
         }
@@ -100,7 +70,7 @@ public sealed class BleP2PCentralService_iOS : IBleP2PCentralService
                 if (_adapter.ConnectedDevices.Contains(device))
                     await _adapter.DisconnectDeviceAsync(device).ConfigureAwait(false);
             }
-            catch (Exception ex) { Debug.WriteLine($"BleP2PCentralService_iOS: Disconnect failed: {ex.Message}"); }
+            catch (Exception ex) { Debug.WriteLine($"{Tag}: Disconnect failed: {ex.Message}"); }
         }
     }
 }

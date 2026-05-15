@@ -1,5 +1,6 @@
 using Foundation;
 using MultipeerConnectivity;
+using QiMata.MobileIoT.Constants;
 using QiMata.MobileIoT.Services;
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
@@ -10,7 +11,6 @@ namespace QiMata.MobileIoT.Platforms.iOS;
 public sealed class MultipeerService : NSObject, IP2PService, IMCSessionDelegate,
                                         IMCNearbyServiceAdvertiserDelegate, IMCNearbyServiceBrowserDelegate
 {
-    readonly string _svcType = "maui-p2p";
     readonly MCPeerID _self;
     readonly MCSession _session;
     readonly MCNearbyServiceAdvertiser _adv;
@@ -23,10 +23,10 @@ public sealed class MultipeerService : NSObject, IP2PService, IMCSessionDelegate
         _session = new MCSession(_self, null, MCEncryptionPreference.Required);
         _session.Delegate = this;
 
-        _adv = new MCNearbyServiceAdvertiser(_self, null, _svcType);
+        _adv = new MCNearbyServiceAdvertiser(_self, null, TransportConstants.MultipeerServiceType);
         _adv.Delegate = this;
 
-        _browser = new MCNearbyServiceBrowser(_self, _svcType);
+        _browser = new MCNearbyServiceBrowser(_self, TransportConstants.MultipeerServiceType);
         _browser.Delegate = this;
     }
 
@@ -39,7 +39,6 @@ public sealed class MultipeerService : NSObject, IP2PService, IMCSessionDelegate
 
     public Task<bool> ConnectToPeerAsync(string peerId, CancellationToken ct = default)
     {
-        // Multipeer connects via invitations; browser sends invite automatically
         return Task.FromResult(true);
     }
 
@@ -68,21 +67,19 @@ public sealed class MultipeerService : NSObject, IP2PService, IMCSessionDelegate
         _adv.StopAdvertisingPeer();
         _browser.StopBrowsingForPeers();
         _session.Disconnect();
+        _inbound.Writer.TryComplete();
         return Task.CompletedTask;
     }
 
-    // ---- Advertiser ----
     public void DidReceiveInvitationFromPeer(MCNearbyServiceAdvertiser advertiser, MCPeerID peerID,
                                              NSData? context, MCNearbyServiceAdvertiserInvitationHandler invitationHandler)
         => invitationHandler(true, _session);
 
-    // ---- Browser ----
     public void FoundPeer(MCNearbyServiceBrowser browser, MCPeerID peerID, NSDictionary info)
         => browser.InvitePeer(peerID, _session, null, 20);
 
     public void LostPeer(MCNearbyServiceBrowser browser, MCPeerID peerID) { }
 
-    // ---- Session ----
     public void DidReceiveData(MCSession session, NSData data, MCPeerID peerID)
         => _inbound.Writer.TryWrite(data.ToArray());
 

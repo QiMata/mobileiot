@@ -1,21 +1,27 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using QiMata.MobileIoT.Services;
+using QiMata.MobileIoT.Services.Interfaces;
 
 namespace QiMata.MobileIoT.ViewModels;
 
-public partial class AudioDemoViewModel : ObservableObject
+public partial class AudioDemoViewModel : BaseViewModel
 {
     private readonly IAudioModemService _modem;
 
     [ObservableProperty]
     private string _status = "Idle";
 
-    public AudioDemoViewModel(IAudioModemService modem)
+    public AudioDemoViewModel(IAudioModemService modem, IAppLogger logger) : base(logger)
     {
         _modem = modem;
-        _modem.DataReceived += (_, msg) => Status = msg;
+        Subscribe<string>(
+            h => _modem.DataReceived += h,
+            h => _modem.DataReceived -= h,
+            OnDataReceived);
     }
+
+    private void OnDataReceived(object? sender, string msg) => Status = msg;
 
     [RelayCommand]
     private async Task StartAsync()

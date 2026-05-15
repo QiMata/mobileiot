@@ -1,11 +1,13 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using QiMata.MobileIoT.Constants;
 using QiMata.MobileIoT.Services;
+using QiMata.MobileIoT.Services.Interfaces;
 using System.Text;
 
 namespace QiMata.MobileIoT.ViewModels;
 
-public partial class SerialDemoViewModel : ObservableObject
+public partial class SerialDemoViewModel : BaseViewModel
 {
     private readonly ISerialDeviceService _serial;
 
@@ -33,10 +35,13 @@ public partial class SerialDemoViewModel : ObservableObject
     [ObservableProperty]
     string _piStatus = "--";
 
-    public SerialDemoViewModel(ISerialDeviceService serial)
+    public SerialDemoViewModel(ISerialDeviceService serial, IAppLogger logger) : base(logger)
     {
         _serial = serial;
-        _serial.DataReceived += OnDataReceived;
+        Subscribe<ReadOnlyMemory<byte>>(
+            h => _serial.DataReceived += h,
+            h => _serial.DataReceived -= h,
+            OnDataReceived);
     }
 
     private string _rxBuffer = string.Empty;
@@ -54,11 +59,7 @@ public partial class SerialDemoViewModel : ObservableObject
             if (string.IsNullOrEmpty(line))
                 continue;
 
-#if ANDROID || IOS || MACCATALYST || WINDOWS
-            MainThread.BeginInvokeOnMainThread(() => ParseResponse(line));
-#else
-            ParseResponse(line);
-#endif
+            OnMain(() => ParseResponse(line));
         }
     }
 
@@ -66,7 +67,6 @@ public partial class SerialDemoViewModel : ObservableObject
     {
         if (line.StartsWith("SENSOR:"))
         {
-            // SENSOR:temp=23.4,hum=55.7
             var payload = line["SENSOR:".Length..];
             foreach (var pair in payload.Split(','))
             {
@@ -77,28 +77,34 @@ public partial class SerialDemoViewModel : ObservableObject
                     else if (kv[0] == "hum") LastSensorHum = kv[1];
                 }
             }
-            Log += $"RX: {line}\n";
+            AppendLine($"RX: {line}");
         }
         else if (line.StartsWith("STATUS:"))
         {
             PiStatus = line["STATUS:".Length..].Replace(",", "  |  ");
-            Log += $"RX: {line}\n";
+            AppendLine($"RX: {line}");
         }
         else
         {
-            Log += $"RX: {line}\n";
+            AppendLine($"RX: {line}");
         }
+    }
+
+    private void AppendLine(string message)
+    {
+        Log += message + "\n";
+        Logger.Info(message);
     }
 
     private async Task SendCommandAsync(string cmd)
     {
         if (!_serial.IsOpen)
         {
-            Log += "Not connected\n";
+            AppendLine("Not connected");
             return;
         }
         await _serial.WriteAsync(Encoding.ASCII.GetBytes($"{cmd}\n"));
-        Log += $"TX: {cmd}\n";
+        AppendLine($"TX: {cmd}");
     }
 
     [RelayCommand]
@@ -115,12 +121,12 @@ public partial class SerialDemoViewModel : ObservableObject
         var devices = await _serial.ListAsync();
         if (devices.Count == 0)
         {
-            Log += "No devices found\n";
+            AppendLine("No devices found");
             return;
         }
 
         var d = devices[0];
-        bool ok = await _serial.OpenAsync(d.VendorId, d.ProductId, 9600);
+        bool ok = await _serial.OpenAsync(d.VendorId, d.ProductId, TransportConstants.UsbDefaultBaud);
         if (ok)
         {
             ConnectionStatus = $"Connected ({d.ProductName})";
@@ -130,7 +136,7 @@ public partial class SerialDemoViewModel : ObservableObject
         {
             ConnectionStatus = "Open failed";
         }
-        Log += ok ? "Connected\n" : "Open failed\n";
+        AppendLine(ok ? "Connected" : "Open failed");
     }
 
     [RelayCommand]
@@ -152,12 +158,5 @@ public partial class SerialDemoViewModel : ObservableObject
     private Task SendStatusAsync() => SendCommandAsync("STATUS");
 
     [RelayCommand]
-    private Task NavigateBack()
-    {
-#if ANDROID || IOS || MACCATALYST || WINDOWS
-        return Shell.Current.GoToAsync("..");
-#else
-        return Task.CompletedTask;
-#endif
-    }
+    private Task NavigateBack() => Shell.Current.GoToAsync("..");
 }

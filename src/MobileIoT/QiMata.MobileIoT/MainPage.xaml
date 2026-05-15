@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:QiMata.MobileIoT.Controls"
              x:Class="QiMata.MobileIoT.MainPage"
-             BackgroundColor="#F3F4F6">
+             BackgroundColor="{StaticResource PageBackgroundColor}">
 
     <Grid Padding="20">
         <Grid.RowDefinitions>
@@ -11,100 +12,70 @@
         </Grid.RowDefinitions>
 
         <VerticalStackLayout>
-        <Image Source="dotnet_bot.png"
-               HeightRequest="150"
-               Aspect="AspectFit"
-               HorizontalOptions="Center"
-               Margin="0,10"/>
+            <Image Source="dotnet_bot.png"
+                   HeightRequest="150"
+                   Aspect="AspectFit"
+                   HorizontalOptions="Center"
+                   Margin="0,10"/>
 
-        <Label Grid.Row="1" Text="QiMata Mobile IoT" 
-                   FontSize="26"
-                   FontAttributes="Bold"
-                   TextColor="#374151"
-                   HorizontalOptions="Center"/>
+            <controls:PageHeader Title="QiMata Mobile IoT" />
         </VerticalStackLayout>
+
         <ScrollView Grid.Row="1">
-        <Frame  BackgroundColor="White" 
-                   CornerRadius="10" 
-                   Padding="10" 
-                   HasShadow="True">
-            
-                <VerticalStackLayout Spacing="12"
-                                     Margin="20">
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="12" Margin="20">
                     <Button Text="Bluetooth LE"
-                            BackgroundColor="#2563EB"
-                            TextColor="White"
-                            CornerRadius="8"
+                            Style="{StaticResource PrimaryButton}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="BlePage" />
 
                     <Button Text="BLE Beacons"
-                            BackgroundColor="#2563EB"
-                            TextColor="White"
-                            CornerRadius="8"
+                            Style="{StaticResource PrimaryButton}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="BleScannerPage" />
 
                     <Button Text="NFC"
-                            BackgroundColor="#2563EB"
-                            TextColor="White"
-                            CornerRadius="8"
+                            Style="{StaticResource PrimaryButton}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="NfcPage" />
 
                     <Button Text="NFC Peer-to-Peer"
-                            BackgroundColor="#2563EB"
-                            TextColor="White"
-                            CornerRadius="8"
+                            Style="{StaticResource PrimaryButton}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="NfcP2PPage" />
 
                     <Button Text="USB"
-                            BackgroundColor="#2563EB"
-                            TextColor="White"
-                            CornerRadius="8"
+                            Style="{StaticResource PrimaryButton}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="UsbPage" />
 
                     <Button Text="Serial"
-                            BackgroundColor="#2563EB"
-                            TextColor="White"
-                            CornerRadius="8"
+                            Style="{StaticResource PrimaryButton}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="SerialPage" />
 
                     <Button Text="Wi-Fi Direct"
-                            BackgroundColor="#2563EB"
-                            TextColor="White"
-                            CornerRadius="8"
+                            Style="{StaticResource PrimaryButton}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="WifiDirectPage" />
 
                     <Button Text="Audio Jack"
-                            BackgroundColor="#2563EB"
-                            TextColor="White"
-                            CornerRadius="8"
+                            Style="{StaticResource PrimaryButton}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="AudioPage" />
 
                     <Button Text="Computer Vision"
-                            BackgroundColor="#2563EB"
-                            TextColor="White"
-                            CornerRadius="8"
+                            Style="{StaticResource PrimaryButton}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="VisionPage" />
 
                     <Button Text="NFC Provisioning"
-                            BackgroundColor="#2563EB"
-                            TextColor="White"
-                            CornerRadius="8"
+                            Style="{StaticResource PrimaryButton}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="NfcProvisioningPage" />
 
                     <Button Text="Thread"
-                            BackgroundColor="#2563EB"
-                            TextColor="White"
-                            CornerRadius="8"
+                            Style="{StaticResource PrimaryButton}"
                             Command="{Binding NavigateCommand}"
                             CommandParameter="ThreadPage" />
 

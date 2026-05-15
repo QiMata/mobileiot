@@ -2,7 +2,10 @@ using Android.App;
 using Android.Content;
 using Android.Hardware.Usb;
 using Hoho.Android.UsbSerial.Driver;
+using QiMata.MobileIoT.Constants;
+using QiMata.MobileIoT.Platforms.Android.Services;
 using QiMata.MobileIoT.Services;
+using QiMata.MobileIoT.Services.Interfaces;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -14,19 +17,21 @@ namespace QiMata.MobileIoT.Platforms.Android;
 
 public sealed class UsbSerialDeviceService : ISerialDeviceService
 {
-    private const int READ_BUFF_SZ = 4096;
-
     private readonly UsbManager _usb;
+    private readonly UsbPermissionManager _permissions;
+    private readonly IAppLogger _logger;
     private UsbDeviceConnection? _conn;
     private IUsbSerialPort? _port;
     private CancellationTokenSource? _rxCts;
-
-    private static readonly Dictionary<int, TaskCompletionSource<bool>> _permBlocks = new();
-
-    public UsbSerialDeviceService()
-        => _usb = (UsbManager)Application.Context.GetSystemService(Context.UsbService)!;
-
     private bool _isOpen = false;
+
+    public UsbSerialDeviceService(UsbPermissionManager permissions, IAppLogger logger)
+    {
+        _usb = (UsbManager)Application.Context.GetSystemService(Context.UsbService)!;
+        _permissions = permissions;
+        _logger = logger;
+    }
+
     public bool IsOpen => _port != null && _isOpen;
 
     public Task<IReadOnlyList<SerialDeviceInfo>> ListAsync(CancellationToken ct = default)
@@ -39,26 +44,17 @@ public sealed class UsbSerialDeviceService : ISerialDeviceService
                    .ToList()
                    .AsReadOnly());
 
-    public async Task<bool> OpenAsync(ushort vid, ushort pid, int baudRate = 9600, CancellationToken ct = default)
+    public async Task<bool> OpenAsync(ushort vid, ushort pid, int baudRate = TransportConstants.UsbDefaultBaud, CancellationToken ct = default)
     {
         var dev = _usb.DeviceList.Values.FirstOrDefault(d => d.VendorId == vid && d.ProductId == pid);
         if (dev == null) return false;
 
-        //-- Request runtime permission if we don't have it ����������������������
-        if (!_usb.HasPermission(dev))
+        if (!await _permissions.EnsurePermissionAsync(_usb, dev, ct).ConfigureAwait(false))
         {
-            var tcs = new TaskCompletionSource<bool>();
-            _permBlocks[dev.DeviceId] = tcs;
-
-            var pi = PendingIntent.GetBroadcast(
-                         Application.Context, 0,
-                         new Intent(UsbPermissionBroadcastReceiver.ACTION_USB_PERMISSION),
-                         PendingIntentFlags.Immutable);
-
-            _usb.RequestPermission(dev, pi);
-            await tcs.Task.WaitAsync(ct);
+            _logger.Warn($"USB permission denied for VID={vid:X4} PID={pid:X4}");
+            return false;
         }
-        //-- Open connection / configure port �����������������������������������
+
         _conn = _usb.OpenDevice(dev);
         if (_conn == null) return false;
 
@@ -87,7 +83,7 @@ public sealed class UsbSerialDeviceService : ISerialDeviceService
 
     private void RxLoop(CancellationToken token)
     {
-        var buffer = new byte[READ_BUFF_SZ];
+        var buffer = new byte[TransportConstants.UsbReadBufferSize];
         while (!token.IsCancellationRequested && _port != null)
         {
             try
@@ -98,7 +94,7 @@ public sealed class UsbSerialDeviceService : ISerialDeviceService
             }
             catch (IOException)
             {
-                break; // Device unplugged
+                break;
             }
         }
     }
@@ -111,12 +107,5 @@ public sealed class UsbSerialDeviceService : ISerialDeviceService
         _conn?.Close();
         _rxCts?.Dispose();
         return ValueTask.CompletedTask;
-    }
-
-    /// <summary>Called by the broadcast receiver once permission is granted.</summary>
-    internal static void UnblockPermission(int deviceId)
-    {
-        if (_permBlocks.Remove(deviceId, out var tcs))
-            tcs.TrySetResult(true);
     }
 }

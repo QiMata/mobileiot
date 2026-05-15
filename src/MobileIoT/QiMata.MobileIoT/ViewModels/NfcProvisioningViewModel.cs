@@ -6,11 +6,11 @@ using QiMata.MobileIoT.Services.Interfaces;
 
 namespace QiMata.MobileIoT.ViewModels;
 
-public partial class NfcProvisioningViewModel : ObservableObject
+public partial class NfcProvisioningViewModel : BaseViewModel
 {
     private readonly INfcService _nfc;
 
-    public NfcProvisioningViewModel(INfcService nfc)
+    public NfcProvisioningViewModel(INfcService nfc, IAppLogger logger) : base(logger)
     {
         _nfc = nfc;
     }
@@ -49,6 +49,7 @@ public partial class NfcProvisioningViewModel : ObservableObject
         catch (Exception ex)
         {
             ProvisionStatus = $"Write failed: {ex.Message}";
+            Logger.Warn("NFC provisioning write failed", ex);
         }
     }
 

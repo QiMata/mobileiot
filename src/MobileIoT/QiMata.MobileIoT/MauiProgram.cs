@@ -38,9 +38,16 @@ namespace QiMata.MobileIoT
 
             bool isDesign = DesignMode.IsDesignModeEnabled;
 
+            ViewModels.BaseViewModel.DispatchToMain = Helpers.DispatcherExtensions.RunOnMain;
+
+            builder.Services.AddSingleton<AppLogger>();
+            builder.Services.AddSingleton<IAppLogger>(sp => sp.GetRequiredService<AppLogger>());
+            builder.Services.AddSingleton<IObservableLog>(sp => sp.GetRequiredService<AppLogger>());
+
 #if ANDROID
             if (!isDesign)
             {
+                builder.Services.AddSingleton<Platforms.Android.Services.UsbPermissionManager>();
                 builder.Services.AddSingleton<IBeaconScanner, BeaconScanner_Android>();
                 builder.Services.AddSingleton<INfcService, AndroidNfcService>();
                 builder.Services.AddSingleton<INfcP2PService, NfcP2PService_Android>();
@@ -129,7 +136,10 @@ namespace QiMata.MobileIoT
             builder.Services.AddSingleton<HttpClient>();
             builder.Services.AddSingleton<IThreadBridgeClient, ThreadBridgeClient>();
             builder.Services.AddSingleton<IThreadDemoService, ThreadDemoService>();
+            builder.Services.AddSingleton<IPermissionGate, PermissionGate>();
             builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
+            builder.Services.AddTransient<MainPageViewModel>();
+            builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<ThreadViewModel>();
             builder.Services.AddTransient<ThreadPage>();
             builder.Services.AddTransient<ViewModels.AudioDemoViewModel>();

@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Moq;
+using QiMata.MobileIoT.Services.Interfaces;
 using QiMata.MobileIoT.ViewModels;
 using QiMata.MobileIoT.ThreadDemoCore.Models;
 using QiMata.MobileIoT.ThreadDemoCore.Services;
@@ -11,8 +12,9 @@ public class ThreadViewModelTests
 {
     private readonly Mock<IThreadDemoService> _serviceMock = new();
     private readonly Mock<INavigationService> _navMock = new();
+    private readonly Mock<IAppLogger> _loggerMock = new();
 
-    private ThreadViewModel CreateVm() => new(_serviceMock.Object, _navMock.Object);
+    private ThreadViewModel CreateVm() => new(_serviceMock.Object, _navMock.Object, _loggerMock.Object);
 
     [Fact]
     public void InitialState_HasDefaults()

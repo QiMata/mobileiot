@@ -1,15 +1,19 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using QiMata.MobileIoT.Constants;
 using QiMata.MobileIoT.Services;
+using QiMata.MobileIoT.Services.Interfaces;
 
 namespace QiMata.MobileIoT.ViewModels;
 
-public partial class UsbViewModel : ObservableObject
+public partial class UsbViewModel : BaseViewModel
 {
     readonly IUsbDeviceService _usb;
 
-    public UsbViewModel(IUsbDeviceService usb)
-        => _usb = usb;
+    public UsbViewModel(IUsbDeviceService usb, IAppLogger logger) : base(logger)
+    {
+        _usb = usb;
+    }
 
     [ObservableProperty]
     private string _log = string.Empty;
@@ -34,7 +38,7 @@ public partial class UsbViewModel : ObservableObject
     {
         if (!_usb.IsOpen)
             return;
-        await _usb.WriteAsync(new byte[] { 0x50, 0x49, 0x4E, 0x47 });
+        await _usb.WriteAsync(BleConstants.Ping);
         var buf = new byte[64];
         int n = await _usb.ReadAsync(buf);
         if (n > 0)

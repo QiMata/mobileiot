@@ -1,60 +1,47 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="QiMata.MobileIoT.Views.NfcPage">
+             xmlns:controls="clr-namespace:QiMata.MobileIoT.Controls"
+             x:Class="QiMata.MobileIoT.Views.NfcPage"
+             BackgroundColor="{StaticResource PageBackgroundColor}"
+             Title="NFC">
     <Grid Padding="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <VerticalStackLayout>
-            <Label Text="NFC Tag Reader / Writer"
-                   FontSize="26"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center"
-                   Margin="0,20"/>
-        </VerticalStackLayout>
+        <controls:PageHeader Title="NFC Tag Reader / Writer" />
 
-        <!-- Content -->
         <ScrollView Grid.Row="1">
-            <Frame CornerRadius="10" Padding="20" HasShadow="True">
+            <Frame Style="{StaticResource CardFrame}">
                 <VerticalStackLayout Spacing="20">
 
-                    <!-- Read -->
+                    <Label Text="{Binding StatusMessage}"
+                           TextColor="{StaticResource BrandRed}"
+                           FontSize="14" />
+
                     <Label Text="Last Tag Content:"
-                           FontSize="20"
-                           FontAttributes="Bold"/>
+                           Style="{StaticResource SectionHeaderLabel}"/>
                     <Label Text="{Binding TagContent}"
                            FontSize="18"
                            LineBreakMode="WordWrap"/>
 
                     <Button Text="{Binding ListenButtonText}"
-                            BackgroundColor="#2563EB"
-                            TextColor="White"
+                            Style="{StaticResource PrimaryButton}"
                             Command="{Binding ToggleListenCommand}"/>
 
-                    <BoxView HeightRequest="1"
-                             BackgroundColor="#E5E7EB"
-                             Margin="0,10"/>
+                    <BoxView Style="{StaticResource DividerLine}" />
 
-                    <!-- Write -->
                     <Label Text="Write Tag"
-                           FontSize="20"
-                           FontAttributes="Bold"/>
+                           Style="{StaticResource SectionHeaderLabel}"/>
                     <Entry Placeholder="Text to write"
                            Text="{Binding TextToWrite}"/>
                     <Button Text="Write to Tag"
-                            BackgroundColor="#059669"
-                            TextColor="White"
+                            Style="{StaticResource SuccessButton}"
                             Command="{Binding WriteCommand}"/>
 
-                    <!-- Back -->
-                    <Button Text="Back"
-                            BackgroundColor="#6B7280"
-                            TextColor="White"
-                            Command="{Binding NavigateBackCommand}"/>
+                    <controls:BackButton Command="{Binding NavigateBackCommand}" />
                 </VerticalStackLayout>
             </Frame>
         </ScrollView>

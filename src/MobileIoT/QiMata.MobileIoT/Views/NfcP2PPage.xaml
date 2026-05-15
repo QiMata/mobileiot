@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:QiMata.MobileIoT.Controls"
              x:Class="QiMata.MobileIoT.Views.NfcP2PPage"
+             BackgroundColor="{StaticResource PageBackgroundColor}"
              Title="NFC Peer-to-Peer">
     <Grid Padding="20">
         <Grid.RowDefinitions>
@@ -9,25 +11,15 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <VerticalStackLayout>
-            <Label Text="NFC Peer-to-Peer"
-                   FontSize="26"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center"
-                   Margin="0,20"/>
-        </VerticalStackLayout>
+        <controls:PageHeader Title="NFC Peer-to-Peer" />
 
-        <Frame Grid.Row="1" BackgroundColor="White" CornerRadius="10" Padding="20" HasShadow="True">
+        <Frame Grid.Row="1" Style="{StaticResource CardFrame}">
             <VerticalStackLayout Spacing="20">
                 <Button Text="Tap phones to exchange"
-                        BackgroundColor="#2563EB"
-                        TextColor="White"
+                        Style="{StaticResource PrimaryButton}"
                         Command="{Binding StartP2PCommand}" />
 
-                <Button Text="Back"
-                        BackgroundColor="#6B7280"
-                        TextColor="White"
-                        Command="{Binding NavigateBackCommand}" />
+                <controls:BackButton Command="{Binding NavigateBackCommand}" />
             </VerticalStackLayout>
         </Frame>
     </Grid>

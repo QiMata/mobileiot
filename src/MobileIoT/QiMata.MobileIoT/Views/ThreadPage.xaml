@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:QiMata.MobileIoT.Controls"
              x:Class="QiMata.MobileIoT.Views.ThreadPage"
-             BackgroundColor="#F3F4F6"
+             BackgroundColor="{StaticResource PageBackgroundColor}"
              Title="Thread Demo">
 
     <Grid Padding="20">
@@ -11,77 +12,54 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <Label Text="Thread Protocol Demo"
-               FontSize="26"
-               FontAttributes="Bold"
-               TextColor="#374151"
-               HorizontalOptions="Center"
-               Margin="0,20"/>
+        <controls:PageHeader Title="Thread Protocol Demo" />
 
-        <!-- Content -->
         <ScrollView Grid.Row="1">
-            <Frame BackgroundColor="White"
-                   CornerRadius="10"
-                   Padding="20"
-                   HasShadow="True">
+            <Frame Style="{StaticResource CardFrame}">
                 <VerticalStackLayout Spacing="16">
 
-                    <!-- Mode Toggle -->
                     <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
                         <Label Text="Use Live Bridge"
                                FontSize="16"
-                               TextColor="#374151"
+                               TextColor="{StaticResource HeaderText}"
                                VerticalOptions="Center"/>
                         <Switch IsToggled="{Binding UseLiveBridge}"
-                                OnColor="#059669"/>
+                                OnColor="{StaticResource BrandGreen}"/>
                     </HorizontalStackLayout>
 
-                    <!-- Bridge Settings -->
                     <Label Text="Bridge URL"
-                           FontSize="14"
-                           TextColor="#6B7280"/>
+                           Style="{StaticResource MutedLabel}"/>
                     <Entry Text="{Binding BridgeUrl}"
                            Placeholder="http://raspberrypi.local:8080"
                            Keyboard="Url"/>
 
                     <Label Text="Target Node"
-                           FontSize="14"
-                           TextColor="#6B7280"/>
+                           Style="{StaticResource MutedLabel}"/>
                     <Entry Text="{Binding TargetNode}"
                            Placeholder="mesh-local IPv6 address"/>
 
                     <Label Text="Ping Payload"
-                           FontSize="14"
-                           TextColor="#6B7280"/>
+                           Style="{StaticResource MutedLabel}"/>
                     <Entry Text="{Binding Payload}"
                            Placeholder="ping"/>
 
-                    <!-- Action Buttons -->
                     <Button Text="Refresh Status"
-                            BackgroundColor="#2563EB"
-                            TextColor="White"
-                            CornerRadius="8"
+                            Style="{StaticResource PrimaryButton}"
                             Command="{Binding RefreshStatusCommand}" />
 
                     <Button Text="Send CoAP Ping"
-                            BackgroundColor="#059669"
-                            TextColor="White"
-                            CornerRadius="8"
+                            Style="{StaticResource SuccessButton}"
                             Command="{Binding SendPingCommand}" />
 
                     <ActivityIndicator IsRunning="{Binding IsBusy}"
                                        IsVisible="{Binding IsBusy}"
-                                       Color="#2563EB"
+                                       Color="{StaticResource BrandBlue}"
                                        HorizontalOptions="Center"/>
 
-                    <BoxView HeightRequest="1" BackgroundColor="#E5E7EB" Margin="0,10"/>
+                    <BoxView Style="{StaticResource DividerLine}" />
 
-                    <!-- Status Panel -->
                     <Label Text="Thread Status"
-                           FontSize="20"
-                           FontAttributes="Bold"
-                           TextColor="#374151"/>
+                           Style="{StaticResource SectionHeaderLabel}"/>
 
                     <Label Text="{Binding Role, StringFormat='Role: {0}'}"
                            FontSize="16"
@@ -96,30 +74,23 @@
                            TextColor="#111827"/>
 
                     <Label Text="{Binding SourceMode, StringFormat='Source: {0}'}"
-                           FontSize="14"
-                           TextColor="#6B7280"/>
+                           Style="{StaticResource MutedLabel}"/>
 
                     <Label Text="Dataset (hex):"
-                           FontSize="14"
-                           TextColor="#6B7280"/>
+                           Style="{StaticResource MutedLabel}"/>
                     <Label Text="{Binding DatasetHex}"
                            FontSize="12"
                            TextColor="#111827"
                            LineBreakMode="CharacterWrap"/>
 
-                    <BoxView HeightRequest="1" BackgroundColor="#E5E7EB" Margin="0,10"/>
+                    <BoxView Style="{StaticResource DividerLine}" />
 
-                    <!-- Log -->
                     <HorizontalStackLayout Spacing="10">
                         <Label Text="Log"
-                               FontSize="20"
-                               FontAttributes="Bold"
-                               TextColor="#374151"
+                               Style="{StaticResource SectionHeaderLabel}"
                                VerticalOptions="Center"/>
                         <Button Text="Clear"
-                                BackgroundColor="#DC2626"
-                                TextColor="White"
-                                CornerRadius="8"
+                                Style="{StaticResource DangerButton}"
                                 HeightRequest="32"
                                 Padding="10,0"
                                 FontSize="12"
@@ -132,12 +103,7 @@
                             FontFamily="Courier New"
                             FontSize="11"/>
 
-                    <!-- Back -->
-                    <Button Text="Back"
-                            BackgroundColor="#6B7280"
-                            TextColor="White"
-                            CornerRadius="8"
-                            Command="{Binding NavigateBackCommand}" />
+                    <controls:BackButton Command="{Binding NavigateBackCommand}" />
 
                 </VerticalStackLayout>
             </Frame>

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:QiMata.MobileIoT.Controls"
              x:Class="QiMata.MobileIoT.Views.SerialPage"
-             BackgroundColor="#F3F4F6"
+             BackgroundColor="{StaticResource PageBackgroundColor}"
              Title="Serial Console">
 
     <Grid Padding="20">
@@ -11,27 +12,14 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <Label Text="Serial Console"
-               FontSize="26"
-               FontAttributes="Bold"
-               TextColor="#374151"
-               HorizontalOptions="Center"
-               Margin="0,20"/>
+        <controls:PageHeader Title="Serial Console" />
 
-        <!-- Content -->
         <ScrollView Grid.Row="1">
-            <Frame BackgroundColor="White"
-                   CornerRadius="10"
-                   Padding="20"
-                   HasShadow="True">
+            <Frame Style="{StaticResource CardFrame}">
                 <VerticalStackLayout Spacing="16">
 
-                    <!-- Connect -->
                     <Button Text="{Binding ConnectButtonText}"
-                            BackgroundColor="#2563EB"
-                            TextColor="White"
-                            CornerRadius="8"
+                            Style="{StaticResource PrimaryButton}"
                             Command="{Binding ConnectAsyncCommand}" />
 
                     <Label Text="{Binding ConnectionStatus}"
@@ -39,34 +27,24 @@
                            TextColor="#111827"
                            HorizontalOptions="Center" />
 
-                    <BoxView HeightRequest="1" BackgroundColor="#E5E7EB" Margin="0,10"/>
+                    <BoxView Style="{StaticResource DividerLine}" />
 
-                    <!-- LED Control -->
                     <Label Text="LED Control"
-                           FontSize="20"
-                           FontAttributes="Bold"
-                           TextColor="#374151" />
+                           Style="{StaticResource SectionHeaderLabel}" />
 
                     <HorizontalStackLayout Spacing="12">
                         <Button Text="LED ON"
-                                BackgroundColor="#059669"
-                                TextColor="White"
-                                CornerRadius="8"
+                                Style="{StaticResource SuccessButton}"
                                 Command="{Binding SendLedOnAsyncCommand}" />
                         <Button Text="LED OFF"
-                                BackgroundColor="#DC2626"
-                                TextColor="White"
-                                CornerRadius="8"
+                                Style="{StaticResource DangerButton}"
                                 Command="{Binding SendLedOffAsyncCommand}" />
                     </HorizontalStackLayout>
 
-                    <BoxView HeightRequest="1" BackgroundColor="#E5E7EB" Margin="0,10"/>
+                    <BoxView Style="{StaticResource DividerLine}" />
 
-                    <!-- GPIO -->
                     <Label Text="GPIO"
-                           FontSize="20"
-                           FontAttributes="Bold"
-                           TextColor="#374151" />
+                           Style="{StaticResource SectionHeaderLabel}" />
 
                     <HorizontalStackLayout Spacing="8">
                         <Entry Placeholder="Pin"
@@ -74,33 +52,24 @@
                                Keyboard="Numeric"
                                WidthRequest="60" />
                         <Button Text="Read"
-                                BackgroundColor="#2563EB"
-                                TextColor="White"
-                                CornerRadius="8"
+                                Style="{StaticResource PrimaryButton}"
                                 Command="{Binding SendGpioReadAsyncCommand}" />
                         <Entry Placeholder="Val"
                                Text="{Binding GpioValue}"
                                Keyboard="Numeric"
                                WidthRequest="50" />
                         <Button Text="Write"
-                                BackgroundColor="#2563EB"
-                                TextColor="White"
-                                CornerRadius="8"
+                                Style="{StaticResource PrimaryButton}"
                                 Command="{Binding SendGpioWriteAsyncCommand}" />
                     </HorizontalStackLayout>
 
-                    <BoxView HeightRequest="1" BackgroundColor="#E5E7EB" Margin="0,10"/>
+                    <BoxView Style="{StaticResource DividerLine}" />
 
-                    <!-- Sensor -->
                     <Label Text="DHT22 Sensor"
-                           FontSize="20"
-                           FontAttributes="Bold"
-                           TextColor="#374151" />
+                           Style="{StaticResource SectionHeaderLabel}" />
 
                     <Button Text="Read Sensor"
-                            BackgroundColor="#2563EB"
-                            TextColor="White"
-                            CornerRadius="8"
+                            Style="{StaticResource PrimaryButton}"
                             Command="{Binding SendSensorReadAsyncCommand}" />
 
                     <Label Text="{Binding LastSensorTemp, StringFormat='Temperature: {0} °C'}"
@@ -111,31 +80,23 @@
                            FontSize="18"
                            TextColor="#111827" />
 
-                    <BoxView HeightRequest="1" BackgroundColor="#E5E7EB" Margin="0,10"/>
+                    <BoxView Style="{StaticResource DividerLine}" />
 
-                    <!-- Status -->
                     <Label Text="System Status"
-                           FontSize="20"
-                           FontAttributes="Bold"
-                           TextColor="#374151" />
+                           Style="{StaticResource SectionHeaderLabel}" />
 
                     <Button Text="Pi Status"
-                            BackgroundColor="#2563EB"
-                            TextColor="White"
-                            CornerRadius="8"
+                            Style="{StaticResource PrimaryButton}"
                             Command="{Binding SendStatusAsyncCommand}" />
 
                     <Label Text="{Binding PiStatus}"
                            FontSize="16"
                            TextColor="#111827" />
 
-                    <BoxView HeightRequest="1" BackgroundColor="#E5E7EB" Margin="0,10"/>
+                    <BoxView Style="{StaticResource DividerLine}" />
 
-                    <!-- Log -->
                     <Label Text="Log"
-                           FontSize="20"
-                           FontAttributes="Bold"
-                           TextColor="#374151" />
+                           Style="{StaticResource SectionHeaderLabel}" />
 
                     <Editor Text="{Binding Log}"
                             IsReadOnly="True"
@@ -143,12 +104,7 @@
                             FontFamily="Courier New"
                             FontSize="12" />
 
-                    <!-- Back -->
-                    <Button Text="Back"
-                            BackgroundColor="#6B7280"
-                            TextColor="White"
-                            CornerRadius="8"
-                            Command="{Binding NavigateBackCommand}" />
+                    <controls:BackButton Command="{Binding NavigateBackCommand}" />
 
                 </VerticalStackLayout>
             </Frame>

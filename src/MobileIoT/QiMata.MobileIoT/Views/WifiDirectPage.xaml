@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:QiMata.MobileIoT.Controls"
              xmlns:models="clr-namespace:QiMata.MobileIoT.Models;assembly=QiMata.MobileIoT.Shared"
              x:Class="QiMata.MobileIoT.Views.WifiDirectPage"
-             BackgroundColor="#F3F4F6"
+             BackgroundColor="{StaticResource PageBackgroundColor}"
              Title="Wi-Fi Direct">
 
     <Grid Padding="20">
@@ -12,27 +13,14 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <Label Text="Wi-Fi Direct"
-               FontSize="26"
-               FontAttributes="Bold"
-               TextColor="#374151"
-               HorizontalOptions="Center"
-               Margin="0,20"/>
+        <controls:PageHeader Title="Wi-Fi Direct" />
 
-        <!-- Content -->
         <ScrollView Grid.Row="1">
-            <Frame BackgroundColor="White"
-                   CornerRadius="10"
-                   Padding="20"
-                   HasShadow="True">
+            <Frame Style="{StaticResource CardFrame}">
                 <VerticalStackLayout Spacing="16">
 
-                    <!-- Connect -->
                     <Button Text="{Binding ConnectButtonText}"
-                            BackgroundColor="#2563EB"
-                            TextColor="White"
-                            CornerRadius="8"
+                            Style="{StaticResource PrimaryButton}"
                             Command="{Binding DiscoverAsyncCommand}" />
 
                     <Label Text="{Binding ConnectionStatus}"
@@ -40,18 +28,13 @@
                            TextColor="#111827"
                            HorizontalOptions="Center" />
 
-                    <BoxView HeightRequest="1" BackgroundColor="#E5E7EB" Margin="0,10"/>
+                    <BoxView Style="{StaticResource DividerLine}" />
 
-                    <!-- Telemetry -->
                     <Label Text="Telemetry"
-                           FontSize="20"
-                           FontAttributes="Bold"
-                           TextColor="#374151" />
+                           Style="{StaticResource SectionHeaderLabel}" />
 
                     <Button Text="{Binding StreamButtonText}"
-                            BackgroundColor="#059669"
-                            TextColor="White"
-                            CornerRadius="8"
+                            Style="{StaticResource SuccessButton}"
                             Command="{Binding ToggleStreamAsyncCommand}" />
 
                     <Label Text="{Binding Temperature, StringFormat='Temperature: {0:F1} °C'}"
@@ -70,18 +53,13 @@
                            FontSize="18"
                            TextColor="#111827" />
 
-                    <BoxView HeightRequest="1" BackgroundColor="#E5E7EB" Margin="0,10"/>
+                    <BoxView Style="{StaticResource DividerLine}" />
 
-                    <!-- File Browser -->
                     <Label Text="File Browser"
-                           FontSize="20"
-                           FontAttributes="Bold"
-                           TextColor="#374151" />
+                           Style="{StaticResource SectionHeaderLabel}" />
 
                     <Button Text="List Files"
-                            BackgroundColor="#2563EB"
-                            TextColor="White"
-                            CornerRadius="8"
+                            Style="{StaticResource PrimaryButton}"
                             Command="{Binding RequestFileListAsyncCommand}" />
 
                     <CollectionView ItemsSource="{Binding Files}"
@@ -95,12 +73,10 @@
                                            VerticalOptions="Center" />
                                     <Label Text="{Binding Size, StringFormat='({0} bytes)'}"
                                            FontSize="12"
-                                           TextColor="#6B7280"
+                                           TextColor="{StaticResource BrandGray}"
                                            VerticalOptions="Center" />
                                     <Button Text="Download"
-                                            BackgroundColor="#2563EB"
-                                            TextColor="White"
-                                            CornerRadius="6"
+                                            Style="{StaticResource PrimaryButton}"
                                             FontSize="12"
                                             Padding="8,4"
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DownloadFileAsyncCommand}"
@@ -110,13 +86,10 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
 
-                    <BoxView HeightRequest="1" BackgroundColor="#E5E7EB" Margin="0,10"/>
+                    <BoxView Style="{StaticResource DividerLine}" />
 
-                    <!-- Log -->
                     <Label Text="Log"
-                           FontSize="20"
-                           FontAttributes="Bold"
-                           TextColor="#374151" />
+                           Style="{StaticResource SectionHeaderLabel}" />
 
                     <Editor Text="{Binding Log}"
                             IsReadOnly="True"
@@ -124,12 +97,7 @@
                             FontFamily="Courier New"
                             FontSize="12" />
 
-                    <!-- Back -->
-                    <Button Text="Back"
-                            BackgroundColor="#6B7280"
-                            TextColor="White"
-                            CornerRadius="8"
-                            Command="{Binding NavigateBackCommand}" />
+                    <controls:BackButton Command="{Binding NavigateBackCommand}" />
 
                 </VerticalStackLayout>
             </Frame>

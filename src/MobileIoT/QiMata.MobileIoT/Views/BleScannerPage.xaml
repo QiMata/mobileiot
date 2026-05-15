@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:viewModels="clr-namespace:QiMata.MobileIoT.ViewModels"
+             xmlns:controls="clr-namespace:QiMata.MobileIoT.Controls"
+             xmlns:vm="clr-namespace:QiMata.MobileIoT.ViewModels"
              x:Class="QiMata.MobileIoT.Views.BleScannerPage"
              Title="BLE Beacons"
-             BackgroundColor="#F3F4F6">
+             BackgroundColor="{StaticResource PageBackgroundColor}">
 
     <Grid Padding="20">
         <Grid.RowDefinitions>
@@ -12,19 +13,12 @@
             <RowDefinition Height="*"   />
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <Label Text="Detected BLE Beacons"
-               FontSize="26"
-               FontAttributes="Bold"
-               TextColor="#374151"
-               HorizontalOptions="Center"
-               Margin="0,20"/>
+        <controls:PageHeader Title="Detected BLE Beacons" />
 
-        <!-- Device list -->
         <CollectionView Grid.Row="1"
                         ItemsSource="{Binding Devices}">
             <CollectionView.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate x:DataType="vm:BeaconItemViewModel">
                     <Frame Margin="0,6"
                            Padding="12"
                            CornerRadius="8"
@@ -37,23 +31,23 @@
                                    TextColor="#111827"/>
                             <Label Text="{Binding DeviceId}"
                                    FontSize="12"
-                                   TextColor="#6B7280"/>
+                                   TextColor="{StaticResource BrandGray}"/>
                             <Label Text="{Binding Rssi, StringFormat='RSSI: {0} dBm'}"
                                    FontSize="14"
-                                   TextColor="#374151"/>
+                                   TextColor="{StaticResource HeaderText}"/>
                             <Label Text="{Binding DataPreview}"
                                    FontFamily="Courier New"
                                    FontSize="12"
-                                   TextColor="#2563EB"/>
+                                   TextColor="{StaticResource BrandBlue}"/>
                             <VerticalStackLayout IsVisible="{Binding IsTelemetryBeacon}" Spacing="2">
                                 <Label Text="{Binding DecodedTemp, StringFormat='Temp: {0:F1} °C'}"
                                        FontSize="16"
                                        FontAttributes="Bold"
-                                       TextColor="#059669"/>
+                                       TextColor="{StaticResource BrandGreen}"/>
                                 <Label Text="{Binding DecodedHumidity, StringFormat='Humidity: {0:F1}%'}"
                                        FontSize="16"
                                        FontAttributes="Bold"
-                                       TextColor="#059669"/>
+                                       TextColor="{StaticResource BrandGreen}"/>
                             </VerticalStackLayout>
                         </VerticalStackLayout>
                     </Frame>

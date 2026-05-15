@@ -118,14 +118,23 @@
       </ItemGroup>
 
 	<ItemGroup>
+          <Compile Update="Controls\PageHeader.xaml.cs">
+            <DependentUpon>PageHeader.xaml</DependentUpon>
+          </Compile>
+          <Compile Update="Controls\BackButton.xaml.cs">
+            <DependentUpon>BackButton.xaml</DependentUpon>
+          </Compile>
+          <MauiXaml Update="Controls\PageHeader.xaml">
+            <Generator>MSBuild:Compile</Generator>
+          </MauiXaml>
+          <MauiXaml Update="Controls\BackButton.xaml">
+            <Generator>MSBuild:Compile</Generator>
+          </MauiXaml>
           <Compile Update="Views\BlePage.xaml.cs">
             <DependentUpon>BlePage.xaml</DependentUpon>
           </Compile>
           <Compile Update="Views\BleScannerPage.xaml.cs">
             <DependentUpon>BleScannerPage.xaml</DependentUpon>
-          </Compile>
-          <Compile Update="Views\BeaconPage.xaml.cs">
-            <DependentUpon>BeaconPage.xaml</DependentUpon>
           </Compile>
 	  <Compile Update="Views\NfcP2PPage.xaml.cs">
 	    <DependentUpon>NfcP2PPage.xaml</DependentUpon>
@@ -145,9 +154,6 @@
         </ItemGroup>
 
         <ItemGroup>
-	  <MauiXaml Update="Views\BeaconPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
 	  <MauiXaml Update="Views\NfcP2PPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

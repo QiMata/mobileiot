@@ -1,41 +1,36 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using QiMata.MobileIoT.Services.Interfaces;
 using QiMata.MobileIoT.ThreadDemoCore.Models;
 using QiMata.MobileIoT.ThreadDemoCore.Services;
 
 namespace QiMata.MobileIoT.ViewModels;
 
-public partial class ThreadViewModel : ObservableObject
+public partial class ThreadViewModel : BaseViewModel
 {
     private readonly IThreadDemoService _threadService;
     private readonly INavigationService _navigation;
 
     public const int MaxLogEntries = 200;
 
-    public ThreadViewModel(IThreadDemoService threadService, INavigationService navigation)
+    public ThreadViewModel(IThreadDemoService threadService, INavigationService navigation, IAppLogger logger) : base(logger)
     {
         _threadService = threadService;
         _navigation = navigation;
     }
 
-    // --- Connection settings ---
     [ObservableProperty] private bool _useLiveBridge;
     [ObservableProperty] private string _bridgeUrl = "http://raspberrypi.local:8080";
     [ObservableProperty] private string _targetNode = string.Empty;
     [ObservableProperty] private string _payload = "ping";
 
-    // --- Status display ---
     [ObservableProperty] private string _role = "--";
     [ObservableProperty] private string _datasetHex = "--";
     [ObservableProperty] private string _meshAddresses = "--";
     [ObservableProperty] private string _rloc16 = "--";
     [ObservableProperty] private string _sourceMode = "--";
 
-    // --- Busy state ---
-    [ObservableProperty] private bool _isBusy;
-
-    // --- Log ---
     public ObservableCollection<ThreadLogEntry> LogEntries { get; } = [];
 
     [ObservableProperty] private string _logText = string.Empty;
@@ -92,6 +87,7 @@ public partial class ThreadViewModel : ObservableObject
         catch (Exception ex)
         {
             AppendLog("ERROR", ex.Message);
+            Logger.Error("Thread RefreshStatus failed", ex);
         }
         finally
         {
@@ -127,6 +123,7 @@ public partial class ThreadViewModel : ObservableObject
         catch (Exception ex)
         {
             AppendLog("ERROR", ex.Message);
+            Logger.Error("Thread SendPing failed", ex);
         }
         finally
         {

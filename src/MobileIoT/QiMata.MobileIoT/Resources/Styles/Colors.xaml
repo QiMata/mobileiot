@@ -28,6 +28,15 @@
     <Color x:Key="Gray900">#212121</Color>
     <Color x:Key="Gray950">#141414</Color>
 
+    <!-- MobileIoT brand palette (matches existing inline hex usage across pages) -->
+    <Color x:Key="BrandBlue">#2563EB</Color>
+    <Color x:Key="BrandGreen">#059669</Color>
+    <Color x:Key="BrandRed">#DC2626</Color>
+    <Color x:Key="BrandGray">#6B7280</Color>
+    <Color x:Key="PageBackgroundColor">#F3F4F6</Color>
+    <Color x:Key="DividerGray">#E5E7EB</Color>
+    <Color x:Key="HeaderText">#374151</Color>
+
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
     <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>

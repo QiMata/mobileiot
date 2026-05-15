@@ -3,6 +3,7 @@ using System.Diagnostics;
 using CoreBluetooth;
 using CoreFoundation;
 using Foundation;
+using QiMata.MobileIoT.Constants;
 using QiMata.MobileIoT.Services.Interfaces;
 
 namespace QiMata.MobileIoT.Platforms.iOS;
@@ -60,7 +61,7 @@ public sealed class BleAdvertiseService_iOS : NSObject, IBleAdvertiseService, IC
 
     async Task WaitForReadyAsync(CancellationToken cancellationToken)
     {
-        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(8));
+        using var timeoutCts = new CancellationTokenSource(BleConstants.AdvertiseStartTimeoutIos);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
         try
         {
@@ -70,7 +71,7 @@ public sealed class BleAdvertiseService_iOS : NSObject, IBleAdvertiseService, IC
         {
             await StopAsync().ConfigureAwait(false);
             throw new InvalidOperationException(
-                "CBPeripheralManager did not reach PoweredOn within 8s; advertise aborted");
+                $"CBPeripheralManager did not reach PoweredOn within {BleConstants.AdvertiseStartTimeoutIos.TotalSeconds:F0}s; advertise aborted");
         }
     }
 

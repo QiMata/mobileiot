@@ -2,6 +2,7 @@
 using Android.App;
 using Android.Content;
 using Android.Hardware.Usb;
+using QiMata.MobileIoT.Platforms.Android.Services;
 
 namespace QiMata.MobileIoT.Platforms.Android;
 
@@ -17,9 +18,9 @@ public sealed class UsbPermissionBroadcastReceiver : BroadcastReceiver
 
         var granted = intent.GetBooleanExtra(UsbManager.ExtraPermissionGranted, false);
         var device  = (UsbDevice?)intent.GetParcelableExtra(UsbManager.ExtraDevice);
-        if (granted && device != null)
+        if (device != null)
         {
-            UsbSerialDeviceService.UnblockPermission(device.DeviceId);
+            UsbPermissionManager.CompletePermission(device.DeviceId, granted);
         }
     }
 }

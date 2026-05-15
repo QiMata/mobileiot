@@ -1,31 +1,34 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using System;
-
-using Microsoft.Maui;
-using Microsoft.Maui.Dispatching;
-using System.Collections.ObjectModel;
-using System.Linq;
+using CommunityToolkit.Mvvm.Input;
 using QiMata.MobileIoT.Services.Interfaces;
+using QiMata.MobileIoT.ThreadDemoCore.Services;
+using System.Collections.ObjectModel;
 
 namespace QiMata.MobileIoT.ViewModels;
 
-public class MainPageViewModel : ObservableObject
+public partial class MainPageViewModel : BaseViewModel
 {
     readonly IBeaconScanner _scanner;
+    readonly INavigationService _navigation;
 
     public ObservableCollection<string> BeaconLogs { get; } = new();
 
-    public MainPageViewModel(IBeaconScanner scanner)
+    public MainPageViewModel(IBeaconScanner scanner, INavigationService navigation, IAppLogger logger) : base(logger)
     {
         _scanner = scanner;
-        _scanner.AdvertisementReceived += OnAd;
+        _navigation = navigation;
+        Subscribe<BeaconAdvertisement>(
+            h => _scanner.AdvertisementReceived += h,
+            h => _scanner.AdvertisementReceived -= h,
+            OnAd);
         _scanner.StartScanning();
     }
 
     void OnAd(object? s, BeaconAdvertisement e)
     {
         var preview = BitConverter.ToString(e.Data.Take(4).ToArray());
-        MainThread.BeginInvokeOnMainThread(() =>
-            BeaconLogs.Add($"{DateTime.Now:T}  RSSI {e.Rssi}  {preview}"));
+        OnMain(() => BeaconLogs.Add($"{DateTime.Now:T}  RSSI {e.Rssi}  {preview}"));
     }
+
+    [RelayCommand]
+    private Task NavigateAsync(string route) => _navigation.NavigateAsync(route);
 }

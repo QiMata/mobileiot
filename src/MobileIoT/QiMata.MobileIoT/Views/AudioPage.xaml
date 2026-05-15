@@ -1,21 +1,33 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:QiMata.MobileIoT.Controls"
              x:Class="QiMata.MobileIoT.Views.AudioPage"
+             BackgroundColor="{StaticResource PageBackgroundColor}"
              Title="Audio Jack">
-    <VerticalStackLayout Padding="20" Spacing="20">
-        <Label Text="Audio Jack Telemetry"
-               FontSize="24"
-               FontAttributes="Bold"
-               HorizontalOptions="Center"/>
-        <Label Text="{Binding Status}"
-               FontSize="18"
-               HorizontalOptions="Center"/>
-        <Button Text="Start"
-                Command="{Binding StartCommand}"/>
-        <Button Text="Stop"
-                Command="{Binding StopCommand}"/>
-        <Button Text="Back"
-                Command="{Binding NavigateBackCommand}"/>
-    </VerticalStackLayout>
+    <Grid Padding="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <controls:PageHeader Title="Audio Jack Telemetry" />
+
+        <ScrollView Grid.Row="1">
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="20">
+                    <Label Text="{Binding Status}"
+                           FontSize="18"
+                           HorizontalOptions="Center"/>
+                    <Button Text="Start"
+                            Style="{StaticResource PrimaryButton}"
+                            Command="{Binding StartCommand}"/>
+                    <Button Text="Stop"
+                            Style="{StaticResource DangerButton}"
+                            Command="{Binding StopCommand}"/>
+                    <controls:BackButton Command="{Binding NavigateBackCommand}"/>
+                </VerticalStackLayout>
+            </Frame>
+        </ScrollView>
+    </Grid>
 </ContentPage>

@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Maui.ApplicationModel;
+using QiMata.MobileIoT.Constants;
 using QiMata.MobileIoT.Services;
 using QiMata.MobileIoT.Services.Interfaces;
 
@@ -9,7 +10,8 @@ namespace QiMata.MobileIoT.ViewModels;
 public partial class VisionViewModel(
     ImageClassificationService service,
     IQrScanningService qrScanner,
-    IPiCameraService piCamera) : ObservableObject
+    IPiCameraService piCamera,
+    IAppLogger logger) : BaseViewModel(logger)
 {
     private readonly ImageClassificationService _service = service;
     private readonly IQrScanningService _qrScanner = qrScanner;
@@ -24,9 +26,8 @@ public partial class VisionViewModel(
     [ObservableProperty]
     string qrResult = string.Empty;
 
-    // Pi Camera fields
     [ObservableProperty]
-    string piAddress = "raspberrypi.local";
+    string piAddress = AppConstants.Hosts.RaspberryPi;
 
     [ObservableProperty]
     string piStatus = "Not connected";
@@ -72,7 +73,6 @@ public partial class VisionViewModel(
         if (stream is not null)
         {
             PiPhoto = ImageSource.FromStream(() => stream);
-            // Also classify locally
             stream.Position = 0;
             PiCameraResult = _service.ClassifyImage(stream);
         }

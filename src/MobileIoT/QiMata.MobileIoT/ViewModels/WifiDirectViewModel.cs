@@ -5,12 +5,14 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using QiMata.MobileIoT.Constants;
 using QiMata.MobileIoT.Models;
 using QiMata.MobileIoT.Services;
+using QiMata.MobileIoT.Services.Interfaces;
 
 namespace QiMata.MobileIoT.ViewModels;
 
-public partial class WifiDirectViewModel : ObservableObject
+public partial class WifiDirectViewModel : BaseViewModel
 {
     private readonly IP2PService _p2p;
     private CancellationTokenSource? _receiveCts;
@@ -36,9 +38,15 @@ public partial class WifiDirectViewModel : ObservableObject
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    public WifiDirectViewModel(IP2PService p2p)
+    public WifiDirectViewModel(IP2PService p2p, IAppLogger logger) : base(logger)
     {
         _p2p = p2p;
+    }
+
+    private void AppendLine(string message)
+    {
+        Log += message + "\n";
+        Logger.Info(message);
     }
 
     private async Task SendJsonAsync(object msg, CancellationToken ct = default)
@@ -63,28 +71,27 @@ public partial class WifiDirectViewModel : ObservableObject
             StreamButtonText = "Start Stream";
             ConnectionStatus = "Disconnected";
             ConnectButtonText = "Discover";
-            Log += "Disconnected\n";
+            AppendLine("Disconnected");
             return;
         }
 
         ConnectionStatus = "Discovering...";
-        Log += "Discovering peers...\n";
+        AppendLine("Discovering peers...");
         bool ok = await _p2p.StartDiscoveryAsync();
         if (!ok)
         {
             ConnectionStatus = "Discovery failed";
-            Log += "Discovery failed\n";
+            AppendLine("Discovery failed");
             return;
         }
 
         ConnectionStatus = "Connected";
         ConnectButtonText = "Disconnect";
         _isConnected = true;
-        Log += "Connected\n";
+        AppendLine("Connected");
 
-        // Start receive loop
         _receiveCts = new CancellationTokenSource();
-        _ = ReceiveLoopAsync(_receiveCts.Token);
+        FireAndForget(() => ReceiveLoopAsync(_receiveCts.Token));
     }
 
     private async Task ReceiveLoopAsync(CancellationToken ct)
@@ -106,13 +113,13 @@ public partial class WifiDirectViewModel : ObservableObject
         {
             var lenBytes = _rxBuffer.GetRange(0, 4).ToArray();
             uint len = BinaryPrimitives.ReadUInt32BigEndian(lenBytes);
-            if (len > 10 * 1024 * 1024) // sanity
+            if (len > 10 * 1024 * 1024)
             {
                 _rxBuffer.Clear();
                 return;
             }
             if (_rxBuffer.Count < 4 + (int)len)
-                return; // incomplete frame
+                return;
 
             var payload = _rxBuffer.GetRange(4, (int)len).ToArray();
             _rxBuffer.RemoveRange(0, 4 + (int)len);
@@ -129,7 +136,7 @@ public partial class WifiDirectViewModel : ObservableObject
             using var doc = JsonDocument.Parse(json);
             var type = doc.RootElement.GetProperty("type").GetString();
 
-            MainThread.BeginInvokeOnMainThread(() =>
+            OnMain(() =>
             {
                 switch (type)
                 {
@@ -158,7 +165,7 @@ public partial class WifiDirectViewModel : ObservableObject
                                 Files.Add(new RemoteFileInfo(name, size));
                             }
                         }
-                        Log += $"Received file list: {Files.Count} files\n";
+                        AppendLine($"Received file list: {Files.Count} files");
                         break;
 
                     case "file_data":
@@ -169,11 +176,11 @@ public partial class WifiDirectViewModel : ObservableObject
                             var bytes = Convert.FromBase64String(b64);
                             var path = Path.Combine(FileSystem.AppDataDirectory, fileName);
                             File.WriteAllBytes(path, bytes);
-                            Log += $"Downloaded: {fileName} ({bytes.Length} bytes) -> {path}\n";
+                            AppendLine($"Downloaded: {fileName} ({bytes.Length} bytes) -> {path}");
                         }
                         else
                         {
-                            Log += $"Download failed: {fileName}\n";
+                            AppendLine($"Download failed: {fileName}");
                         }
                         break;
                 }
@@ -181,8 +188,8 @@ public partial class WifiDirectViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            MainThread.BeginInvokeOnMainThread(() =>
-                Log += $"Parse error: {ex.Message}\n");
+            OnMain(() => AppendLine($"Parse error: {ex.Message}"));
+            Logger.Warn("DispatchMessage parse error", ex);
         }
     }
 
@@ -196,14 +203,14 @@ public partial class WifiDirectViewModel : ObservableObject
             await SendJsonAsync(new { type = "start_telemetry" });
             IsStreaming = true;
             StreamButtonText = "Stop Stream";
-            Log += "Telemetry streaming started\n";
+            AppendLine("Telemetry streaming started");
         }
         else
         {
             await SendJsonAsync(new { type = "stop_telemetry" });
             IsStreaming = false;
             StreamButtonText = "Start Stream";
-            Log += "Telemetry streaming stopped\n";
+            AppendLine("Telemetry streaming stopped");
         }
     }
 
@@ -211,8 +218,8 @@ public partial class WifiDirectViewModel : ObservableObject
     private async Task RequestFileListAsync()
     {
         if (!_isConnected) return;
-        await SendJsonAsync(new { type = "file_list", path = "/home/pi/data" });
-        Log += "Requested file list\n";
+        await SendJsonAsync(new { type = "file_list", path = AppConstants.Hosts.PiDataPath });
+        AppendLine("Requested file list");
     }
 
     [RelayCommand]
@@ -220,7 +227,7 @@ public partial class WifiDirectViewModel : ObservableObject
     {
         if (!_isConnected || file is null) return;
         await SendJsonAsync(new { type = "file_download", path = file.Name });
-        Log += $"Requested download: {file.Name}\n";
+        AppendLine($"Requested download: {file.Name}");
     }
 
     [RelayCommand]

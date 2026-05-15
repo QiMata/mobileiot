@@ -1,19 +1,23 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using QiMata.MobileIoT.Constants;
 using QiMata.MobileIoT.Services.Interfaces;
 using System.Collections.ObjectModel;
 
 namespace QiMata.MobileIoT.ViewModels;
 
-public partial class BeaconScanViewModel : ObservableObject
+public class BeaconScanViewModel : BaseViewModel
 {
     readonly IBeaconScanner _scanner;
 
     public ObservableCollection<BeaconItemViewModel> Devices { get; } = new();
 
-    public BeaconScanViewModel(IBeaconScanner scanner)
+    public BeaconScanViewModel(IBeaconScanner scanner, IAppLogger logger) : base(logger)
     {
         _scanner = scanner;
-        _scanner.AdvertisementReceived += OnAdv;
+        Subscribe<BeaconAdvertisement>(
+            h => _scanner.AdvertisementReceived += h,
+            h => _scanner.AdvertisementReceived -= h,
+            OnAdv);
         _scanner.StartScanning();
     }
 
@@ -22,8 +26,7 @@ public partial class BeaconScanViewModel : ObservableObject
         var existing = Devices.FirstOrDefault(d => d.DeviceId == adv.DeviceId);
         if (existing is null)
         {
-            MainThread.BeginInvokeOnMainThread(() =>
-                Devices.Add(new BeaconItemViewModel(adv)));
+            OnMain(() => Devices.Add(new BeaconItemViewModel(adv)));
         }
         else
         {
@@ -34,7 +37,7 @@ public partial class BeaconScanViewModel : ObservableObject
 
 public class BeaconItemViewModel : ObservableObject
 {
-    private const string KnownPiUuid = "12345678-1234-1234-1234-1234567890AB";
+    private static readonly string KnownPiUuid = BleConstants.ServiceUuid.ToString().ToUpperInvariant();
 
     public string DeviceId   { get; }
     public string? Name      { get; private set; }
@@ -42,7 +45,6 @@ public class BeaconItemViewModel : ObservableObject
     public string DataPreview => BitConverter.ToString(Data.Take(16).ToArray());
     byte[] Data { get; set; }
 
-    // Telemetry fields
     public string? BeaconUuid { get; private set; }
     public double? DecodedTemp { get; private set; }
     public double? DecodedHumidity { get; private set; }
@@ -80,7 +82,6 @@ public class BeaconItemViewModel : ObservableObject
         if (scanRecord is null || scanRecord.Length < 2)
             return;
 
-        // Iterate AD structures in the scan record
         int i = 0;
         while (i < scanRecord.Length - 1)
         {
@@ -90,22 +91,18 @@ public class BeaconItemViewModel : ObservableObject
 
             int type = scanRecord[i + 1];
 
-            // Type 0xFF = Manufacturer Specific Data
             if (type == 0xFF && length >= 26)
             {
                 int dataStart = i + 2;
                 int dataLen = length - 1;
 
-                // Check Apple company ID (0x4C 0x00, little-endian)
                 if (dataLen >= 25 &&
                     scanRecord[dataStart] == 0x4C &&
                     scanRecord[dataStart + 1] == 0x00)
                 {
-                    // Check iBeacon prefix (0x02 0x15)
                     if (scanRecord[dataStart + 2] == 0x02 &&
                         scanRecord[dataStart + 3] == 0x15)
                     {
-                        // Extract UUID (16 bytes at offset +4)
                         var uuidBytes = new byte[16];
                         Array.Copy(scanRecord, dataStart + 4, uuidBytes, 0, 16);
                         var uuid = new Guid(
@@ -117,12 +114,9 @@ public class BeaconItemViewModel : ObservableObject
 
                         BeaconUuid = uuid.ToString().ToUpperInvariant();
 
-                        // Extract major (2 bytes big-endian at offset +20)
                         short major = (short)((scanRecord[dataStart + 20] << 8) | scanRecord[dataStart + 21]);
-                        // Extract minor (2 bytes big-endian at offset +22)
                         ushort minor = (ushort)((scanRecord[dataStart + 22] << 8) | scanRecord[dataStart + 23]);
 
-                        // Check if this is our known Pi telemetry beacon
                         if (string.Equals(BeaconUuid, KnownPiUuid, StringComparison.OrdinalIgnoreCase))
                         {
                             IsTelemetryBeacon = true;

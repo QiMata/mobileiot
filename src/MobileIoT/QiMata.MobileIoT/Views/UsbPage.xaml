@@ -1,18 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:QiMata.MobileIoT.Controls"
              x:Class="QiMata.MobileIoT.Views.UsbPage"
+             BackgroundColor="{StaticResource PageBackgroundColor}"
              Title="USB">
-    <VerticalStackLayout Padding="20" Spacing="12">
-        <Button Text="Connect"
-                Command="{Binding ConnectCommand}" />
+    <Grid Padding="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-        <Button Text="Send Ping"
-                Command="{Binding SendPingCommand}" />
+        <controls:PageHeader Title="USB" />
 
-        <ScrollView>
-            <Label Text="{Binding Log}"
-                   LineBreakMode="WordWrap" />
+        <ScrollView Grid.Row="1">
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="12">
+                    <Button Text="Connect"
+                            Style="{StaticResource PrimaryButton}"
+                            Command="{Binding ConnectCommand}" />
+
+                    <Button Text="Send Ping"
+                            Style="{StaticResource PrimaryButton}"
+                            Command="{Binding SendPingCommand}" />
+
+                    <Label Text="{Binding Log}"
+                           LineBreakMode="WordWrap" />
+                </VerticalStackLayout>
+            </Frame>
         </ScrollView>
-    </VerticalStackLayout>
+    </Grid>
 </ContentPage>

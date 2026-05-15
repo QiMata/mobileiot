@@ -3,6 +3,7 @@ using Android.Bluetooth;
 using Android.Bluetooth.LE;
 using Android.OS;
 using Java.Util;
+using QiMata.MobileIoT.Constants;
 using QiMata.MobileIoT.Services.Interfaces;
 using Debug = System.Diagnostics.Debug;
 using OperationCanceledException = System.OperationCanceledException;
@@ -93,7 +94,7 @@ public sealed class BleAdvertiseService_Android : IBleAdvertiseService
 
         // Wait briefly for OnStartSuccess or OnStartFailure so the scenario can
         // surface a meaningful skip reason instead of hanging.
-        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        using var timeoutCts = new CancellationTokenSource(BleConstants.AdvertiseStartTimeoutAndroid);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
         try
         {
@@ -103,7 +104,8 @@ public sealed class BleAdvertiseService_Android : IBleAdvertiseService
         {
             // Treat as advertise failure — clean up and rethrow so scenario reports skipped.
             await StopAsync().ConfigureAwait(false);
-            throw new InvalidOperationException("BLE advertise did not start within 5s (OEM stack may have rejected it)");
+            throw new InvalidOperationException(
+                $"BLE advertise did not start within {BleConstants.AdvertiseStartTimeoutAndroid.TotalSeconds:F0}s (OEM stack may have rejected it)");
         }
     }
 
