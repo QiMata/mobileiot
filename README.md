@@ -59,8 +59,9 @@ status via `ot-ctl` and perform CoAP echo pings to mesh nodes.
 
 ### App side
 
-The shared Thread logic lives in `QiMata.MobileIoT.Shared.Thread`, a plain
-`net8.0` library with no MAUI dependencies. The MAUI app references it and
+The shared Thread logic lives in the `QiMata.MobileIoT.Shared.Thread`
+namespace under the `QiMata.MobileIoT.Shared` `net8.0` library, with no MAUI
+dependencies. The MAUI app references it and
 provides `ThreadPage.xaml` with controls for status refresh, CoAP ping, and
 a scrollable log capped at 200 entries.
 
