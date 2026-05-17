@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QiMata.MobileIoT", "QiMata.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QiMata.MobileIoT.Tests", "QiMata.MobileIoT.Tests\QiMata.MobileIoT.Tests.csproj", "{FA1AF17C-1A7D-4C6B-BEA5-6FFCAA6D800A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QiMata.MobileIoT.ThreadDemoCore.Tests", "QiMata.MobileIoT.ThreadDemoCore.Tests\QiMata.MobileIoT.ThreadDemoCore.Tests.csproj", "{B2C3D4E5-F6A1-8901-BCDE-F12345678901}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QiMata.MobileIoT.Shared.Thread.Tests", "QiMata.MobileIoT.Shared.Thread.Tests\QiMata.MobileIoT.Shared.Thread.Tests.csproj", "{B2C3D4E5-F6A1-8901-BCDE-F12345678901}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QiMata.MobileIoT.Shared", "QiMata.MobileIoT.Shared\QiMata.MobileIoT.Shared.csproj", "{F940DAD2-D01A-451F-9DB4-676214F69B54}"
 EndProject
