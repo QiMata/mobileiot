@@ -34,7 +34,7 @@ python -m harness run --tier auto --json > run.jsonl
 
 This directory contains the **framework skeleton only**. Per-integration test suites live next to the code they exercise (`src/pi/tests/`, `src/MobileIoT/QiMata.MobileIoT.Tests/`) and plug in via entry-point registered `IntegrationPlugin` classes under [`harness/integrations/`](harness/integrations/).
 
-See [`../C:/Users/Recording/.claude/plans/i-want-to-build-indexed-rose.md`](../) (planning doc, not in repo) and the directory layout below.
+The directory layout below shows where the harness runtime, fixtures, transports, and self-tests live.
 
 ## Layout
 
