@@ -3,28 +3,30 @@
 from __future__ import annotations
 
 import argparse
-import json
 import logging
 import threading
 import time
-from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import List, Optional, Sequence, Tuple
 
 import Adafruit_DHT  # Library for DHT22 sensor (ensure it's installed)
 import RPi.GPIO as GPIO  # GPIO library for LED control
-from bluezero import adapter, peripheral
+from bluezero import peripheral
 
 from azure_retransmit import (
-    AzureIoTHubPublisher,
     BackgroundTelemetryRelay,
-    IoTOpsEdgePublisher,
-    TelemetryPublisher,
     build_sensor_payload,
+)
+from ble_demo_support import (
+    LED_PIN,
+    build_peripheral,
+    build_publishers_from_args,
+    cleanup_gpio,
+    configure_gpio,
+    load_ble_constants,
 )
 
 LOGGER = logging.getLogger(__name__)
 
-BLE_CONFIG_PATH = Path(__file__).resolve().parents[1] / "shared" / "ble_constants.json"
 DEFAULT_DEVICE_NAME = "PiSensor"
 
 TELEMETRY_SOURCE = "bluetoothle_demo"
@@ -32,7 +34,6 @@ _TELEMETRY_RELAY: Optional[BackgroundTelemetryRelay] = None
 
 DHT_SENSOR = Adafruit_DHT.DHT22
 DHT_PIN = 4
-LED_PIN = 17
 
 _SENSOR_SAMPLE_INTERVAL = 2.0
 _last_temp_c = 0.0
@@ -68,38 +69,6 @@ def _emit_sensor_telemetry(measurement: str, value: float, unit: str) -> None:
 
 class SensorReadError(RuntimeError):
     """Raised when the DHT22 sensor fails to provide a reading."""
-
-
-def load_ble_constants(path: Path = BLE_CONFIG_PATH) -> Dict[str, str]:
-    if not path.exists():
-        raise FileNotFoundError(f"BLE constants file missing at {path}")
-
-    with path.open("r", encoding="utf-8") as handle:
-        data = json.load(handle)
-
-    required = {
-        "serviceUuid",
-        "temperatureCharacteristicUuid",
-        "humidityCharacteristicUuid",
-        "ledCharacteristicUuid",
-    }
-    missing = sorted(required - data.keys())
-    if missing:
-        raise KeyError(f"BLE constants file missing keys: {', '.join(missing)}")
-
-    return {key: str(value) for key, value in data.items()}
-
-
-def configure_gpio() -> None:
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(LED_PIN, GPIO.OUT, initial=GPIO.LOW)
-
-
-def cleanup_gpio() -> None:
-    try:
-        GPIO.cleanup()
-    except RuntimeError:
-        LOGGER.debug("GPIO cleanup failed; hardware may already be released")
 
 
 def _read_dht22(now: float | None = None) -> Tuple[float, float]:
@@ -191,69 +160,6 @@ def _notification_loop(periph: peripheral.Peripheral, stop_event: threading.Even
             periph.update_value(srv_id=1, chr_id=2, value=_uint16_bytes(int(round(humidity * 100))))
 
 
-def _build_publishers_from_args(args: argparse.Namespace) -> List[TelemetryPublisher]:
-    publishers: List[TelemetryPublisher] = []
-
-    if args.azure_iot_hub_connection_string:
-        publishers.append(AzureIoTHubPublisher(args.azure_iot_hub_connection_string))
-
-    if args.azure_iot_ops_ingest_url:
-        publishers.append(
-            IoTOpsEdgePublisher(
-                args.azure_iot_ops_ingest_url,
-                api_key=args.azure_iot_ops_api_key,
-                api_key_header=args.azure_iot_ops_api_key_header,
-            )
-        )
-
-    return publishers
-
-
-def build_peripheral(constants: Dict[str, str], *, device_name: str) -> peripheral.Peripheral:
-    adapter_address = next(iter(adapter.Adapter.available())).address
-    ble_periph = peripheral.Peripheral(
-        adapter_address,
-        local_name=device_name,
-        appearance=0x0340,
-    )
-
-    ble_periph.add_service(srv_id=1, uuid=constants["serviceUuid"], primary=True)
-    ble_periph.add_characteristic(
-        srv_id=1,
-        chr_id=1,
-        uuid=constants["temperatureCharacteristicUuid"],
-        value=[0x00, 0x00],
-        notifying=False,
-        flags=["read", "notify"],
-        read_callback=temperature_read_callback,
-        write_callback=None,
-        notify_callback=temp_notify_callback,
-    )
-    ble_periph.add_characteristic(
-        srv_id=1,
-        chr_id=2,
-        uuid=constants["humidityCharacteristicUuid"],
-        value=[0x00, 0x00],
-        notifying=False,
-        flags=["read", "notify"],
-        read_callback=humidity_read_callback,
-        write_callback=None,
-        notify_callback=hum_notify_callback,
-    )
-    ble_periph.add_characteristic(
-        srv_id=1,
-        chr_id=3,
-        uuid=constants["ledCharacteristicUuid"],
-        value=[0x00],
-        notifying=False,
-        flags=["write"],
-        read_callback=None,
-        write_callback=lambda data: led_write_callback(data),
-    )
-
-    return ble_periph
-
-
 def run_event_loop(periph: peripheral.Peripheral, *, device_name: str) -> None:
     notification_stop = threading.Event()
     notification_thread = threading.Thread(
@@ -323,7 +229,7 @@ def main() -> None:
     configure_gpio()
 
     telemetry_relay: Optional[BackgroundTelemetryRelay] = None
-    publishers = _build_publishers_from_args(args)
+    publishers = build_publishers_from_args(args)
     if publishers:
         telemetry_relay = BackgroundTelemetryRelay(publishers, max_queue_size=args.telemetry_queue_size)
         set_telemetry_relay(telemetry_relay)
@@ -332,7 +238,15 @@ def main() -> None:
         LOGGER.info("Azure telemetry forwarding disabled")
 
     try:
-        ble_periph = build_peripheral(constants, device_name=args.device_name)
+        ble_periph = build_peripheral(
+            constants,
+            device_name=args.device_name,
+            temperature_read_callback=temperature_read_callback,
+            humidity_read_callback=humidity_read_callback,
+            led_write_callback=led_write_callback,
+            temp_notify_callback=temp_notify_callback,
+            hum_notify_callback=hum_notify_callback,
+        )
         run_event_loop(ble_periph, device_name=args.device_name)
     finally:
         if telemetry_relay is not None:
