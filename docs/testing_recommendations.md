@@ -20,6 +20,7 @@ This document consolidates the current guidance for strengthening automated test
 ### Integration and contract tests
 - Create contract tests that load `src/shared/ble_constants.json`, the Python BLE server definitions, and the MAUI `BleUuidConfig` resource to keep UUIDs in sync.
 - Build end-to-end smoke tests that feed prerecorded audio samples (mirroring `audio_demo` output) through `AudioModemService` to ensure the decoder raises the expected messages.
+- Add entry-point smoke tests for `bluetoothle_demo.py` and `thread_demo.py` so the runnable scripts stay covered even though their internals now live in helper modules.
 - Script BLE adapter simulations to validate data exchange between the app and Pi utilities using the shared UUIDs.
 
 ## Raspberry Pi utilities (Python)
@@ -29,7 +30,7 @@ This document consolidates the current guidance for strengthening automated test
 - Verify logging updates and LED toggling logic when commands succeed or fail, mirroring the .NET view-model assertions.
 
 ### BLE demo
-- Add targeted tests for helper functions in `bluetoothle_demo.py`: ensure `load_ble_constants` rejects missing keys, characteristic callbacks respect cached sensor values, and LED writes toggle the expected GPIO pins. Mock `Adafruit_DHT`, `GPIO`, and `adapter.Adapter.available()` to avoid hardware dependencies.
+- Add targeted tests for helper functions in `ble_demo_support.py`: ensure `load_ble_constants` rejects missing keys, characteristic callbacks respect cached sensor values, and LED writes toggle the expected GPIO pins. Mock `Adafruit_DHT`, `GPIO`, and `adapter.Adapter.available()` to avoid hardware dependencies. Keep entry-point smoke tests on `bluetoothle_demo.py`.
 - Reuse the lightweight stubbing strategy from the serial demo tests to validate JSON configuration loading, byte encoding helpers, and sensor retry caching windows.
 - Encapsulate Bluezero adapter discovery and GPIO access behind thin wrappers so tests can simulate discovery, read/write errors, and disconnections without the real plugins.
 - If the beacon example remains, factor its construction into a helper so you can assert UUID/major/minor packing and TX power bytes.
