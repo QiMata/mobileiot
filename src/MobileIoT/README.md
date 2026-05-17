@@ -1,12 +1,13 @@
 # MobileIoT Demo Apps
 
-This solution contains two independent demo apps plus one shared harness/contracts library.
+This solution contains a MAUI demo, an Uno demo, one shared app library, and one shared test project.
 
 ## Projects
 
-- `QiMata.MobileIoT.Shared` is a platform-neutral `net8.0` library. It owns service interfaces, models, mock services, Thread service/model logic, and the TEST_HARNESS HTTP/scenario contract.
-- `QiMata.MobileIoT` is the existing .NET MAUI demo. It keeps MAUI pages, MAUI ViewModels, Shell navigation, MAUI permissions, and MAUI/platform service implementations.
+- `QiMata.MobileIoT.Shared` is the platform-neutral `net8.0` app library. It owns service interfaces, models, mock services, Thread service/model logic, and the TEST_HARNESS HTTP/scenario contract.
+- `QiMata.MobileIoT` is the .NET MAUI demo. It keeps MAUI pages, MAUI ViewModels, Shell navigation, MAUI permissions, and MAUI platform service implementations.
 - `QiMata.MobileIoT.Uno` is the Uno Platform demo. It uses a WinUI-style `Frame`, Uno pages, Uno service registrations, and the same shared harness host.
+- `QiMata.MobileIoT.Shared.Thread.Tests` is the shared Thread test project. It covers the Thread view model and service logic without a UI dependency.
 
 The app ids are:
 
@@ -24,6 +25,7 @@ Shared scenarios live in `QiMata.MobileIoT.Shared/Services/TestHarness/Scenarios
 ```bash
 dotnet build src/MobileIoT/QiMata.MobileIoT.Shared/QiMata.MobileIoT.Shared.csproj -c TestHarness
 dotnet build src/MobileIoT/QiMata.MobileIoT.Uno/QiMata.MobileIoT.Uno.csproj -c TestHarness -f net9.0-windows10.0.19041
+dotnet test src/MobileIoT/QiMata.MobileIoT.Shared.Thread.Tests/QiMata.MobileIoT.Shared.Thread.Tests.csproj
 python -m harness build --app uno --platform windows
 python -m harness run --integration smoke_uno_windows --app uno --tier hardware
 ```
