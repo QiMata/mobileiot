@@ -98,7 +98,7 @@ In summary, the most viable demo for QiMata’s MobileIoT app is **using the Pi�
 
 ## Implementation Plan for the Demo in QiMata/mobileiot
 
-To integrate this into the `QiMata/mobileiot` repository, we can add a new module (both on the Pi side and in the .NET MAUI app) following a pattern similar to the BLE and USB demos.
+To integrate this into the `QiMata/mobileiot` repository, we can add a new module (both on the Pi side and in the .NET MAUI app) following a pattern similar to the BLE, Thread, and USB demos.
 
 **1. Hardware Setup:** Connect the Raspberry Pi’s audio output to the mobile device’s headphone/mic jack. Use a suitable TRRS cable/adapter:
 
@@ -160,7 +160,7 @@ While implementing data-over-audio is quite feasible, note a few considerations:
 
 Implementing data transmission via the audio jack is highly doable with some signal processing work. It offers a creative demonstration of hardware/software integration: essentially repurposing the headphone interface as a data port. We’ve examined how to encode digital data as sound (FSK, DTMF, etc.), how to wire a Raspberry Pi to a phone’s mic input (with proper coupling and adapters), and how to use .NET MAUI to capture and decode the signal.
 
-For the **QiMata/mobileiot** project, the recommended demo is: **Raspberry Pi transmitting a sensor value to the .NET MAUI app using an audio cable connection.** This could be presented as an “Audio Jack Telemetry” feature in the app. The steps would involve minimal hardware (just a cable and a couple of passive components) and open-source libraries like Plugin.Maui.Audio and possibly a signal processing snippet for decoding. It complements the existing BLE and USB demos by showing a fallback communication method requiring no wireless stack or USB host – just analog sound.
+For the **QiMata/mobileiot** project, the recommended demo is: **Raspberry Pi transmitting a sensor value to the .NET MAUI app using an audio cable connection.** This could be presented as an “Audio Jack Telemetry” feature in the app. The steps would involve minimal hardware (just a cable and a couple of passive components) and open-source libraries like Plugin.Maui.Audio and possibly a signal processing snippet for decoding. It complements the existing BLE, Thread, and USB demos by showing a fallback communication method requiring no wireless stack or USB host - just analog sound.
 
 In summary, while not mainstream, audio-jack data transfer is a viable and fun IoT experiment. It teaches about modulation, encoding, and low-level data transfer, fitting well with an educational/demo repository. By encapsulating the encode/decode logic into reusable modules (e.g., an `AudioModem` class for the app, and a Python script or .NET routine for the Pi), this functionality can be cleanly integrated and potentially re-used for other projects. The result will be a unique demo where plugging in a headphone cable suddenly enables an IoT data link – sure to get some amazed reactions when shown in action.
 

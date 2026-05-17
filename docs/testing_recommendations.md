@@ -20,6 +20,7 @@ This document consolidates the current guidance for strengthening automated test
 ### Integration and contract tests
 - Create contract tests that load `src/shared/ble_constants.json`, the Python BLE server definitions, and the MAUI `BleUuidConfig` resource to keep UUIDs in sync.
 - Build end-to-end smoke tests that feed prerecorded audio samples (mirroring `audio_demo` output) through `AudioModemService` to ensure the decoder raises the expected messages.
+- Add entry-point smoke tests for `bluetoothle_demo.py` and `thread_demo.py` so the runnable scripts stay covered even though their internals now live in helper modules.
 - Script BLE adapter simulations to validate data exchange between the app and Pi utilities using the shared UUIDs.
 
 ## Raspberry Pi utilities (Python)

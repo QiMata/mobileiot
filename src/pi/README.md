@@ -4,7 +4,7 @@ This README summarizes the Raspberry Pi demo scripts used with the QiMata Mobile
 
 ## BLE GATT Server Demo (Sensor and LED)
 
-**Purpose:** `bluetoothle_demo.py` turns the Pi into a BLE GATT peripheral that exposes:
+**Purpose:** `bluetoothle_demo.py` remains the runnable BLE entry point. Its helper modules now carry the internal BLE logic, while the script itself turns the Pi into a BLE GATT peripheral that exposes:
 - Temperature characteristic (`00002A6E-0000-1000-8000-00805F9B34FB`)
 - Humidity characteristic (`00002A6F-0000-1000-8000-00805F9B34FB`)
 - LED write characteristic (`12345679-1234-1234-1234-1234567890AB`)
@@ -82,7 +82,7 @@ sudo ./run_usb_bulk_echo.sh
 
 ## Thread Protocol Demo (OTBR + CoAP Bridge)
 
-**Purpose:** `thread_demo.py` bridges Thread network info to the app over HTTP and supports CoAP echo pings.
+**Purpose:** `thread_demo.py` remains the runnable Thread entry point. Its helper modules now carry the OTBR and CoAP internals, while the script bridges Thread network info to the app over HTTP and supports CoAP echo pings.
 
 **Prerequisites:**
 1. Install and configure OTBR on the Pi.
