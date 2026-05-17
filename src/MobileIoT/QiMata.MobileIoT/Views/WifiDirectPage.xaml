@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:QiMata.MobileIoT.Controls"
-             xmlns:models="clr-namespace:QiMata.MobileIoT.Models;assembly=QiMata.MobileIoT.Shared"
+             xmlns:models="clr-namespace:QiMata.MobileIoT.Shared.Models;assembly=QiMata.MobileIoT.Shared"
              x:Class="QiMata.MobileIoT.Views.WifiDirectPage"
              BackgroundColor="{StaticResource PageBackgroundColor}"
              Title="Wi-Fi Direct">
