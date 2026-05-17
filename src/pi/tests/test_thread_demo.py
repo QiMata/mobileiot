@@ -1,25 +1,21 @@
-"""Tests for thread_demo.py – HTTP bridge and ot-ctl parser.
+"""Tests for the Thread demo bridge and ot-ctl parser.
 
 Run with:
     python -m pytest src/pi/tests -q
 """
 
-import json
-import asyncio
-from unittest.mock import patch, MagicMock
-import pytest
-from aiohttp import web
-from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
+from unittest.mock import MagicMock, patch
 
-import sys, os
+import pytest
+
+import os
+import sys
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from thread_demo import (
+from thread_demo_bridge import (
     OtCtlDiagnostics,
     create_app,
-    handle_healthz,
-    handle_thread_status,
-    handle_thread_ping,
 )
 
 
@@ -30,12 +26,12 @@ from thread_demo import (
 class TestOtCtlDiagnostics:
     """Test the ot-ctl output parsing logic."""
 
-    @patch("thread_demo.subprocess.run")
+    @patch("thread_demo_bridge.subprocess.run")
     def test_state_returns_role(self, mock_run):
         mock_run.return_value = MagicMock(stdout="leader\n", returncode=0)
         assert OtCtlDiagnostics.state() == "leader"
 
-    @patch("thread_demo.subprocess.run")
+    @patch("thread_demo_bridge.subprocess.run")
     def test_ipaddr_returns_list(self, mock_run):
         mock_run.return_value = MagicMock(
             stdout="fddead:00be:ef00:0:0:ff:fe00:fc00\nfddead:00be:ef00:0:a8cd:baff:dead:beef\n",
@@ -45,17 +41,17 @@ class TestOtCtlDiagnostics:
         assert len(addrs) == 2
         assert "fddead:00be:ef00:0:0:ff:fe00:fc00" in addrs
 
-    @patch("thread_demo.subprocess.run")
+    @patch("thread_demo_bridge.subprocess.run")
     def test_rloc16_returns_hex(self, mock_run):
         mock_run.return_value = MagicMock(stdout="0400\n", returncode=0)
         assert OtCtlDiagnostics.rloc16() == "0400"
 
-    @patch("thread_demo.subprocess.run")
+    @patch("thread_demo_bridge.subprocess.run")
     def test_dataset_active_hex(self, mock_run):
         mock_run.return_value = MagicMock(stdout="0e0800000000000100\n", returncode=0)
         assert OtCtlDiagnostics.dataset_active_hex() == "0e0800000000000100"
 
-    @patch("thread_demo.subprocess.run")
+    @patch("thread_demo_bridge.subprocess.run")
     def test_get_status_success(self, mock_run):
         # Each call to _run returns different output based on args
         def side_effect(args, **kwargs):
@@ -78,7 +74,7 @@ class TestOtCtlDiagnostics:
         assert len(status["meshLocalAddresses"]) == 2
         assert status["rloc16"] == "1800"
 
-    @patch("thread_demo.subprocess.run")
+    @patch("thread_demo_bridge.subprocess.run")
     def test_get_status_otctl_missing(self, mock_run):
         mock_run.side_effect = FileNotFoundError("ot-ctl not found")
 
@@ -86,7 +82,7 @@ class TestOtCtlDiagnostics:
         assert status["ok"] is False
         assert "error" in status
 
-    @patch("thread_demo.subprocess.run")
+    @patch("thread_demo_bridge.subprocess.run")
     def test_get_status_otctl_timeout(self, mock_run):
         import subprocess
         mock_run.side_effect = subprocess.TimeoutExpired(cmd="ot-ctl", timeout=5)
@@ -164,7 +160,7 @@ class TestThreadStatus:
 
 class TestThreadPing:
     @pytest.mark.asyncio
-    @patch("thread_demo.coap_ping")
+    @patch("thread_demo_bridge.coap_ping")
     async def test_ping_success(self, mock_coap, aiohttp_client):
         mock_coap.return_value = {
             "ok": True,
@@ -186,7 +182,7 @@ class TestThreadPing:
         assert data["rttMs"] > 0
 
     @pytest.mark.asyncio
-    @patch("thread_demo.coap_ping")
+    @patch("thread_demo_bridge.coap_ping")
     async def test_ping_timeout(self, mock_coap, aiohttp_client):
         mock_coap.return_value = {
             "ok": False,
