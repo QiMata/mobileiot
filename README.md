@@ -59,8 +59,9 @@ status via `ot-ctl` and perform CoAP echo pings to mesh nodes.
 
 ### App side
 
-The core logic lives in `QiMata.MobileIoT.ThreadDemoCore`, a plain `net8.0`
-class library with no MAUI dependencies. The MAUI app references it and
+The shared Thread logic lives in the `QiMata.MobileIoT.Shared.Thread`
+namespace under the `QiMata.MobileIoT.Shared` `net8.0` library, with no MAUI
+dependencies. The MAUI app references it and
 provides `ThreadPage.xaml` with controls for status refresh, CoAP ping, and
 a scrollable log capped at 200 entries.
 
@@ -82,7 +83,7 @@ Prerequisites: OTBR installed and a Thread network commissioned. See
 
 ```bash
 # .NET (from src/MobileIoT/)
-dotnet test QiMata.MobileIoT.ThreadDemoCore.Tests
+dotnet test QiMata.MobileIoT.Shared.Thread.Tests
 
 # Python (from repo root)
 python -m pytest src/pi/tests -q
