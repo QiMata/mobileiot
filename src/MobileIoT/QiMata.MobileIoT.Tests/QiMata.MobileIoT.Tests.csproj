@@ -10,6 +10,9 @@
     <Compile Include="..\QiMata.MobileIoT\ViewModels\SerialDemoViewModel.cs" Link="ViewModels\SerialDemoViewModel.cs" />
     <Compile Include="..\QiMata.MobileIoT\Services\AudioModemService.cs" Link="Services\AudioModemService.cs" />
     <Compile Include="..\QiMata.MobileIoT\Services\RootMeanSquareAudioDecoder.cs" Link="Services\RootMeanSquareAudioDecoder.cs" />
+    <Compile Include="..\QiMata.MobileIoT\Constants\AppConstants.cs" Link="Constants\AppConstants.cs" />
+    <Compile Include="..\QiMata.MobileIoT\Constants\BleConstants.cs" Link="Constants\BleConstants.cs" />
+    <Compile Include="..\QiMata.MobileIoT\Constants\TransportConstants.cs" Link="Constants\TransportConstants.cs" />
   </ItemGroup>
 
   <ItemGroup>

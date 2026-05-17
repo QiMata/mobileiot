@@ -1,3 +1,4 @@
+using QiMata.MobileIoT.Shared.Services;
 using Android.App;
 using Android.Content;
 using Android.Hardware.Usb;
@@ -5,7 +6,7 @@ using Hoho.Android.UsbSerial.Driver;
 using QiMata.MobileIoT.Constants;
 using QiMata.MobileIoT.Platforms.Android.Services;
 using QiMata.MobileIoT.Services;
-using QiMata.MobileIoT.Services.Interfaces;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
 using System.IO;
 using System.Linq;
 using System.Threading;

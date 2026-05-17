@@ -1,7 +1,7 @@
 #if ANDROID && TEST_HARNESS
 using Android.Nfc;
 using Android.Nfc.Tech;
-using QiMata.MobileIoT.Services.Interfaces;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
 
 namespace QiMata.MobileIoT.Platforms.Android;
 

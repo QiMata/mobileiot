@@ -1,4 +1,4 @@
-namespace QiMata.MobileIoT.Models;
+namespace QiMata.MobileIoT.Shared.Models;
 
 public record TelemetryData(
     double Temp,

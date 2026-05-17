@@ -1,3 +1,4 @@
+using QiMata.MobileIoT.Shared.Services;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
 using ZXing.Net.Maui;

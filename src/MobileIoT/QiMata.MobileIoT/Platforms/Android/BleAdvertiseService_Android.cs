@@ -4,7 +4,7 @@ using Android.Bluetooth.LE;
 using Android.OS;
 using Java.Util;
 using QiMata.MobileIoT.Constants;
-using QiMata.MobileIoT.Services.Interfaces;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
 using Debug = System.Diagnostics.Debug;
 using OperationCanceledException = System.OperationCanceledException;
 

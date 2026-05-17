@@ -1,4 +1,4 @@
-namespace QiMata.MobileIoT.ThreadDemoCore.Models;
+namespace QiMata.MobileIoT.Shared.Thread.Models;
 
 public sealed class ThreadPingResult
 {

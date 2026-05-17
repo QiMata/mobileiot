@@ -1,8 +1,8 @@
 using System.Net.Http.Json;
 using System.Text.Json;
-using QiMata.MobileIoT.ThreadDemoCore.Models;
+using QiMata.MobileIoT.Shared.Thread.Models;
 
-namespace QiMata.MobileIoT.ThreadDemoCore.Services;
+namespace QiMata.MobileIoT.Shared.Thread.Services;
 
 public sealed class ThreadBridgeClient : IThreadBridgeClient
 {

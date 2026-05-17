@@ -1,4 +1,4 @@
-using QiMata.MobileIoT.Services.Interfaces;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

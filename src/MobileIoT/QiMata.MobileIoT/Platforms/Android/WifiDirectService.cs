@@ -1,8 +1,9 @@
+using QiMata.MobileIoT.Shared.Services;
 using Android.Content;
 using Android.Net.Wifi.P2p;
 using QiMata.MobileIoT.Constants;
 using QiMata.MobileIoT.Services;
-using QiMata.MobileIoT.Services.Interfaces;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
 using QiMata.MobileIoT.Platforms.Android.Helpers;
 using Android.App;
 using Microsoft.Maui.ApplicationModel;

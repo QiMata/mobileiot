@@ -2,7 +2,7 @@
 using Plugin.BLE;
 using Plugin.BLE.Abstractions.Contracts;
 using QiMata.MobileIoT.Helpers;
-using QiMata.MobileIoT.Services.Interfaces;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
 using Debug = System.Diagnostics.Debug;
 
 namespace QiMata.MobileIoT.Platforms.Android;

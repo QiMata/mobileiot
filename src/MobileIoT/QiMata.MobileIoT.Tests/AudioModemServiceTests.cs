@@ -1,7 +1,7 @@
 using Moq;
 using Plugin.Maui.Audio;
 using QiMata.MobileIoT.Services;
-using QiMata.MobileIoT.Services.Interfaces;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
 using System;
 using System.IO;
 using System.Threading;

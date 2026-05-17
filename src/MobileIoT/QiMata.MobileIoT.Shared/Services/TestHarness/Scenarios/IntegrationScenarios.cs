@@ -1,12 +1,13 @@
+using QiMata.MobileIoT.Shared.Services;
 #if TEST_HARNESS
 using System.Text.Json;
-using QiMata.MobileIoT.Models;
-using QiMata.MobileIoT.Services.Interfaces;
-using QiMata.MobileIoT.ThreadDemoCore.Models;
-using QiMata.MobileIoT.ThreadDemoCore.Services;
-using QiMata.MobileIoT.Usb;
+using QiMata.MobileIoT.Shared.Models;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
+using QiMata.MobileIoT.Shared.Thread.Models;
+using QiMata.MobileIoT.Shared.Thread.Services;
+using QiMata.MobileIoT.Shared.Usb;
 
-namespace QiMata.MobileIoT.Services.TestHarness.Scenarios;
+namespace QiMata.MobileIoT.Shared.Services.TestHarness.Scenarios;
 
 public sealed class BleGattScenario(IServiceProvider services) : ScenarioBase(services)
 {

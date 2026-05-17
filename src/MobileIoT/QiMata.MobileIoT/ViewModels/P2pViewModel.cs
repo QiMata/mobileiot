@@ -1,8 +1,9 @@
+using QiMata.MobileIoT.Shared.Services;
 using System.Text;
 using CommunityToolkit.Mvvm.Input;
 using QiMata.MobileIoT.Services;
-using QiMata.MobileIoT.Services.Interfaces;
-using QiMata.MobileIoT.ViewModels;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
+using QiMata.MobileIoT.Shared.ViewModels;
 
 public partial class P2pViewModel(IP2PService p2p, IAppLogger logger) : BaseViewModel(logger)
 {

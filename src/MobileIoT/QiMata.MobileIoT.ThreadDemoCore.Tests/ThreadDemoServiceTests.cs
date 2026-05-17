@@ -1,10 +1,10 @@
 using FluentAssertions;
 using Moq;
-using QiMata.MobileIoT.ThreadDemoCore.Models;
-using QiMata.MobileIoT.ThreadDemoCore.Services;
+using QiMata.MobileIoT.Shared.Thread.Models;
+using QiMata.MobileIoT.Shared.Thread.Services;
 using Xunit;
 
-namespace QiMata.MobileIoT.ThreadDemoCore.Tests;
+namespace QiMata.MobileIoT.Shared.Thread.Tests;
 
 public class ThreadDemoServiceTests
 {

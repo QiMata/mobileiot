@@ -1,4 +1,4 @@
-namespace QiMata.MobileIoT.Services.Interfaces;
+namespace QiMata.MobileIoT.Shared.Services.Interfaces;
 
 public interface INfcReaderService
 {

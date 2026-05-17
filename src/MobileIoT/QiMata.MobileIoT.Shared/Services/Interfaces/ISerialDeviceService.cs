@@ -1,4 +1,4 @@
-namespace QiMata.MobileIoT.Services;
+namespace QiMata.MobileIoT.Shared.Services;
 
 public interface ISerialDeviceService : IAsyncDisposable
 {

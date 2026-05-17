@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
-using QiMata.MobileIoT.Services.Interfaces;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
 using System.Runtime.CompilerServices;
 
 namespace QiMata.MobileIoT.Services;

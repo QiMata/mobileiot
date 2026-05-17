@@ -1,6 +1,7 @@
+using QiMata.MobileIoT.Shared.Services;
 using Moq;
-using QiMata.MobileIoT.Models;
-using QiMata.MobileIoT.Services.Interfaces;
+using QiMata.MobileIoT.Shared.Models;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -9,9 +10,9 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using QiMata.MobileIoT.Usb;
+using QiMata.MobileIoT.Shared.Usb;
 
-namespace QiMata.MobileIoT.Services.Mock
+namespace QiMata.MobileIoT.Shared.Services.Mock
 {
     public interface INfcP2PTestHarness
     {
