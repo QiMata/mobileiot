@@ -30,45 +30,17 @@ from harness.app.ios_driver import IosAppDriver
 from harness.inventory.model import DeviceKind
 from harness.transports import transport_for
 
-from ._phone_helpers import wait_health as _wait_health, wake_screen as _wake_screen
+from ._phone_helpers import (
+    install_and_launch_android_app,
+    require_android_devices_with_capability,
+    wait_health as _wait_health,
+)
 
 
 PACKAGE_ID = "com.qimata.mobileiot"
 PERI_PORT = 47821
 CENT_PORT = 47822
 ADVERTISE_WARMUP_S = 1.0
-
-
-def _install_and_launch_android(transport, device_id: str, apk_path: str) -> None:
-    """Wake, install (always — `-r` reinstall is cheap and avoids stale-APK
-    bugs), force-stop, grant runtime BLE permissions, and launch the MAUI
-    activity."""
-    _wake_screen(transport, device_id)
-    transport.shell(["svc", "bluetooth", "enable"], timeout=10.0)
-    transport.install_apk(apk_path)
-    # Android 12+ requires runtime BLUETOOTH_SCAN + BLUETOOTH_CONNECT;
-    # MAUI Permissions only covers location. Grant via adb so the test
-    # doesn't hang on a UI permission prompt.
-    for perm in (
-        "android.permission.BLUETOOTH_SCAN",
-        "android.permission.BLUETOOTH_CONNECT",
-        "android.permission.BLUETOOTH_ADVERTISE",
-        "android.permission.ACCESS_FINE_LOCATION",
-    ):
-        transport.shell(["pm", "grant", PACKAGE_ID, perm], timeout=5.0)
-    resolved = transport.shell(
-        ["cmd", "package", "resolve-activity", "--brief", PACKAGE_ID],
-        timeout=5.0,
-    )
-    activity_line = next(
-        (ln for ln in resolved.stdout.splitlines() if ln.startswith(f"{PACKAGE_ID}/")),
-        None,
-    )
-    assert activity_line, (
-        f"{device_id}: could not resolve launcher activity ({resolved.stdout!r})"
-    )
-    transport.shell(["am", "force-stop", PACKAGE_ID])
-    transport.shell(["am", "start", "-n", activity_line], timeout=10.0)
 
 
 def _post_peripheral(
@@ -104,17 +76,47 @@ def _post_peripheral(
 
 
 def _ble_pairs(android_phones):
-    return [(d, t) for d, t in android_phones if "ble" in d.capabilities]
+    return require_android_devices_with_capability(android_phones, "ble")
+
+
+def _assert_ble_exchange(
+    *,
+    central_body: dict,
+    peripheral_body: dict,
+    payload_hex: str,
+    central_label: str,
+    peripheral_label: str,
+    central_error_label: str,
+    peripheral_error_label: str,
+) -> None:
+    if peripheral_body.get("status") == "skipped":
+        pytest.skip(
+            f"{peripheral_label} skipped: "
+            f"{peripheral_body.get('result', peripheral_body)}"
+        )
+    if central_body.get("status") == "skipped":
+        pytest.skip(f"{central_label} skipped: {central_body}")
+
+    central_state = central_body.get("result", {})
+    peripheral_state = peripheral_body.get("result", {})
+
+    assert central_state.get("ok") is True, (
+        f"{central_error_label} did not complete exchange: {central_body}"
+    )
+    assert peripheral_state.get("served") is True, (
+        f"{peripheral_error_label} never saw a write: {peripheral_body}"
+    )
+    received_hex = (peripheral_state.get("centralBytesReceived") or "").upper()
+    assert received_hex == payload_hex, (
+        f"payload mismatch: sent={payload_hex} got={received_hex} "
+        f"peripheral={peripheral_state} central={central_state}"
+    )
 
 
 @pytest.mark.hardware(roles=["android", "android"], capabilities=["ble"])
 def test_ble_radios_ready_on_two_phones(android_phones):
     """Both Android phones report a Bluetooth adapter in the ON state."""
     pairs = _ble_pairs(android_phones)
-    if len(pairs) < 2:
-        pytest.skip(
-            f"need 2 Android phones with ble capability online; got {len(pairs)}"
-        )
 
     states: dict[str, str] = {}
     for device, transport in pairs[:2]:
@@ -146,14 +148,38 @@ def test_ble_p2p_payload_round_trips(android_phones, app_builder: AppBuilder):
     random 16-byte payload to the characteristic; both phones report the
     same bytes."""
     pairs = _ble_pairs(android_phones)
-    if len(pairs) < 2:
-        pytest.skip(f"need 2 Android phones with ble capability; got {len(pairs)}")
 
     artifact = app_builder.build("maui", "android")
     (peri_dev, peri), (cent_dev, cent) = pairs[0], pairs[1]
 
-    _install_and_launch_android(peri, peri_dev.id, str(artifact.path))
-    _install_and_launch_android(cent, cent_dev.id, str(artifact.path))
+    install_and_launch_android_app(
+        peri,
+        label=peri_dev.id,
+        apk_path=str(artifact.path),
+        package_id=PACKAGE_ID,
+        always_install=True,
+        enable_command=["svc", "bluetooth", "enable"],
+        extra_permissions=(
+            "android.permission.BLUETOOTH_SCAN",
+            "android.permission.BLUETOOTH_CONNECT",
+            "android.permission.BLUETOOTH_ADVERTISE",
+            "android.permission.ACCESS_FINE_LOCATION",
+        ),
+    )
+    install_and_launch_android_app(
+        cent,
+        label=cent_dev.id,
+        apk_path=str(artifact.path),
+        package_id=PACKAGE_ID,
+        always_install=True,
+        enable_command=["svc", "bluetooth", "enable"],
+        extra_permissions=(
+            "android.permission.BLUETOOTH_SCAN",
+            "android.permission.BLUETOOTH_CONNECT",
+            "android.permission.BLUETOOTH_ADVERTISE",
+            "android.permission.ACCESS_FINE_LOCATION",
+        ),
+    )
 
     peri.forward_port(PERI_PORT, 47821)
     cent.forward_port(CENT_PORT, 47821)
@@ -200,28 +226,14 @@ def test_ble_p2p_payload_round_trips(android_phones, app_builder: AppBuilder):
         peri_thread.join(timeout=20)
         assert not peri_error, f"peripheral POST failed: {peri_error['error']}"
 
-        central_state = cent_json.get("result", {})
-        peripheral_state = peri_result.get("result", {})
-
-        if cent_json.get("status") == "skipped":
-            pytest.skip(
-                f"ble-p2p-central skipped: {central_state.get('reason', cent_json)}"
-            )
-        if peri_result.get("status") == "skipped":
-            pytest.skip(
-                f"ble-peripheral skipped: {peripheral_state.get('reason', peri_result)}"
-            )
-
-        assert central_state.get("ok") is True, (
-            f"central did not complete exchange: {cent_json}"
-        )
-        assert peripheral_state.get("served") is True, (
-            f"peripheral never saw a write: {peri_result}"
-        )
-        received_hex = (peripheral_state.get("centralBytesReceived") or "").upper()
-        assert received_hex == payload_hex, (
-            f"payload mismatch: sent={payload_hex} got={received_hex} "
-            f"peripheral={peripheral_state} central={central_state}"
+        _assert_ble_exchange(
+            central_body=cent_json,
+            peripheral_body=peri_result,
+            payload_hex=payload_hex,
+            central_label="ble-p2p-central",
+            peripheral_label="ble-peripheral",
+            central_error_label="central",
+            peripheral_error_label="peripheral",
         )
     finally:
         for tr, port in ((peri, PERI_PORT), (cent, CENT_PORT)):
@@ -259,7 +271,20 @@ def test_ble_p2p_ios_peripheral_android_central(inventory, app_builder: AppBuild
         # Forward Android side to a different host port to avoid collision with
         # the iOS driver's :47821 forward.
         and_apk = app_builder.build("maui", "android")
-        _install_and_launch_android(and_transport, and_dev.id, str(and_apk.path))
+        install_and_launch_android_app(
+            and_transport,
+            label=and_dev.id,
+            apk_path=str(and_apk.path),
+            package_id=PACKAGE_ID,
+            always_install=True,
+            enable_command=["svc", "bluetooth", "enable"],
+            extra_permissions=(
+                "android.permission.BLUETOOTH_SCAN",
+                "android.permission.BLUETOOTH_CONNECT",
+                "android.permission.BLUETOOTH_ADVERTISE",
+                "android.permission.ACCESS_FINE_LOCATION",
+            ),
+        )
         and_transport.forward_port(CENT_PORT, 47821)
         try:
             _wait_health(CENT_PORT, label=and_dev.id)
@@ -303,25 +328,15 @@ def test_ble_p2p_ios_peripheral_android_central(inventory, app_builder: AppBuild
             t.join(timeout=20)
             assert not peri_error, f"iOS peripheral POST failed: {peri_error['error']}"
 
-            if peri_result.get("status") == "skipped":
-                pytest.skip(
-                    f"iOS ble-peripheral skipped (likely unregistered or CB state): "
-                    f"{peri_result.get('result', peri_result)}"
-                )
-            if cent_json.get("status") == "skipped":
-                pytest.skip(f"android ble-p2p-central skipped: {cent_json}")
-
-            central_state = cent_json.get("result", {})
-            peripheral_state = peri_result.get("result", {})
-
-            assert central_state.get("ok") is True, (
-                f"central did not complete exchange: {cent_json}"
+            _assert_ble_exchange(
+                central_body=cent_json,
+                peripheral_body=peri_result,
+                payload_hex=payload_hex,
+                central_label="android ble-p2p-central",
+                peripheral_label="iOS ble-peripheral",
+                central_error_label="central",
+                peripheral_error_label="iOS peripheral",
             )
-            assert peripheral_state.get("served") is True, (
-                f"iOS peripheral never saw a write: {peri_result}"
-            )
-            received_hex = (peripheral_state.get("centralBytesReceived") or "").upper()
-            assert received_hex == payload_hex
         finally:
             try:
                 and_transport.unforward_port(CENT_PORT)
@@ -348,7 +363,20 @@ def test_ble_p2p_android_peripheral_ios_central(inventory, app_builder: AppBuild
     ios_driver = IosAppDriver(ios_transport, app_builder, "maui")
     try:
         and_apk = app_builder.build("maui", "android")
-        _install_and_launch_android(and_transport, and_dev.id, str(and_apk.path))
+        install_and_launch_android_app(
+            and_transport,
+            label=and_dev.id,
+            apk_path=str(and_apk.path),
+            package_id=PACKAGE_ID,
+            always_install=True,
+            enable_command=["svc", "bluetooth", "enable"],
+            extra_permissions=(
+                "android.permission.BLUETOOTH_SCAN",
+                "android.permission.BLUETOOTH_CONNECT",
+                "android.permission.BLUETOOTH_ADVERTISE",
+                "android.permission.ACCESS_FINE_LOCATION",
+            ),
+        )
         and_transport.forward_port(PERI_PORT, 47821)
 
         ios_driver.ensure_installed()
@@ -410,22 +438,15 @@ def test_ble_p2p_android_peripheral_ios_central(inventory, app_builder: AppBuild
             t.join(timeout=20)
             assert not peri_error, f"android peripheral POST failed: {peri_error['error']}"
 
-            if peri_result.get("status") == "skipped":
-                pytest.skip(f"android ble-peripheral skipped: {peri_result}")
-            if cent_json.get("status") == "skipped":
-                pytest.skip(f"iOS ble-p2p-central skipped: {cent_json}")
-
-            central_state = cent_json.get("result", {})
-            peripheral_state = peri_result.get("result", {})
-
-            assert central_state.get("ok") is True, (
-                f"iOS central did not complete exchange: {cent_json}"
+            _assert_ble_exchange(
+                central_body=cent_json,
+                peripheral_body=peri_result,
+                payload_hex=payload_hex,
+                central_label="iOS ble-p2p-central",
+                peripheral_label="android ble-peripheral",
+                central_error_label="iOS central",
+                peripheral_error_label="android peripheral",
             )
-            assert peripheral_state.get("served") is True, (
-                f"android peripheral never saw a write: {peri_result}"
-            )
-            received_hex = (peripheral_state.get("centralBytesReceived") or "").upper()
-            assert received_hex == payload_hex
         finally:
             try:
                 and_transport.unforward_port(CENT_PORT)

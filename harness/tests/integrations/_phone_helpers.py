@@ -17,6 +17,7 @@ Three helpers:
 """
 from __future__ import annotations
 
+from collections.abc import Sequence
 import time
 
 import pytest
@@ -24,6 +25,32 @@ import requests
 
 
 HCE_AID_HEX = "F0010203040506"
+
+
+def android_devices_with_capability(android_phones, capability: str):
+    """Return online Android devices that advertise the requested capability."""
+    return [
+        (device, transport)
+        for device, transport in android_phones
+        if capability in device.capabilities
+    ]
+
+
+def require_android_devices_with_capability(
+    android_phones,
+    capability: str,
+    *,
+    minimum: int = 2,
+):
+    """Return matching Android devices or skip with a stable, descriptive message."""
+    matches = android_devices_with_capability(android_phones, capability)
+    if len(matches) < minimum:
+        phone_label = "phone" if minimum == 1 else "phones"
+        pytest.skip(
+            f"need {minimum} Android {phone_label} with {capability} capability online; "
+            f"got {len(matches)}"
+        )
+    return matches
 
 
 def wake_screen(transport, label: str) -> None:
@@ -98,6 +125,45 @@ def wait_activity_resumed(
     raise TimeoutError(
         f"{label}: MainActivity never reached foreground (last={last_reason!r})"
     )
+
+
+def resolve_launcher_activity(transport, package_id: str, label: str) -> str:
+    """Resolve the launchable activity for an Android package."""
+    resolved = transport.shell(
+        ["cmd", "package", "resolve-activity", "--brief", package_id],
+        timeout=5.0,
+    )
+    activity_line = next(
+        (ln for ln in resolved.stdout.splitlines() if ln.startswith(f"{package_id}/")),
+        None,
+    )
+    assert activity_line, (
+        f"{label}: could not resolve launcher activity ({resolved.stdout!r})"
+    )
+    return activity_line
+
+
+def install_and_launch_android_app(
+    transport,
+    *,
+    label: str,
+    apk_path: str,
+    package_id: str,
+    always_install: bool = False,
+    enable_command: Sequence[str] | None = None,
+    extra_permissions: Sequence[str] = (),
+) -> None:
+    """Wake, optionally enable a radio, install the app, and start its launcher."""
+    wake_screen(transport, label)
+    if enable_command is not None:
+        transport.shell(list(enable_command), timeout=10.0)
+    if always_install or "package:" not in transport.shell(["pm", "path", package_id]).stdout:
+        transport.install_apk(apk_path)
+    for perm in extra_permissions:
+        transport.shell(["pm", "grant", package_id, perm], timeout=5.0)
+    activity_line = resolve_launcher_activity(transport, package_id, label)
+    transport.shell(["am", "force-stop", package_id])
+    transport.shell(["am", "start", "-n", activity_line], timeout=10.0)
 
 
 # Backwards-compatible aliases (older tests reference the underscore-prefixed names).

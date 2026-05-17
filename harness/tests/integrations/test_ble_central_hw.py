@@ -20,13 +20,24 @@ import requests
 
 from harness.app.builder import AppBuilder
 
-from ._phone_helpers import wait_health as _wait_health, wake_screen as _wake_screen
+from ._phone_helpers import install_and_launch_android_app, wait_health as _wait_health
 
 
 PACKAGE_ID = "com.qimata.mobileiot"
 PI_DEVICE_NAME = "PiDHTSensor"
 PI_TMUX_SESSION = "pi-ble-demo"
 LOCAL_PORT = 47821
+
+
+def _assert_ble_gatt_result(body: dict, *, label: str) -> None:
+    result = body.get("result", {})
+
+    if body.get("status") == "skipped":
+        pytest.skip(f"ble-gatt scenario skipped: {result.get('reason', body)}")
+
+    assert "temperature" in result, f"{label}: no temperature in {body}"
+    assert "humidity" in result, f"{label}: no humidity in {body}"
+    assert "led" in result, f"{label}: no led in {body}"
 
 
 def _start_pi_peripheral(pi_transport) -> None:
@@ -69,29 +80,20 @@ def _stop_pi_peripheral(pi_transport) -> None:
 def test_ble_central_android_reads_pi_gatt(android_phone, pi, app_builder: AppBuilder):
     """Android phone reads temperature, humidity, and toggles the LED on Pi."""
     device, transport = android_phone
-    pi_device, pi_transport = pi
+    _pi_device, pi_transport = pi
 
     _start_pi_peripheral(pi_transport)
     try:
         artifact = app_builder.build("maui", "android")
 
-        _wake_screen(transport, device.id)
-        transport.shell(["svc", "bluetooth", "enable"], timeout=10.0)
-        if "package:" not in transport.shell(["pm", "path", PACKAGE_ID]).stdout:
-            transport.install_apk(str(artifact.path))
-        resolved = transport.shell(
-            ["cmd", "package", "resolve-activity", "--brief", PACKAGE_ID],
-            timeout=5.0,
+        install_and_launch_android_app(
+            transport,
+            label=device.id,
+            apk_path=str(artifact.path),
+            package_id=PACKAGE_ID,
+            always_install=False,
+            enable_command=["svc", "bluetooth", "enable"],
         )
-        activity_line = next(
-            (ln for ln in resolved.stdout.splitlines() if ln.startswith(f"{PACKAGE_ID}/")),
-            None,
-        )
-        assert activity_line, (
-            f"{device.id}: could not resolve launcher activity ({resolved.stdout!r})"
-        )
-        transport.shell(["am", "force-stop", PACKAGE_ID])
-        transport.shell(["am", "start", "-n", activity_line], timeout=10.0)
 
         transport.forward_port(LOCAL_PORT, 47821)
         try:
@@ -103,16 +105,7 @@ def test_ble_central_android_reads_pi_gatt(android_phone, pi, app_builder: AppBu
             )
             r.raise_for_status()
             body = r.json()
-            result = body.get("result", {})
-
-            if body.get("status") == "skipped":
-                pytest.skip(
-                    f"ble-gatt scenario skipped: {result.get('reason', body)}"
-                )
-
-            assert "temperature" in result, f"no temperature in {body}"
-            assert "humidity" in result, f"no humidity in {body}"
-            assert "led" in result, f"no led in {body}"
+            _assert_ble_gatt_result(body, label=device.id)
         finally:
             try:
                 transport.unforward_port(LOCAL_PORT)
@@ -130,7 +123,7 @@ def test_ble_central_ios_reads_pi_gatt(ios_app_driver, pi):
     Uses the `ios_app_driver` fixture which installs the IPA, launches with
     `MIOT_TEST_MODE=1`, and forwards port 47821 via pymobiledevice3 usbmux.
     """
-    pi_device, pi_transport = pi
+    _pi_device, pi_transport = pi
 
     _start_pi_peripheral(pi_transport)
     try:
@@ -146,15 +139,6 @@ def test_ble_central_ios_reads_pi_gatt(ios_app_driver, pi):
         )
         r.raise_for_status()
         body = r.json()
-        result = body.get("result", {})
-
-        if body.get("status") == "skipped":
-            pytest.skip(
-                f"ble-gatt scenario skipped: {result.get('reason', body)}"
-            )
-
-        assert "temperature" in result, f"no temperature in {body}"
-        assert "humidity" in result, f"no humidity in {body}"
-        assert "led" in result, f"no led in {body}"
+        _assert_ble_gatt_result(body, label="iOS")
     finally:
         _stop_pi_peripheral(pi_transport)
