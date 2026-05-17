@@ -1,5 +1,4 @@
 using QiMata.MobileIoT.Shared.Services;
-using QiMata.MobileIoT.Services;
 using QiMata.MobileIoT.Shared.Services.Interfaces;
 
 namespace QiMata.MobileIoT.Uno.Services;
