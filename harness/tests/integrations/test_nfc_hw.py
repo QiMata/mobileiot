@@ -11,9 +11,10 @@ from harness.app.builder import AppBuilder
 
 from ._phone_helpers import (
     HCE_AID_HEX,
+    install_and_launch_android_app,
+    require_android_devices_with_capability,
     wait_activity_resumed as _wait_activity_resumed,
     wait_health as _wait_health,
-    wake_screen as _wake_screen,
 )
 
 
@@ -29,11 +30,7 @@ def test_nfc_radios_ready_on_two_phones(android_phones):
     in inventory, since the harness gate (`pytest.mark.hardware`) checks the
     capability per-role but doesn't enforce that two *distinct* phones match.
     """
-    nfc_pairs = [(d, t) for d, t in android_phones if "nfc" in d.capabilities]
-    if len(nfc_pairs) < 2:
-        pytest.skip(
-            f"need 2 Android phones with nfc capability online; got {len(nfc_pairs)}"
-        )
+    nfc_pairs = require_android_devices_with_capability(android_phones, "nfc")
 
     states: dict[str, str] = {}
     for device, transport in nfc_pairs[:2]:
@@ -57,9 +54,7 @@ def test_nfc_hce_payload_round_trips(android_phones, app_builder: AppBuilder):
     Pre-conditions: TestHarness MAUI APK installed and the two phones placed
     back-to-back (NFC antennas aligned).
     """
-    nfc_pairs = [(d, t) for d, t in android_phones if "nfc" in d.capabilities]
-    if len(nfc_pairs) < 2:
-        pytest.skip(f"need 2 Android phones with nfc capability online; got {len(nfc_pairs)}")
+    nfc_pairs = require_android_devices_with_capability(android_phones, "nfc")
 
     artifact = app_builder.build("maui", "android")
     (emu_dev, emu), (rdr_dev, rdr) = nfc_pairs[0], nfc_pairs[1]
@@ -68,18 +63,14 @@ def test_nfc_hce_payload_round_trips(android_phones, app_builder: AppBuilder):
     # The MAUI activity class is auto-generated (crcXXXX.MainActivity), so we
     # resolve it from the LAUNCHER filter and start it by FQCN.
     for device, transport in nfc_pairs[:2]:
-        _wake_screen(transport, device.id)
-        transport.shell(["svc", "nfc", "enable"], timeout=10.0)
-        if "package:" not in transport.shell(["pm", "path", PACKAGE_ID]).stdout:
-            transport.install_apk(str(artifact.path))
-        resolved = transport.shell(["cmd", "package", "resolve-activity", "--brief", PACKAGE_ID], timeout=5.0)
-        activity_line = next(
-            (ln for ln in resolved.stdout.splitlines() if ln.startswith(f"{PACKAGE_ID}/")),
-            None,
+        install_and_launch_android_app(
+            transport,
+            label=device.id,
+            apk_path=str(artifact.path),
+            package_id=PACKAGE_ID,
+            always_install=False,
+            enable_command=["svc", "nfc", "enable"],
         )
-        assert activity_line, f"{device.id}: could not resolve launcher activity ({resolved.stdout!r})"
-        transport.shell(["am", "force-stop", PACKAGE_ID])
-        transport.shell(["am", "start", "-n", activity_line], timeout=10.0)
 
     # Distinct local ports → both phones' 47821 forwarded to the dev box.
     emu_port, rdr_port = 47821, 47822
