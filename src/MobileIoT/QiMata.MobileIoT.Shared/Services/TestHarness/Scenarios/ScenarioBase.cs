@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace QiMata.MobileIoT.Services.TestHarness.Scenarios;
+namespace QiMata.MobileIoT.Shared.Services.TestHarness.Scenarios;
 
 public abstract class ScenarioBase : IScenario
 {

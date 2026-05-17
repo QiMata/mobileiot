@@ -1,3 +1,5 @@
+using QiMata.MobileIoT.Shared.Services;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
 using Moq;
 using QiMata.MobileIoT.Services;
 using QiMata.MobileIoT.ViewModels;
@@ -16,10 +18,11 @@ public class SerialDemoViewModelTests
     public async Task ConnectAsync_LogsWhenNoDevicesFound()
     {
         var service = new Mock<ISerialDeviceService>();
+        var logger = new Mock<IAppLogger>();
         service.Setup(s => s.ListAsync(It.IsAny<CancellationToken>()))
                .ReturnsAsync(Array.Empty<SerialDeviceInfo>());
 
-        var vm = new SerialDemoViewModel(service.Object);
+        var vm = new SerialDemoViewModel(service.Object, logger.Object);
 
         await vm.ConnectCommand.ExecuteAsync(null);
 
@@ -30,6 +33,7 @@ public class SerialDemoViewModelTests
     public async Task ConnectAsync_LogsConnectionResult()
     {
         var service = new Mock<ISerialDeviceService>();
+        var logger = new Mock<IAppLogger>();
         service.Setup(s => s.ListAsync(It.IsAny<CancellationToken>()))
                .ReturnsAsync(new List<SerialDeviceInfo>
                {
@@ -38,7 +42,7 @@ public class SerialDemoViewModelTests
         service.Setup(s => s.OpenAsync(It.IsAny<ushort>(), It.IsAny<ushort>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
                .ReturnsAsync(true);
 
-        var vm = new SerialDemoViewModel(service.Object);
+        var vm = new SerialDemoViewModel(service.Object, logger.Object);
 
         await vm.ConnectCommand.ExecuteAsync(null);
 
@@ -49,9 +53,10 @@ public class SerialDemoViewModelTests
     public async Task SendAsync_AppendsWhenPortClosed()
     {
         var service = new Mock<ISerialDeviceService>();
+        var logger = new Mock<IAppLogger>();
         service.SetupGet(s => s.IsOpen).Returns(false);
 
-        var vm = new SerialDemoViewModel(service.Object);
+        var vm = new SerialDemoViewModel(service.Object, logger.Object);
 
         await vm.SendLedOnCommand.ExecuteAsync(null);
 
@@ -63,11 +68,12 @@ public class SerialDemoViewModelTests
     public async Task SendAsync_TogglesLedCommands()
     {
         var service = new Mock<ISerialDeviceService>();
+        var logger = new Mock<IAppLogger>();
         service.SetupGet(s => s.IsOpen).Returns(true);
         service.Setup(s => s.WriteAsync(It.IsAny<byte[]>(), It.IsAny<CancellationToken>()))
                .ReturnsAsync(8);
 
-        var vm = new SerialDemoViewModel(service.Object);
+        var vm = new SerialDemoViewModel(service.Object, logger.Object);
 
         await vm.SendLedOnCommand.ExecuteAsync(null);
         await vm.SendLedOffCommand.ExecuteAsync(null);
@@ -82,7 +88,8 @@ public class SerialDemoViewModelTests
     public void DataReceived_AppendsToLog()
     {
         var service = new Mock<ISerialDeviceService>();
-        var vm = new SerialDemoViewModel(service.Object);
+        var logger = new Mock<IAppLogger>();
+        var vm = new SerialDemoViewModel(service.Object, logger.Object);
 
         service.Raise(s => s.DataReceived += null!, service.Object, new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("hello\n")));
 

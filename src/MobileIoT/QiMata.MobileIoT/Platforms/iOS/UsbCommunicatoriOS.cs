@@ -1,8 +1,8 @@
 #if IOS
 using ExternalAccessory;
 using Foundation;
-using QiMata.MobileIoT.Models;
-using QiMata.MobileIoT.Usb;
+using QiMata.MobileIoT.Shared.Models;
+using QiMata.MobileIoT.Shared.Usb;
 using System.Collections.Generic;
 using System.Linq;
 

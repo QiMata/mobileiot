@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace QiMata.MobileIoT.Services.Interfaces;
+namespace QiMata.MobileIoT.Shared.Services.Interfaces;
 
 public interface IAudioDecoder
 {

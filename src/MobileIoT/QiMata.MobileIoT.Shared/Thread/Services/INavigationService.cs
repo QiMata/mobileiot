@@ -1,4 +1,4 @@
-namespace QiMata.MobileIoT.ThreadDemoCore.Services;
+namespace QiMata.MobileIoT.Shared.Thread.Services;
 
 public interface INavigationService
 {

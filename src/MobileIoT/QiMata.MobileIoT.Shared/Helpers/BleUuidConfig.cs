@@ -2,7 +2,7 @@ using System;
 using System.Reflection;
 using System.Text.Json;
 
-namespace QiMata.MobileIoT.Helpers;
+namespace QiMata.MobileIoT.Shared.Helpers;
 
 public static class BleUuidConfig
 {

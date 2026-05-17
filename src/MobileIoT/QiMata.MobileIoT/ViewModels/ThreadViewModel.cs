@@ -1,9 +1,11 @@
+using QiMata.MobileIoT.Shared.Services;
+using QiMata.MobileIoT.Shared.ViewModels;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using QiMata.MobileIoT.Services.Interfaces;
-using QiMata.MobileIoT.ThreadDemoCore.Models;
-using QiMata.MobileIoT.ThreadDemoCore.Services;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
+using QiMata.MobileIoT.Shared.Thread.Models;
+using QiMata.MobileIoT.Shared.Thread.Services;
 
 namespace QiMata.MobileIoT.ViewModels;
 

@@ -1,4 +1,4 @@
-namespace QiMata.MobileIoT.Services.Interfaces;
+namespace QiMata.MobileIoT.Shared.Services.Interfaces;
 
 /// <summary>
 /// Phone-as-BLE-peripheral surface used by the TestHarness `ble-peripheral`

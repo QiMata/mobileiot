@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace QiMata.MobileIoT.Services.Interfaces;
+namespace QiMata.MobileIoT.Shared.Services.Interfaces;
 
 public interface IAppLogger
 {

@@ -10,9 +10,9 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using QiMata.MobileIoT.Services.TestHarness.Scenarios;
+using QiMata.MobileIoT.Shared.Services.TestHarness.Scenarios;
 
-namespace QiMata.MobileIoT.Services.TestHarness;
+namespace QiMata.MobileIoT.Shared.Services.TestHarness;
 
 /// <summary>
 /// Localhost-only HTTP hook exposed when the app is compiled with the TEST_HARNESS flag AND the

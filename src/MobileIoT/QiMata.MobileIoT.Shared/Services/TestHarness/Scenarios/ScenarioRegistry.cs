@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace QiMata.MobileIoT.Services.TestHarness.Scenarios;
+namespace QiMata.MobileIoT.Shared.Services.TestHarness.Scenarios;
 
 public sealed class ScenarioRegistry
 {

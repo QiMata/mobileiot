@@ -1,6 +1,6 @@
-using QiMata.MobileIoT.Models;
+using QiMata.MobileIoT.Shared.Models;
 
-namespace QiMata.MobileIoT.Services;
+namespace QiMata.MobileIoT.Shared.Services;
 
 public interface IUsbDeviceService : IAsyncDisposable
 {

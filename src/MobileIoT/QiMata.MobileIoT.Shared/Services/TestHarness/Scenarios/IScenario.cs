@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace QiMata.MobileIoT.Services.TestHarness.Scenarios;
+namespace QiMata.MobileIoT.Shared.Services.TestHarness.Scenarios;
 
 /// <summary>
 /// A scenario is a scripted in-app flow the harness can start via POST /scenario/{name}.

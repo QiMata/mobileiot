@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace QiMata.MobileIoT.Models;
+namespace QiMata.MobileIoT.Shared.Models;
 
 public class ProvisioningConfig
 {

@@ -1,8 +1,8 @@
 #if TEST_HARNESS
 using Microsoft.Extensions.DependencyInjection;
-using QiMata.MobileIoT.Services.TestHarness.Scenarios;
+using QiMata.MobileIoT.Shared.Services.TestHarness.Scenarios;
 
-namespace QiMata.MobileIoT.Services.TestHarness;
+namespace QiMata.MobileIoT.Shared.Services.TestHarness;
 
 public static class HarnessServiceCollectionExtensions
 {

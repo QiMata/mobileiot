@@ -1,8 +1,10 @@
+using QiMata.MobileIoT.Shared.Services;
+using QiMata.MobileIoT.Shared.ViewModels;
 using System.Text.Json;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using QiMata.MobileIoT.Models;
-using QiMata.MobileIoT.Services.Interfaces;
+using QiMata.MobileIoT.Shared.Models;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
 
 namespace QiMata.MobileIoT.ViewModels;
 

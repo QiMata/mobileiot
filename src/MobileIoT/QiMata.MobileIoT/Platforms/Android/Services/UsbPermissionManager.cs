@@ -2,7 +2,7 @@
 using Android.App;
 using Android.Content;
 using Android.Hardware.Usb;
-using QiMata.MobileIoT.Services.Interfaces;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
 using System.Collections.Concurrent;
 
 namespace QiMata.MobileIoT.Platforms.Android.Services;

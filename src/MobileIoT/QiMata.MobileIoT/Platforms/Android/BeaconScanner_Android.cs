@@ -3,7 +3,7 @@ using Android.Bluetooth;
 using Android.Bluetooth.LE;
 using Android.Runtime;
 using Java.Util;
-using QiMata.MobileIoT.Services.Interfaces;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
 
 namespace QiMata.MobileIoT.Platforms.Android;
 

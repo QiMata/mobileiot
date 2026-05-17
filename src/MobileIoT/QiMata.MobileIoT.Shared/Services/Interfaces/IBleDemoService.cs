@@ -1,6 +1,6 @@
 using System.Threading;
 
-namespace QiMata.MobileIoT.Services.Interfaces;
+namespace QiMata.MobileIoT.Shared.Services.Interfaces;
 
 public interface IBleDemoService
 {

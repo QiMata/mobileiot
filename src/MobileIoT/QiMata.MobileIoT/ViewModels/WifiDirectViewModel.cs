@@ -1,3 +1,5 @@
+using QiMata.MobileIoT.Shared.Services;
+using QiMata.MobileIoT.Shared.ViewModels;
 using System.Buffers.Binary;
 using System.Collections.ObjectModel;
 using System.Text;
@@ -6,9 +8,9 @@ using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using QiMata.MobileIoT.Constants;
-using QiMata.MobileIoT.Models;
+using QiMata.MobileIoT.Shared.Models;
 using QiMata.MobileIoT.Services;
-using QiMata.MobileIoT.Services.Interfaces;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
 
 namespace QiMata.MobileIoT.ViewModels;
 

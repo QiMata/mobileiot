@@ -1,3 +1,4 @@
+using QiMata.MobileIoT.Shared.Services;
 using Foundation;
 using MultipeerConnectivity;
 using QiMata.MobileIoT.Constants;

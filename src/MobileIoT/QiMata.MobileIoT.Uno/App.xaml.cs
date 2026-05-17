@@ -1,12 +1,13 @@
+using QiMata.MobileIoT.Shared.Services;
 using Uno.Resizetizer;
 using QiMata.MobileIoT.Services;
-using QiMata.MobileIoT.Services.Interfaces;
-using QiMata.MobileIoT.Services.Mock;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
+using QiMata.MobileIoT.Shared.Services.Mock;
 using QiMata.MobileIoT.Uno.Services;
 #if TEST_HARNESS
-using QiMata.MobileIoT.Services.TestHarness;
+using QiMata.MobileIoT.Shared.Services.TestHarness;
 #endif
-using QiMata.MobileIoT.ThreadDemoCore.Services;
+using QiMata.MobileIoT.Shared.Thread.Services;
 
 namespace QiMata.MobileIoT.Uno;
 
@@ -43,7 +44,7 @@ public partial class App : Application
                     services.AddSingleton<INfcService>(MockServiceFactory.CreateNfcService());
                     services.AddSingleton<INfcP2PService>(MockServiceFactory.CreateNfcP2PService());
                     services.AddSingleton<IP2PService>(MockServiceFactory.CreateP2PService());
-                    services.AddSingleton<QiMata.MobileIoT.Usb.IUsbCommunicator>(MockServiceFactory.CreateUsbCommunicator());
+                    services.AddSingleton<QiMata.MobileIoT.Shared.Usb.IUsbCommunicator>(MockServiceFactory.CreateUsbCommunicator());
                     services.AddSingleton<ISerialDeviceService>(MockServiceFactory.CreateSerialDeviceService());
                     services.AddSingleton<IQrScanningService, UnoQrScanningService>();
                     services.AddSingleton<IImageClassificationService, UnoImageClassificationService>();

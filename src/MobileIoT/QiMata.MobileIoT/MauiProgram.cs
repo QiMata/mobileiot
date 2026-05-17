@@ -1,3 +1,4 @@
+using QiMata.MobileIoT.Shared.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Controls;
@@ -8,14 +9,14 @@ using QiMata.MobileIoT.Platforms.Android;
 using QiMata.MobileIoT.Platforms.iOS;
 #endif
 using QiMata.MobileIoT.Services;
-using QiMata.MobileIoT.Services.Interfaces;
-using QiMata.MobileIoT.Services.Mock;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
+using QiMata.MobileIoT.Shared.Services.Mock;
 #if TEST_HARNESS
-using QiMata.MobileIoT.Services.TestHarness;
+using QiMata.MobileIoT.Shared.Services.TestHarness;
 #endif
-using QiMata.MobileIoT.ThreadDemoCore.Services;
+using QiMata.MobileIoT.Shared.Thread.Services;
 using QiMata.MobileIoT.ViewModels;
-using QiMata.MobileIoT.Usb;
+using QiMata.MobileIoT.Shared.Usb;
 using QiMata.MobileIoT.Views;
 using ZXing.Net.Maui;
 using ZXing.Net.Maui.Controls;
@@ -38,7 +39,7 @@ namespace QiMata.MobileIoT
 
             bool isDesign = DesignMode.IsDesignModeEnabled;
 
-            ViewModels.BaseViewModel.DispatchToMain = Helpers.DispatcherExtensions.RunOnMain;
+            QiMata.MobileIoT.Shared.ViewModels.BaseViewModel.DispatchToMain = Helpers.DispatcherExtensions.RunOnMain;
 
             builder.Services.AddSingleton<AppLogger>();
             builder.Services.AddSingleton<IAppLogger>(sp => sp.GetRequiredService<AppLogger>());

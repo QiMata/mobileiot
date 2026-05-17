@@ -1,6 +1,6 @@
-using QiMata.MobileIoT.Models;
+using QiMata.MobileIoT.Shared.Models;
 
-namespace QiMata.MobileIoT.Usb;
+namespace QiMata.MobileIoT.Shared.Usb;
 
 public interface IUsbCommunicator
 {

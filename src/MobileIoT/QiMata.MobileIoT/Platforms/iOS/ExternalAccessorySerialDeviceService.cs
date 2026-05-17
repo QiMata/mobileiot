@@ -1,3 +1,4 @@
+using QiMata.MobileIoT.Shared.Services;
 using ExternalAccessory;
 using Foundation;
 using QiMata.MobileIoT.Services;

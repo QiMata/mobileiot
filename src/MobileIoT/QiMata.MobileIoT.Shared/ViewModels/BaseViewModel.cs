@@ -1,8 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using QiMata.MobileIoT.Services.Interfaces;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
 using System.Runtime.CompilerServices;
 
-namespace QiMata.MobileIoT.ViewModels;
+namespace QiMata.MobileIoT.Shared.ViewModels;
 
 public abstract partial class BaseViewModel : ObservableObject, IDisposable
 {

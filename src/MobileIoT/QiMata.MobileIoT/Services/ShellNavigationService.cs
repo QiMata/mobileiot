@@ -1,5 +1,5 @@
-using QiMata.MobileIoT.Services.Interfaces;
-using QiMata.MobileIoT.ThreadDemoCore.Services;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
+using QiMata.MobileIoT.Shared.Thread.Services;
 
 namespace QiMata.MobileIoT.Services;
 

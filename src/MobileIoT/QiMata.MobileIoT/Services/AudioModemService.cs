@@ -1,5 +1,6 @@
+using QiMata.MobileIoT.Shared.Services;
 using Plugin.Maui.Audio;
-using QiMata.MobileIoT.Services.Interfaces;
+using QiMata.MobileIoT.Shared.Services.Interfaces;
 
 namespace QiMata.MobileIoT.Services;
 
