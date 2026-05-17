@@ -1,13 +1,9 @@
-using QiMata.MobileIoT.Shared.Services;
 using Uno.Resizetizer;
-using QiMata.MobileIoT.Services;
-using QiMata.MobileIoT.Shared.Services.Interfaces;
-using QiMata.MobileIoT.Shared.Services.Mock;
+using QiMata.MobileIoT.Uno.DependencyInjection;
 using QiMata.MobileIoT.Uno.Services;
 #if TEST_HARNESS
 using QiMata.MobileIoT.Shared.Services.TestHarness;
 #endif
-using QiMata.MobileIoT.Shared.Thread.Services;
 
 namespace QiMata.MobileIoT.Uno;
 
@@ -34,28 +30,7 @@ public partial class App : Application
                 // Switch to Development environment when running in DEBUG
                 .UseEnvironment(Environments.Development)
 #endif
-                .ConfigureServices((context, services) =>
-                {
-                    services.AddSingleton<HttpClient>();
-                    services.AddSingleton<UnoNavigationService>();
-                    services.AddSingleton<IBleDemoService>(MockServiceFactory.CreateBleDemoService());
-                    services.AddSingleton<IBluetoothService>(MockServiceFactory.CreateBluetoothService());
-                    services.AddSingleton<IBeaconScanner>(MockServiceFactory.CreateBeaconScanner());
-                    services.AddSingleton<INfcService>(MockServiceFactory.CreateNfcService());
-                    services.AddSingleton<INfcP2PService>(MockServiceFactory.CreateNfcP2PService());
-                    services.AddSingleton<IP2PService>(MockServiceFactory.CreateP2PService());
-                    services.AddSingleton<QiMata.MobileIoT.Shared.Usb.IUsbCommunicator>(MockServiceFactory.CreateUsbCommunicator());
-                    services.AddSingleton<ISerialDeviceService>(MockServiceFactory.CreateSerialDeviceService());
-                    services.AddSingleton<IQrScanningService, UnoQrScanningService>();
-                    services.AddSingleton<IImageClassificationService, UnoImageClassificationService>();
-                    services.AddSingleton<IPiCameraService, UnoPiCameraService>();
-                    services.AddSingleton<IAudioModemService, UnoAudioModemService>();
-                    services.AddSingleton<IThreadBridgeClient, ThreadBridgeClient>();
-                    services.AddSingleton<IThreadDemoService, ThreadDemoService>();
-#if TEST_HARNESS
-                    services.AddMobileIoTHarness();
-#endif
-                })
+                .ConfigureServices((_, services) => services.AddUnoServices())
             );
         MainWindow = builder.Window;
 
