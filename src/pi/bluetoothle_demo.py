@@ -18,7 +18,7 @@ from azure_retransmit import (
 )
 from ble_demo_support import (
     LED_PIN,
-    build_peripheral,
+    build_peripheral as _build_peripheral,
     build_publishers_from_args,
     cleanup_gpio,
     configure_gpio,
@@ -139,6 +139,18 @@ def hum_notify_callback(notifying: bool, characteristic: object | None = None) -
     _notify_hum = bool(notifying)
 
 
+def build_peripheral(constants: dict[str, str], *, device_name: str) -> peripheral.Peripheral:
+    return _build_peripheral(
+        constants,
+        device_name=device_name,
+        temperature_read_callback=temperature_read_callback,
+        humidity_read_callback=humidity_read_callback,
+        led_write_callback=led_write_callback,
+        temp_notify_callback=temp_notify_callback,
+        hum_notify_callback=hum_notify_callback,
+    )
+
+
 def _notification_loop(periph: peripheral.Peripheral, stop_event: threading.Event) -> None:
     while not stop_event.wait(2.0):
         if not (_notify_temp or _notify_hum):
@@ -238,15 +250,7 @@ def main() -> None:
         LOGGER.info("Azure telemetry forwarding disabled")
 
     try:
-        ble_periph = build_peripheral(
-            constants,
-            device_name=args.device_name,
-            temperature_read_callback=temperature_read_callback,
-            humidity_read_callback=humidity_read_callback,
-            led_write_callback=led_write_callback,
-            temp_notify_callback=temp_notify_callback,
-            hum_notify_callback=hum_notify_callback,
-        )
+        ble_periph = build_peripheral(constants, device_name=args.device_name)
         run_event_loop(ble_periph, device_name=args.device_name)
     finally:
         if telemetry_relay is not None:
