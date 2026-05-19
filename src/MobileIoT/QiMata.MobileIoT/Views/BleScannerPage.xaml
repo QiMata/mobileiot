@@ -28,7 +28,7 @@
                             <Label Text="{Binding Name, FallbackValue=(no name)}"
                                    FontAttributes="Bold"
                                    FontSize="18"
-                                   TextColor="#111827"/>
+                                   TextColor="{StaticResource BodyText}"/>
                             <Label Text="{Binding DeviceId}"
                                    FontSize="12"
                                    TextColor="{StaticResource BrandGray}"/>
