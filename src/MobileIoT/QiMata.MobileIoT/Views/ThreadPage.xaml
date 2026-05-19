@@ -12,7 +12,10 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <controls:PageHeader Title="Thread Protocol Demo" />
+        <VerticalStackLayout>
+            <controls:PageHeader Title="Thread Protocol Demo" />
+            <controls:FeatureDescription Text="Queries Thread mesh status via the Pi OTBR bridge and runs CoAP echo pings. Starts in mock mode; toggle 'Use Live Bridge' for real data." />
+        </VerticalStackLayout>
 
         <ScrollView Grid.Row="1">
             <Frame Style="{StaticResource CardFrame}">

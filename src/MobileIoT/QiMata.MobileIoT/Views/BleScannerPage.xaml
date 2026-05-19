@@ -13,7 +13,10 @@
             <RowDefinition Height="*"   />
         </Grid.RowDefinitions>
 
-        <controls:PageHeader Title="Detected BLE Beacons" />
+        <VerticalStackLayout>
+            <controls:PageHeader Title="Detected BLE Beacons" />
+            <controls:FeatureDescription Text="Scans for nearby BLE advertisers; tap a result to inspect services." />
+        </VerticalStackLayout>
 
         <CollectionView Grid.Row="1"
                         ItemsSource="{Binding Devices}">

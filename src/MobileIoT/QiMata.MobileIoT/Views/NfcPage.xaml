@@ -11,7 +11,10 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <controls:PageHeader Title="NFC Tag Reader / Writer" />
+        <VerticalStackLayout>
+            <controls:PageHeader Title="NFC Tag Reader / Writer" />
+            <controls:FeatureDescription Text="Reads NDEF records from any NFC tag." />
+        </VerticalStackLayout>
 
         <ScrollView Grid.Row="1">
             <Frame Style="{StaticResource CardFrame}">

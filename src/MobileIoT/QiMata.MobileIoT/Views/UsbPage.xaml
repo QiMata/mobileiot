@@ -11,7 +11,10 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <controls:PageHeader Title="USB" />
+        <VerticalStackLayout>
+            <controls:PageHeader Title="USB" />
+            <controls:FeatureDescription Text="Sends a USB bulk-transfer ping to the Pi g_zero gadget and reports the echo round-trip." />
+        </VerticalStackLayout>
 
         <ScrollView Grid.Row="1">
             <Frame Style="{StaticResource CardFrame}">

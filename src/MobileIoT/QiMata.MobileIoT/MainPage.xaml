@@ -19,6 +19,7 @@
                    Margin="0,10"/>
 
             <controls:PageHeader Title="QiMata Mobile IoT" />
+            <controls:FeatureDescription Text="Launchpad for each demo. Tap a tile to open the feature page." />
         </VerticalStackLayout>
 
         <ScrollView Grid.Row="1">

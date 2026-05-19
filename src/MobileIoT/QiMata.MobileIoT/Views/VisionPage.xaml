@@ -12,7 +12,10 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <controls:PageHeader Title="Computer Vision" />
+        <VerticalStackLayout>
+            <controls:PageHeader Title="Computer Vision" />
+            <controls:FeatureDescription Text="Pulls JPEG frames from the Pi camera HTTP endpoint and renders a live preview." />
+        </VerticalStackLayout>
 
         <ScrollView Grid.Row="1">
             <Frame Style="{StaticResource CardFrame}">

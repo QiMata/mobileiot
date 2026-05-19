@@ -13,7 +13,10 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <controls:PageHeader Title="Wi-Fi Direct" />
+        <VerticalStackLayout>
+            <controls:PageHeader Title="Wi-Fi Direct" />
+            <controls:FeatureDescription Text="Establishes a Wi-Fi Direct peer link with the Pi and exchanges JSON messages." />
+        </VerticalStackLayout>
 
         <ScrollView Grid.Row="1">
             <Frame Style="{StaticResource CardFrame}">

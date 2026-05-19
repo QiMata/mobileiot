@@ -11,7 +11,10 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <controls:PageHeader Title="Audio Jack Telemetry" />
+        <VerticalStackLayout>
+            <controls:PageHeader Title="Audio Jack Telemetry" />
+            <controls:FeatureDescription Text="Listens on the device microphone for FSK audio telemetry from the Pi headphone jack. Decoder is currently a stub — see 'Demo limitations' in the README." />
+        </VerticalStackLayout>
 
         <ScrollView Grid.Row="1">
             <Frame Style="{StaticResource CardFrame}">

@@ -12,7 +12,10 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <controls:PageHeader Title="Serial Console" />
+        <VerticalStackLayout>
+            <controls:PageHeader Title="Serial Console" />
+            <controls:FeatureDescription Text="Talks to the Pi over USB CDC ACM; sends LED_ON / LED_OFF commands and shows the Pi's reply." />
+        </VerticalStackLayout>
 
         <ScrollView Grid.Row="1">
             <Frame Style="{StaticResource CardFrame}">
