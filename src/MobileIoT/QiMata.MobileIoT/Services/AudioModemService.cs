@@ -4,6 +4,7 @@ using QiMata.MobileIoT.Shared.Services.Interfaces;
 
 namespace QiMata.MobileIoT.Services;
 
+/// <summary>Records microphone audio and decodes it into text messages using an <see cref="IAudioDecoder"/>.</summary>
 public class AudioModemService : IAudioModemService
 {
     private readonly IAudioRecorder _recorder;
@@ -11,8 +12,10 @@ public class AudioModemService : IAudioModemService
     private CancellationTokenSource? _cts;
     private readonly Func<Task> _requestMicrophonePermission;
 
+    /// <summary>Raised when a decoded text message is successfully extracted from the audio stream.</summary>
     public event EventHandler<string>? DataReceived;
 
+    /// <summary>Initialises the service with an audio recorder, decoder, and optional microphone permission callback.</summary>
     public AudioModemService(
         IAudioManager audioManager,
         IAudioDecoder decoder,
@@ -33,6 +36,7 @@ public class AudioModemService : IAudioModemService
 #endif
     }
 
+    /// <summary>Requests microphone permission and starts recording audio for decoding.</summary>
     public async Task StartAsync(CancellationToken ct = default)
     {
         if (_cts != null)
@@ -43,6 +47,7 @@ public class AudioModemService : IAudioModemService
         await _recorder.StartAsync();
     }
 
+    /// <summary>Stops recording, decodes the captured audio, and raises <see cref="DataReceived"/> for any decoded messages.</summary>
     public async Task StopAsync()
     {
         if (_cts == null)

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using QiMata.MobileIoT;
 using QiMata.MobileIoT.Services;
 using QiMata.MobileIoT.Shared.Services;
 using QiMata.MobileIoT.Shared.Services.Interfaces;
@@ -73,6 +74,8 @@ public static class MauiServiceCollectionExtensions
 
     public static IServiceCollection AddDesignOrRuntimeServices(this IServiceCollection services, bool isDesign)
     {
+        App.IsMockMode = isDesign;
+
         if (isDesign)
         {
             services.AddSingleton<IBleDemoService>(MockServiceFactory.CreateBleDemoService());

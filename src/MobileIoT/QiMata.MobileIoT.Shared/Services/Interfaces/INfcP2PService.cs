@@ -1,5 +1,6 @@
 namespace QiMata.MobileIoT.Shared.Services.Interfaces;
 
+/// <summary>Enables peer-to-peer NFC message exchange by advertising NDEF records and receiving them from nearby devices.</summary>
 public interface INfcP2PService
 {
     /// <summary>

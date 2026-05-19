@@ -1,13 +1,14 @@
 namespace QiMata.MobileIoT.Shared.Services;
 
+/// <summary>Records microphone audio and raises decoded text messages as they are recognized from the audio stream.</summary>
 public interface IAudioModemService
 {
-    /// <summary>Start listening for audio data.</summary>
+    /// <summary>Requests microphone permission and starts recording audio for decoding.</summary>
     Task StartAsync(CancellationToken ct = default);
 
-    /// <summary>Stop listening.</summary>
+    /// <summary>Stops recording and finalises decoding of any buffered audio.</summary>
     Task StopAsync();
 
-    /// <summary>Raised when a decoded message is received.</summary>
+    /// <summary>Raised when a decoded text message is successfully extracted from the audio stream.</summary>
     event EventHandler<string> DataReceived;
 }

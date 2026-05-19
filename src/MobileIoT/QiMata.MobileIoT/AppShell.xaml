@@ -7,6 +7,22 @@
     Shell.FlyoutBehavior="Disabled"
     Title="QiMata.MobileIoT">
 
+    <Shell.TitleView>
+        <Border
+            BackgroundColor="{StaticResource BrandRed}"
+            HeightRequest="28"
+            Padding="8,0"
+            IsVisible="{x:Static local:App.IsMockMode}"
+            VerticalOptions="Center">
+            <Label
+                Text="MOCK MODE — services are simulated"
+                TextColor="White"
+                FontSize="13"
+                HorizontalTextAlignment="Center"
+                VerticalTextAlignment="Center" />
+        </Border>
+    </Shell.TitleView>
+
     <ShellContent
         Title="Home"
         ContentTemplate="{DataTemplate local:MainPage}"
