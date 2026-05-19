@@ -36,6 +36,7 @@
     <Color x:Key="PageBackgroundColor">#F3F4F6</Color>
     <Color x:Key="DividerGray">#E5E7EB</Color>
     <Color x:Key="HeaderText">#374151</Color>
+    <Color x:Key="BodyText">#111827</Color>
 
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>

@@ -24,7 +24,7 @@
 
                     <Label Text="{Binding ConnectionStatus}"
                            FontSize="18"
-                           TextColor="#111827"
+                           TextColor="{StaticResource BodyText}"
                            HorizontalOptions="Center" />
 
                     <BoxView Style="{StaticResource DividerLine}" />
@@ -74,11 +74,11 @@
 
                     <Label Text="{Binding LastSensorTemp, StringFormat='Temperature: {0} °C'}"
                            FontSize="18"
-                           TextColor="#111827" />
+                           TextColor="{StaticResource BodyText}" />
 
                     <Label Text="{Binding LastSensorHum, StringFormat='Humidity: {0}%'}"
                            FontSize="18"
-                           TextColor="#111827" />
+                           TextColor="{StaticResource BodyText}" />
 
                     <BoxView Style="{StaticResource DividerLine}" />
 
@@ -91,7 +91,7 @@
 
                     <Label Text="{Binding PiStatus}"
                            FontSize="16"
-                           TextColor="#111827" />
+                           TextColor="{StaticResource BodyText}" />
 
                     <BoxView Style="{StaticResource DividerLine}" />
 

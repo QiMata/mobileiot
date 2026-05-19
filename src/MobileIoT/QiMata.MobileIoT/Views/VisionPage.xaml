@@ -32,13 +32,13 @@
 
                     <Label Text="{Binding QrResult}"
                            FontSize="16"
-                           TextColor="#111827" />
+                           TextColor="{StaticResource BodyText}" />
 
                     <Image Source="{Binding Photo}" HeightRequest="200" />
 
                     <Label Text="{Binding Result}"
                            FontSize="18"
-                           TextColor="#111827" />
+                           TextColor="{StaticResource BodyText}" />
 
                     <BoxView Style="{StaticResource DividerLine}" />
 
@@ -70,7 +70,7 @@
 
                     <Label Text="{Binding PiCameraResult}"
                            FontSize="18"
-                           TextColor="#111827" />
+                           TextColor="{StaticResource BodyText}" />
 
                     <BoxView Style="{StaticResource DividerLine}" />
 

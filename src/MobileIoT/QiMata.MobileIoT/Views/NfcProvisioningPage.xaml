@@ -55,7 +55,7 @@
 
                     <Label Text="{Binding ProvisionStatus}"
                            FontSize="18"
-                           TextColor="#111827"
+                           TextColor="{StaticResource BodyText}"
                            HorizontalOptions="Center" />
 
                     <controls:BackButton Command="{Binding NavigateBackCommand}" />

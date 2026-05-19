@@ -63,15 +63,15 @@
 
                     <Label Text="{Binding Role, StringFormat='Role: {0}'}"
                            FontSize="16"
-                           TextColor="#111827"/>
+                           TextColor="{StaticResource BodyText}"/>
 
                     <Label Text="{Binding Rloc16, StringFormat='RLOC16: {0}'}"
                            FontSize="16"
-                           TextColor="#111827"/>
+                           TextColor="{StaticResource BodyText}"/>
 
                     <Label Text="{Binding MeshAddresses, StringFormat='Mesh Addresses: {0}'}"
                            FontSize="14"
-                           TextColor="#111827"/>
+                           TextColor="{StaticResource BodyText}"/>
 
                     <Label Text="{Binding SourceMode, StringFormat='Source: {0}'}"
                            Style="{StaticResource MutedLabel}"/>
@@ -80,7 +80,7 @@
                            Style="{StaticResource MutedLabel}"/>
                     <Label Text="{Binding DatasetHex}"
                            FontSize="12"
-                           TextColor="#111827"
+                           TextColor="{StaticResource BodyText}"
                            LineBreakMode="CharacterWrap"/>
 
                     <BoxView Style="{StaticResource DividerLine}" />

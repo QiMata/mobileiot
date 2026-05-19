@@ -25,7 +25,7 @@
 
                     <Label Text="{Binding ConnectionStatus}"
                            FontSize="18"
-                           TextColor="#111827"
+                           TextColor="{StaticResource BodyText}"
                            HorizontalOptions="Center" />
 
                     <BoxView Style="{StaticResource DividerLine}" />
@@ -39,19 +39,19 @@
 
                     <Label Text="{Binding Temperature, StringFormat='Temperature: {0:F1} °C'}"
                            FontSize="18"
-                           TextColor="#111827" />
+                           TextColor="{StaticResource BodyText}" />
 
                     <Label Text="{Binding Humidity, StringFormat='Humidity: {0:F1}%'}"
                            FontSize="18"
-                           TextColor="#111827" />
+                           TextColor="{StaticResource BodyText}" />
 
                     <Label Text="{Binding CpuTemp, StringFormat='CPU Temp: {0:F1} °C'}"
                            FontSize="18"
-                           TextColor="#111827" />
+                           TextColor="{StaticResource BodyText}" />
 
                     <Label Text="{Binding Uptime, StringFormat='Uptime: {0}'}"
                            FontSize="18"
-                           TextColor="#111827" />
+                           TextColor="{StaticResource BodyText}" />
 
                     <BoxView Style="{StaticResource DividerLine}" />
 
@@ -69,7 +69,7 @@
                                 <HorizontalStackLayout Spacing="8" Padding="4">
                                     <Label Text="{Binding Name}"
                                            FontSize="14"
-                                           TextColor="#111827"
+                                           TextColor="{StaticResource BodyText}"
                                            VerticalOptions="Center" />
                                     <Label Text="{Binding Size, StringFormat='({0} bytes)'}"
                                            FontSize="12"
