@@ -11,7 +11,10 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <controls:PageHeader Title="NFC Peer-to-Peer" />
+        <VerticalStackLayout>
+            <controls:PageHeader Title="NFC Peer-to-Peer" />
+            <controls:FeatureDescription Text="Peer-to-peer NFC exchange between two devices." />
+        </VerticalStackLayout>
 
         <Frame Grid.Row="1" Style="{StaticResource CardFrame}">
             <VerticalStackLayout Spacing="20">

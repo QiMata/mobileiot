@@ -12,7 +12,10 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <controls:PageHeader Title="NFC Device Provisioning" />
+        <VerticalStackLayout>
+            <controls:PageHeader Title="NFC Device Provisioning" />
+            <controls:FeatureDescription Text="Writes Wi-Fi credentials to an NFC tag the Pi can read on boot." />
+        </VerticalStackLayout>
 
         <ScrollView Grid.Row="1">
             <Frame Style="{StaticResource CardFrame}">

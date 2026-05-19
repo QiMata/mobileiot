@@ -12,7 +12,10 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <controls:PageHeader Title="BLE Sensor &amp; LED Control" />
+        <VerticalStackLayout>
+            <controls:PageHeader Title="BLE Sensor &amp; LED Control" />
+            <controls:FeatureDescription Text="Streams DHT22 sensor readings from a Pi over BLE GATT and toggles an LED characteristic." />
+        </VerticalStackLayout>
 
         <ScrollView Grid.Row="1">
             <Frame Style="{StaticResource CardFrame}">
