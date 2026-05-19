@@ -43,7 +43,7 @@ Three commands get the core project building and tested from a clean checkout.
 2. Build the MAUI solution:
 
    ```bash
-   dotnet build src/MobileIoT/QiMata.MobileIoT.sln
+   dotnet build src/MobileIoT/MobileIoT.sln
    ```
 
 3. Run the Pi-side tests:
