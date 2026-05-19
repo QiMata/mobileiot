@@ -4,6 +4,56 @@ This repository contains small .NET and Python demos for Raspberry Pi.
 
 The `src/MobileIoT` folder holds the .NET MAUI application, while `src/pi` includes Python utilities that run directly on the Pi hardware.
 
+## Repo at a glance
+
+`src/MobileIoT/` contains the .NET MAUI mobile app targeting Android and iOS (with an experimental Uno Platform head). `src/pi/` holds standalone Python demo scripts that run on a Raspberry Pi to exercise each transport the app supports. `src/pi/gateway/` is a production-grade OPC UA gateway that discovers BLE, USB-serial, and Wi-Fi Direct devices and can forward aggregated telemetry to Azure IoT Operations. `harness/` is a cross-platform Python test harness that drives the integration scenarios without requiring physical hardware for every run. See [docs/code-map.md](docs/code-map.md) for a full module reference.
+
+## System architecture
+
+The diagram below shows how the mobile app, Pi, and cloud services connect across the supported transports.
+
+```mermaid
+flowchart LR
+    Phone["MAUI app<br/>(Android / iOS / Windows)"]
+    Pi["Raspberry Pi<br/>(demo scripts + gateway)"]
+    Tag[("NFC tag")]
+    Thread["Thread mesh<br/>(OTBR)"]
+    Cloud["Azure IoT Hub /<br/>IoT Operations"]
+
+    Phone -- "BLE GATT" --> Pi
+    Phone -- "Wi-Fi Direct (TCP)" --> Pi
+    Phone -- "USB CDC ACM / Bulk" --> Pi
+    Phone -- "Audio jack (FSK)" --> Pi
+    Phone -- "NFC read/write" --> Tag
+    Tag -. "provisioning" .-> Pi
+    Pi -- "CoAP / HTTP bridge" --> Thread
+    Pi -- "OPC UA / MQTT" --> Cloud
+```
+
+## First-time setup
+
+Three commands get the core project building and tested from a clean checkout.
+
+1. Clone the repo:
+
+   ```bash
+   git clone https://github.com/<your-org>/mobileiot.git && cd mobileiot
+   ```
+
+2. Build the MAUI solution:
+
+   ```bash
+   dotnet build src/MobileIoT/QiMata.MobileIoT.sln
+   ```
+
+3. Run the Pi-side tests:
+
+   ```bash
+   python -m pytest src/pi/tests -q
+   ```
+
+Individual demos (below) document any additional hardware setup they require.
+
 ## BLE GATT Demo
 
 The Python script at `src/pi/bluetoothle_demo.py` implements a Bluetooth Low Energy GATT server exposing temperature, humidity and LED control. It matches the UUIDs that the MobileIoT app expects:
