@@ -156,3 +156,12 @@ supplying the appropriate `--sensor` option. Each reading is formatted as
 comma-separated key/value pairs before being handed to `minimodem` for FSK
 modulation. Ensure `minimodem` is installed (`sudo apt-get install minimodem`) and
 the Pi audio output volume is set low enough not to clip the phone input.
+
+## Demo limitations
+
+These features are intentional stubs or placeholders. Listed here so a demo viewer is not surprised when they look incomplete.
+
+- **Audio FSK decoder** — the receive side is a byte counter, not a real demodulator. Transmit side via `minimodem` on the Pi works. See [`src/MobileIoT/QiMata.MobileIoT/Services/AudioModemService.cs`](src/MobileIoT/QiMata.MobileIoT/Services/AudioModemService.cs).
+- **iOS USB (External Accessory)** — returns `NotSupported` because the demo lacks an MFi accessory. Use Android for the USB demos. See [`src/MobileIoT/QiMata.MobileIoT/Platforms/iOS/ExternalAccessorySerialDeviceService.cs`](src/MobileIoT/QiMata.MobileIoT/Platforms/iOS/ExternalAccessorySerialDeviceService.cs).
+- **Full Thread stack** — the Pi bridge exposes `/thread/status` and `/thread/ping` only; commissioning and routing are out of scope. See [`src/pi/thread_demo.py`](src/pi/thread_demo.py).
+- **Pi USB-serial enumeration fallback** — when a USB-serial adapter omits a stable serial number, the gateway falls back to the kernel port path. Fine for fixed-deployment demos, less ideal for moving hardware. See [`src/pi/gateway/adapters/usb_serial.py`](src/pi/gateway/adapters/usb_serial.py).

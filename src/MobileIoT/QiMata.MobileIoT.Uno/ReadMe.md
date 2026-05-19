@@ -1,7 +1,6 @@
-# Getting Started
+# QiMata.MobileIoT.Uno
 
-Welcome to the Uno Platform!
+This is an experimental Uno Platform head for the MobileIoT app. It shares logic with the MAUI app via `QiMata.MobileIoT.Shared` and is not the primary demo surface — most features run from the .NET MAUI head under `../QiMata.MobileIoT/`.
 
-To discover how to get started with your new app: https://aka.platform.uno/get-started
-
-For more information on how to use the Uno.Sdk or upgrade Uno Platform packages in your solution: https://aka.platform.uno/using-uno-sdk
+- See the [root README](../../../README.md) for the full project overview and run instructions.
+- See [`docs/code-map.md`](../../../docs/code-map.md) for the module reference.
