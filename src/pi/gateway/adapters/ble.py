@@ -157,7 +157,9 @@ class BleAdapter(DeviceAdapter):
 
         points: list[TelemetryPoint] = []
 
-        # Temperature: Int16 little-endian, value / 100
+        # Temperature: Int16 little-endian, value / 100.
+        # Scale factor (× 100) matches the firmware encoder in src/pi/bluetoothle_demo.py
+        # — keep both sides in sync if you change precision.
         try:
             raw = await client.read_gatt_char(TEMP_CHAR_UUID)
             temp_int = struct.unpack("<h", raw)[0]
@@ -172,7 +174,8 @@ class BleAdapter(DeviceAdapter):
         except BleakError as exc:
             logger.debug("Could not read temp from %s: %s", device_id, exc)
 
-        # Humidity: Int16 little-endian, value / 100
+        # Humidity: Int16 little-endian, value / 100.
+        # Scale factor (× 100) matches the firmware encoder in src/pi/bluetoothle_demo.py.
         try:
             raw = await client.read_gatt_char(HUM_CHAR_UUID)
             hum_int = struct.unpack("<h", raw)[0]

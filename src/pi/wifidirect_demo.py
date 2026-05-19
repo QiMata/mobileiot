@@ -23,6 +23,11 @@ Prerequisites
 
 2. Run this script after the P2P group is established:
        python3 wifidirect_demo.py
+
+Note: this standalone demo uses synchronous sockets for readability so that a
+reader can follow the protocol top-to-bottom in a single file. The async,
+production-style equivalent used by the gateway lives at
+src/pi/gateway/adapters/wifidirect.py.
 """
 
 import socket
