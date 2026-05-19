@@ -127,6 +127,9 @@ class UsbSerialAdapter(DeviceAdapter):
                 else ""
             )
 
+            # Some Pi USB-serial adapters omit a stable serial number; fall back to the kernel
+            # port path so the gateway still has a unique device id (port path is stable per
+            # physical USB port + cable, which is acceptable for fixed-deployment demos).
             if serial_num:
                 device_id = f"serial:{vid:04x}:{pid:04x}:{serial_num}"
             else:

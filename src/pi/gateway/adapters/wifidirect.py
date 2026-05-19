@@ -39,6 +39,9 @@ class WifiDirectFraming:
     async def decode(reader: asyncio.StreamReader) -> dict | None:
         header = await reader.readexactly(4)
         length = struct.unpack(">I", header)[0]
+        # Sanity cap: reject oversized frames before allocation to avoid OOM on a Pi 3.
+        # The framing protocol allows up to 4 GiB length-prefixed payloads in theory;
+        # 10 MB is well above any legitimate JSON message we send today.
         if length > 10 * 1024 * 1024:  # 10 MB sanity limit
             raise ValueError(f"WiFi Direct frame too large: {length}")
         data = await reader.readexactly(length)
