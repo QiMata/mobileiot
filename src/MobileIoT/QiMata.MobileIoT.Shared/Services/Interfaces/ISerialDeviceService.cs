@@ -1,7 +1,9 @@
 namespace QiMata.MobileIoT.Shared.Services;
 
+/// <summary>Manages USB-serial peripheral connections, providing port enumeration, open/close lifecycle, and byte-level read/write.</summary>
 public interface ISerialDeviceService : IAsyncDisposable
 {
+    /// <summary>Indicates whether a serial port is currently open.</summary>
     bool IsOpen { get; }
 
     /// <summary>Enumerate attached USB-serial peripherals.</summary>

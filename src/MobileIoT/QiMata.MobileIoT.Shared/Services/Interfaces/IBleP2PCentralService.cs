@@ -8,6 +8,7 @@ namespace QiMata.MobileIoT.Shared.Services.Interfaces;
 /// </summary>
 public interface IBleP2PCentralService
 {
+    /// <summary>Scans for a peripheral by name, connects, writes a payload to its GATT characteristic, and returns the response bytes, or null on timeout.</summary>
     Task<byte[]?> ConnectAndExchangeAsync(
         string deviceName,
         Guid serviceUuid,

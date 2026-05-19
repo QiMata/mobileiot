@@ -5,5 +5,6 @@ namespace QiMata.MobileIoT.Shared.Services.Interfaces;
 /// </summary>
 public interface IPermissionGate
 {
+    /// <summary>Checks and, if necessary, requests the permissions required to navigate to the given route, returning true if all are granted.</summary>
     Task<bool> EnsureForRouteAsync(string route);
 }
