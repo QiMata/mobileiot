@@ -1,0 +1,20 @@
+{
+  "chat.promptFiles": true,
+  "chat.tools.terminal.autoApprove": {
+    "/^python(3)? -m harness( |$)/": true,
+    "/^pytest( |$)/": true,
+    "/^adb( |$)/": true,
+    "/^dotnet (build|publish)( |$)/": true,
+    "ls": true,
+    "pwd": true,
+    "cat": true
+  },
+  "github.copilot.chat.agent.terminal.allowList": {
+    "python -m harness doctor": true,
+    "python -m harness run --tier hardware": true,
+    "python3 -m harness doctor": true,
+    "python3 -m harness run --tier hardware": true,
+    "ls": true,
+    "pwd": true
+  }
+}

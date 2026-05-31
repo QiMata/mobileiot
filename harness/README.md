@@ -1,11 +1,13 @@
 # MobileIoT Test Harness
 
+> Coding agents: see [../CLAUDE.md](../CLAUDE.md) and [../.claude/skills/test-harness/SKILL.md](../.claude/skills/test-harness/SKILL.md). This README is for humans.
+
 Framework that lets a coding agent (or a human) drive end-to-end tests across phones and a Raspberry Pi from either a Windows or Mac dev box.
 
 ## Quick start
 
 ```bash
-# From repo root
+# Install (from repo root)
 cd harness
 python -m pip install -e .[ios,ble,serial,dev]
 
@@ -15,16 +17,11 @@ python -m harness doctor
 # Run mock-tier tests only (no hardware required)
 python -m harness run --tier mock
 
-# Build a specific app/platform pair
-python -m harness build --app maui --platform android
-python -m harness build --app uno --platform windows
-
-# Run against the Uno WinUI demo on the local Windows host
-python -m harness run --integration smoke_uno_windows --app uno --tier hardware
-
 # Run everything that can run (mock + hardware for devices that are online)
 python -m harness run --tier auto --json > run.jsonl
 ```
+
+Full CLI surface (build, per-integration runs, REPL) lives in [../.claude/skills/test-harness/SKILL.md](../.claude/skills/test-harness/SKILL.md).
 
 ## Integration demos
 

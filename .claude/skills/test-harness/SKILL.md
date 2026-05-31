@@ -49,7 +49,7 @@ JSON mode (`--json`) emits one event per line on stdout — use for agent-driven
 
 The framework is pluggable; **do not edit `harness/harness/` core files** when adding integrations — entry-points auto-discover plugins.
 
-Four touch points (see [project_test_harness.md](../../../../../C:/Users/Recording/.claude/projects/D--Code-mobileiot/memory/project_test_harness.md) for design rationale):
+Four touch points (see `project_test_harness.md` in memory for design rationale):
 
 1. **Plugin** — `harness/harness/integrations/<name>.py`, subclass `IntegrationPlugin` from `harness.integrations.base`. Use `_smoke.py` as a template.
 2. **Entry point** — register in `harness/pyproject.toml` under `[project.entry-points."mobileiot_harness.integrations"]`.
